@@ -4,6 +4,12 @@
 // ゲームシーン
 class GameScene {
 
+	uint32_t textureHandle_ = 0;
+
+	KamataEngine::Sprite* sprite_ = nullptr;
+
+
+
 public:
 	// 初期化
 	void Initialize();
@@ -13,4 +19,6 @@ public:
 
 	// 描画
 	void Draw();
+
+	~GameScene();
 };
