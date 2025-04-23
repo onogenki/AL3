@@ -9,6 +9,11 @@ public:
 
 	KamataEngine::Sprite* sprite_ = nullptr;
 
+	//ワールドトランスフォーム
+	KamataEngine::WorldTransform worldTransform_;
+	//カメラ
+	KamataEngine::Camera camera_;
+
 	// 初期化
 	void Initialize();
 
