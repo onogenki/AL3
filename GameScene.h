@@ -3,14 +3,12 @@
 
 // ゲームシーン
 class GameScene {
+public:
 	//テクスチャハンドル
 	uint32_t textureHandle_ = 0;
-	//ファイル名を指定してテクスチャを読み込み
-	textureHandle_ = TextureManager::Load("sample.png");
 
 	KamataEngine::Sprite* sprite_ = nullptr;
 
-public:
 	// 初期化
 	void Initialize();
 
