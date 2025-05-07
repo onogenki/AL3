@@ -21,7 +21,8 @@ private:
 
 	//ブロックモデル
 	KamataEngine::Model* block_model_ = nullptr;
-	std::vector<KamataEngine::WorldTransform*> worldTransformBlocks_;
+	//もう一度std::vectorを重ねる
+	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks_;
 
 public:
 	// 初期化
