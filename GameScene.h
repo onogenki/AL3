@@ -25,6 +25,11 @@ private:
 	//もう一度std::vectorを重ねる
 	std::vector<std::vector<KamataEngine::WorldTransform*>> worldTransformBlocks_;
 
+	//デバックカメラ有効
+	bool isDebugCameraActive_ = false;
+
+	KamataEngine::DebugCamera* debugCamera_ = nullptr;
+
 public:
 	// 初期化
 	void Initialize();

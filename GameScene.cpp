@@ -99,6 +99,9 @@ void GameScene::Initialize() {
 	// ブロックモデル
 	/*blockModel_ = Model::Create();*/
 
+	// デバックカメラの生成                 画面横幅              画面縦幅
+	debugCamera_ = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight);
+
 	// 要素数
 	const uint32_t kNumBlockVirtical = 10; // 追加
 	const uint32_t kNumBlockHorizontal = 20;
@@ -118,6 +121,10 @@ void GameScene::Initialize() {
 	// ブロックの生成
 	for (uint32_t i = 0; i < kNumBlockVirtical; ++i) {
 		for (uint32_t j = 0; j < kNumBlockHorizontal; ++j) {
+			// 間をあける
+			if ((i + j) % 2 == 1)
+				continue;
+
 			worldTransformBlocks_[i][j] = new WorldTransform();
 			worldTransformBlocks_[i][j]->Initialize();
 			worldTransformBlocks_[i][j]->translation_.x = kBlockWidth * j;
@@ -131,7 +138,8 @@ void GameScene::Update() {
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
 
-			if (!worldTransformBlock)continue;
+			if (!worldTransformBlock)
+				continue;
 			// 拡大縮小・回転・平行移動行列を使ってアフィン変換行列を作る関数
 			Matrix4x4 affin_mat = MakeAffineMatrix(worldTransformBlock->scale_, worldTransformBlock->rotation_, worldTransformBlock->translation_);
 
@@ -140,27 +148,56 @@ void GameScene::Update() {
 			worldTransformBlock->TransferMatrix();
 		}
 	}
+	// debugCamera_->Update();
+
+#ifdef _DEBUG
+	 if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+		isDebugCameraActive_ = !isDebugCameraActive_;
+	 }
+#endif
+
+	// カメラの処理
+	 if (isDebugCameraActive_) {
+		debugCamera_->Update();
+		camera_.matView = debugCamera_->GetCamera().matView;
+		camera_.matProjection = debugCamera_->GetCamera().matProjection;
+		// ビュープロジェクション行列の転送
+		camera_.TransferMatrix();
+	 } else {
+		// ビュープロジェクション行列の更新と転送
+		camera_.UpdateMatrix();
+	 }
 }
 
 void GameScene::Draw() {
-	
+
 	// DirectXCommonインスタンスの取得
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 
 	// 3Dオブジェクト描画前処理
 	Model::PreDraw(dxCommon->GetCommandList());
 
-	//ブロックの描画
+	// ブロックの描画
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
+			if (!worldTransformBlock)
+				continue;
+
 			block_model_->Draw(*worldTransformBlock, camera_);
+
 		}
 	}
+
+
 	Model::PostDraw();
+
 }
+
+
 
 GameScene::~GameScene() {
 	delete block_model_;
+	 delete debugCamera_;
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
 			delete worldTransformBlock;
