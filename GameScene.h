@@ -2,6 +2,7 @@
 #include "KamataEngine.h"
 #include<vector>
 
+
 // ゲームシーン
 class GameScene {
 
