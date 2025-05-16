@@ -1,10 +1,28 @@
 #pragma once
 #include "KamataEngine.h"
 #include<vector>
+#include "Skydome.h"
+#include"Player.h"
+#include "MapChipField.h"
 
 
 // ゲームシーン
 class GameScene {
+
+	public:
+	// 初期化
+	void Initialize();
+
+	// 更新
+	void Update();
+
+	// 描画
+	void Draw();
+
+	~GameScene();
+
+		void GenerateBlocks();
+	void GetNumBlockHorizontal();
 
 private:
 	//3Dモデル
@@ -30,15 +48,11 @@ private:
 
 	KamataEngine::DebugCamera* debugCamera_ = nullptr;
 
-public:
-	// 初期化
-	void Initialize();
+	//0203天球
+	Skydome* skydome_ = nullptr;
+	Model* modelSkydome_ = nullptr;
 
-	// 更新
-	void Update();
+	Player* player_ = nullptr;
 
-	// 描画
-	void Draw();
-
-	~GameScene();
+	MapChipField* mapChipField_;
 };
