@@ -4,6 +4,7 @@
 #include "Skydome.h"
 #include"Player.h"
 #include "MapChipField.h"
+#include "math.h"
 
 
 // ゲームシーン
@@ -26,15 +27,17 @@ class GameScene {
 
 private:
 	//3Dモデル
-	/*KamataEngine::Model* blockModel_ = nullptr;*/
+	KamataEngine::Model* blockModel_ = nullptr;
 
 	//テクスチャハンドル
-	/*uint32_t textureHandle_ = 0;*/
+	uint32_t textureHandle_ = 0;
 
-	/*KamataEngine::Model* model_ = nullptr;*/
+	KamataEngine::Sprite* sprite_ = nullptr;
+
+	KamataEngine::Model* model_ = nullptr;
 
 	//ワールドトランスフォーム
-	/*KamataEngine::WorldTransform worldTransform_;*/
+	KamataEngine::WorldTransform worldTransform_;
 	//カメラ
 	KamataEngine::Camera camera_;
 
@@ -55,4 +58,6 @@ private:
 	Player* player_ = nullptr;
 
 	MapChipField* mapChipField_;
+
+	math* math_ = nullptr;
 };

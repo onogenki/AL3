@@ -29,6 +29,8 @@ void GameScene::Initialize() {
 	// ブロックモデル
 	/*blockModel_ = Model::Create();*/
 
+	
+
 	// 要素数
 	const uint32_t kNumBlockVirtical = 10; // 追加
 	const uint32_t kNumBlockHorizontal = 20;
@@ -131,7 +133,8 @@ void GameScene::Update() {
 		for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
 
 			if (!worldTransformBlock)continue;
-			WorldTransformUpdate(*worldTransformBlock);
+			
+			math_->worldTransformUpdate(*worldTransformBlock);
 		}
 	}
 
@@ -169,6 +172,8 @@ void GameScene::Draw() {
 
 	// スプライト描画前処理
 	Sprite::PreDraw(dxCommon->GetCommandList());
+
+	sprite_->Draw();
 
 	// スプライト描画後処理
 	Sprite::PostDraw();
