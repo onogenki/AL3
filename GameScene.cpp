@@ -131,6 +131,12 @@ void GameScene::Initialize() {
 			worldTransformBlocks_[i][j]->translation_.y = kBlockHeight * i;
 		}
 	}
+
+	skydome_->Initialize();
+	//3Dモデルの生成
+	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
+
+
 }
 
 void GameScene::Update() {
@@ -149,6 +155,7 @@ void GameScene::Update() {
 		}
 	}
 	// debugCamera_->Update();
+	skydome_->Update();
 
 #ifdef _DEBUG
 	 if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
@@ -191,6 +198,7 @@ void GameScene::Draw() {
 
 	Model::PostDraw();
 
+	skydome_->Draw();
 }
 
 
@@ -204,4 +212,5 @@ GameScene::~GameScene() {
 		}
 	}
 	worldTransformBlocks_.clear();
+	delete modelSkydome_;
 }
