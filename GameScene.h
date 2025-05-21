@@ -51,6 +51,8 @@ private:
 
 	KamataEngine::DebugCamera* debugCamera_ = nullptr;
 
+	Player* player_ = nullptr;
+
 	//0203天球
 	Skydome* skydome_ = nullptr;
 	Model* modelSkydome_ = nullptr;
@@ -60,4 +62,5 @@ private:
 	MapChipField* mapChipField_;
 
 	math* math_ = nullptr;
+
 };

@@ -21,7 +21,8 @@ void GameScene::Initialize() {
 	player_ = new Player();
 	//プレイヤーモデル
 	player_model_ = Model::CreateFromOBJ("player");
-	player_->Initialize(player_model_, textureHandle_, &camera_);
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(x, y);
+	player_->Initialize(modelPlayer_, &camera_, playerPosition);
 
 	// ブロックモデルの生成
 	block_model_ = Model::CreateFromOBJ("block");

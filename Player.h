@@ -10,8 +10,7 @@ public:
 	/// <summary>
 	/// 初期化
 	/// </summary>
-	void Initialize();
-
+	void Initialize(Model* model, Camera* camera, const Vector3& position);
 	/// <summary>
 	/// 初期化
 	/// </summary>
@@ -21,6 +20,12 @@ public:
 	/// 初期化
 	/// </summary>
 	void Draw();
+
+	vector3 velocity_{};
+
+	static inline const float kAcceleration = 0;
+
+	static inline const float kAttenuation = 0;
 
 private:
 	// ワールド変換データ
