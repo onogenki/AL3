@@ -136,6 +136,9 @@ void GameScene::Initialize() {
 	//3Dモデルの生成
 	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
 
+	player_ = new Player();
+
+	player_->Initialize();
 
 }
 
@@ -156,6 +159,8 @@ void GameScene::Update() {
 	}
 	// debugCamera_->Update();
 	skydome_->Update();
+
+	player_->Update();
 
 #ifdef _DEBUG
 	 if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
@@ -199,6 +204,9 @@ void GameScene::Draw() {
 	Model::PostDraw();
 
 	skydome_->Draw();
+
+	player_->Draw();
+
 }
 
 
@@ -213,4 +221,5 @@ GameScene::~GameScene() {
 	}
 	worldTransformBlocks_.clear();
 	delete modelSkydome_;
+	delete player_;
 }

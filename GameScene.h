@@ -2,6 +2,7 @@
 #include "KamataEngine.h"
 #include<vector>
 #include "Skydome.h"
+#include "Player.h"
 
 
 // ゲームシーン
@@ -34,6 +35,8 @@ private:
 	Skydome* skydome_ = nullptr;
 	//3Dモデル
 	KamataEngine::Model* modelSkydome_ = nullptr;
+
+	Player* player_ = nullptr;
 
 public:
 	// 初期化
