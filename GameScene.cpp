@@ -3,25 +3,38 @@
 using namespace KamataEngine;
 
 void GameScene::Initialize() {
-	// ファイル名を指定してテクスチャを読み込み
+	// ファイル名を指定してテクスチャを読み込む
 	textureHandle_ = TextureManager::Load("sample.png");
-
-	// 3Dモデルの生成
-	block_model_ = Model::Create();
-
-	// スプライトインスタンスの生成
+	// スプライト生成
+	sprite_ = Sprite::Create(textureHandle_, {100, 50});
+	// 3Dモデル生成
 	model_ = Model::Create();
-
-	// ワールドトランスフォームの初期化
+	// ワールドトランスフォーム初期化
 	worldTransform_.Initialize();
-	// カメラの初期化
+
+	// カメラ初期化
 	camera_.Initialize();
 
-	// ブロックモデル
-	/*blockModel_ = Model::Create();*/
+	// 02_01から追加 プレイヤー生成
+	player_ = new Player();
 
-	// デバックカメラの生成                 画面横幅              画面縦幅
+	// プレイヤーモデル
+	player_model_ = Model::CreateFromOBJ("player");
+
+	player_->Initialize(player_model_, textureHandle_, &camera_);
+
+	// ブロックモデル
+	block_model_ = Model::CreateFromOBJ("block");
+
+	// デバッグカメラの生成
 	debugCamera_ = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight);
+
+	// 02_03天球
+	//  skydome生成
+	skydome_ = new Skydome();
+	// 初期化
+	modelSkydome_ = Model::CreateFromOBJ("SkyDome", true);
+	skydome_->Initialize(modelSkydome_, &camera_);
 
 	// 要素数
 	const uint32_t kNumBlockVirtical = 10; // 追加
@@ -52,13 +65,6 @@ void GameScene::Initialize() {
 			worldTransformBlocks_[i][j]->translation_.y = kBlockHeight * i;
 		}
 	}
-	skydome_->Initialize(Model * model, Camera * camera);
-	//3Dモデルの生成
-	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
-
-	player_ = new Player();
-
-	player_->Initialize(Model * model, Camera * camera, const Vector3& position);
 
 }
 
@@ -70,7 +76,7 @@ void GameScene::Update() {
 			if (!worldTransformBlock)
 				continue;
 			// 拡大縮小・回転・平行移動行列を使ってアフィン変換行列を作る関数
-			math_->worldTransformUpdate(*worldTransformBlock);
+			worldTransformUpdate(*worldTransformBlock);
 		}
 	}
 	// debugCamera_->Update();

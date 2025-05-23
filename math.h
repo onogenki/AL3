@@ -3,9 +3,8 @@
 
 using namespace KamataEngine;
 
-class math {
 
-public:
+
 	void worldTransformUpdate(WorldTransform& worldTransform);
 
 	Matrix4x4 Multiply(const Matrix4x4& matrix1, const Matrix4x4& matrix2);
@@ -27,4 +26,3 @@ public:
 
 	// 拡大縮小・回転・平行移動行列を使ってアフィン変換行列を作る関数
 	Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rot, const Vector3& translate);
-};
