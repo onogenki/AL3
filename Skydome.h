@@ -1,10 +1,12 @@
 #pragma once
 #include"KamataEngine.h"
+#include "GameScene.h"
 
 class Skydome {
 
 	public:
-	void Initialize();
+
+	void Initialize(Model* model, Camera* camera);
 
 	void Update();
 
@@ -12,14 +14,10 @@ class Skydome {
 
 	private:
 		//ワールド変換データ
-	    KamataEngine::WorldTransform worldTransform_;
+	   WorldTransform worldTransform_;
 		//モデル
 	    Model* model_ = nullptr;
 
-
-
-
-
-
+		Camera* camera_ = nullptr;
 
 };

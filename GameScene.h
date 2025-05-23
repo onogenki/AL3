@@ -11,15 +11,15 @@ class GameScene {
 
 private:
 	//3Dモデル
-	/*KamataEngine::Model* blockModel_ = nullptr;*/
+	KamataEngine::Model* blockModel_ = nullptr;
 
 	//テクスチャハンドル
-	/*uint32_t textureHandle_ = 0;*/
+	uint32_t textureHandle_ = 0;
 
-	/*KamataEngine::Model* model_ = nullptr;*/
+	KamataEngine::Model* model_ = nullptr;
 
 	//ワールドトランスフォーム
-	/*KamataEngine::WorldTransform worldTransform_;*/
+	KamataEngine::WorldTransform worldTransform_;
 	//カメラ
 	KamataEngine::Camera camera_;
 

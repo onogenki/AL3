@@ -1,19 +1,19 @@
 #include "GameScene.h"
-#include"Math.h"
+#include"math.h"
 using namespace KamataEngine;
 
 void GameScene::Initialize() {
 	// ファイル名を指定してテクスチャを読み込み
-	/*textureHandle_ = TextureManager::Load("sample.png");*/
+	textureHandle_ = TextureManager::Load("sample.png");
 
 	// 3Dモデルの生成
 	block_model_ = Model::Create();
 
 	// スプライトインスタンスの生成
-	/*model_ = Model::Create();*/
+	model_ = Model::Create();
 
 	// ワールドトランスフォームの初期化
-	/*worldTransform_.Initialize();*/
+	worldTransform_.Initialize();
 	// カメラの初期化
 	camera_.Initialize();
 
@@ -52,13 +52,13 @@ void GameScene::Initialize() {
 			worldTransformBlocks_[i][j]->translation_.y = kBlockHeight * i;
 		}
 	}
-	skydome_->Initialize();
+	skydome_->Initialize(Model * model, Camera * camera);
 	//3Dモデルの生成
 	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
 
 	player_ = new Player();
 
-	player_->Initialize();
+	player_->Initialize(Model * model, Camera * camera, const Vector3& position);
 
 }
 
