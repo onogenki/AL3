@@ -1,9 +1,9 @@
-#include "MapChipField.h"
 #include <cassert>
+#include <fstream>
 #include <map>
-#include<fstream>
-#include<sstream>
-#include<string>
+#include <sstream>
+#include <string>
+#include "MapChipField.h"
 
 namespace {
 std::map<std::string, MapChipType> mapChipTable = {

@@ -1,30 +1,24 @@
 #pragma once
-#include "KamataEngine.h"
 #include "GameScene.h"
+#include "KamataEngine.h"
 
 using namespace KamataEngine;
 
 class Player {
 
 public:
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	void Initialize();
+	void Initialize(Model* model, Camera* camera, const Vector3& position);
 
-	/// <summary>
-	/// 初期化
-	/// </summary>
 	void Update();
 
-	/// <summary>
-	/// 初期化
-	/// </summary>
 	void Draw();
+
 
 private:
 	// ワールド変換データ
-	WorldTransform worldTransform_;
+	KamataEngine::WorldTransform worldTransform_;
 	// モデル
 	Model* model_ = nullptr;
+
+	Camera* camera_ = nullptr;
 };

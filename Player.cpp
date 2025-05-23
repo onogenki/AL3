@@ -1,26 +1,29 @@
 #include "Player.h"
-using namespace KamataEngine;
+#include "Math.h"
+#include <algorithm>
+#include <cassert>
+#include <numbers>
 
-void Player::Initialize(Model* model, Camera* camera) {
+void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 	assert(model);
-
+	// モデル
 	model_ = model;
-	camera_ = camera;
+
 	worldTransform_.Initialize();
+	worldTransform_.translation_ = position;
+	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
+
+	camera_ = camera;
 }
 
-void Player::Update() { Matrix4x4 affin_mat = MakeAffineMatrix(
-	worldTransform_.scale_,
-	worldTransform_.rotation_,
-	worldTransform_.translation_
-);
+void Player::Update() {
 
-worldTransform.matWorld_ = affin_mat;
-
-
+	// ワールド行列更新（アフィン変換～DirectXに転送）
+	WorldTransformUpdate(worldTransform_);
 }
 
 void Player::Draw() {
+
 	// モデル描画
 	model_->Draw(worldTransform_, *camera_);
 }

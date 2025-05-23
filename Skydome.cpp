@@ -1,7 +1,7 @@
 #include "Skydome.h"
 using namespace KamataEngine;
 
-void Skydome::Initialize(Model* model, Camera* camera) { 
+void Skydome::Initialize(Model* model, Camera* camera) {
 	assert(model);
 
 	model_ = model;
@@ -9,12 +9,9 @@ void Skydome::Initialize(Model* model, Camera* camera) {
 	worldTransform_.Initialize();
 }
 
+void Skydome::Update() { worldTransform_.TransferMatrix(); }
 
-void Skydome::Update() { 
-	worldTransform_.TransferMatrix();
-}
-
-void Skydome::Draw() { 
-	//モデル描画
-	model_->Draw(worldTransform_, *camera_); 
+void Skydome::Draw() {
+	// モデル描画
+	model_->Draw(worldTransform_, *camera_);
 }
