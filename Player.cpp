@@ -16,7 +16,10 @@ void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
 	worldTransform_.translation_ = position;
 	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
 
+	Vector3 playerPosition = MapChipField_->GetMapChipPositionByIndex();
 	camera_ = camera;
+
+	player_->Initialize(modelPlayer_, &camera_, playerPosition);
 }
 
 void Player ::Update() {
@@ -82,6 +85,25 @@ void Player ::Update() {
 	}
 
 	worldTransform_.translation_ += velocity_;
+
+	//移動入力
+	// 左右移動操作
+	if (Input::GetInstance()->PushKey(DIK_RIGHT) || 
+		Input::GetInstance()->PushKey(DIK_LEFT))
+	{
+		//左右加速
+		Vector3 acceleration = {};
+		if (Input::GetInstance()->PushKey(DIK_RIGHT))
+		{
+			acceleration.x += kAcceleration;
+		} else if (Input::GetInstance()->PushKey(DIK_LEFT))
+		{
+			acceleration.x -= kAcceleration;
+		}
+		//加速/減速
+		velocity_ += acceleration;
+	}
+
 
 	bool landing = false;
 
