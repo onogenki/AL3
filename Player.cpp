@@ -6,9 +6,10 @@
 using namespace KamataEngine;
 
 
-void Player::Initialize(player_model_, textureHandle_, &camera_) {
-
+void Player::Initialize(Model* player_model_, Camera* camera) {
+	model_ = player_model_;
 	camera_ = camera;
+	worldTransform_.Initialize();
 }
 
 void Player::Update() {

@@ -1,5 +1,5 @@
 #include "GameScene.h"
-#include"math.h"
+#include"Math.h"
 using namespace KamataEngine;
 
 void GameScene::Initialize() {
@@ -21,7 +21,7 @@ void GameScene::Initialize() {
 	// プレイヤーモデル
 	player_model_ = Model::CreateFromOBJ("player");
 
-	player_->Initialize(player_model_, textureHandle_, &camera_);
+	player_->Initialize(player_model_, &camera_);
 
 	// ブロックモデル
 	block_model_ = Model::CreateFromOBJ("block");
@@ -40,8 +40,8 @@ void GameScene::Initialize() {
 	const uint32_t kNumBlockVirtical = 10; // 追加
 	const uint32_t kNumBlockHorizontal = 20;
 	// ブロック1個分の横幅
-	const float kBlockWidth = 2.0f;
-	const float kBlockHeight = 2.0f; // 追加
+	const float kBlockWidth = 1.0f;
+	const float kBlockHeight = 1.0f; // 追加
 
 	// 要素数を変更する
 	// 列数を設定(縦方向のブロック数)
@@ -61,8 +61,8 @@ void GameScene::Initialize() {
 
 			worldTransformBlocks_[i][j] = new WorldTransform();
 			worldTransformBlocks_[i][j]->Initialize();
-			worldTransformBlocks_[i][j]->translation_.x = kBlockWidth * j;
-			worldTransformBlocks_[i][j]->translation_.y = kBlockHeight * i;
+			worldTransformBlocks_[i][j]->translation_.x = kBlockWidth * j + 15.0f;
+			worldTransformBlocks_[i][j]->translation_.y = kBlockHeight * i + 10.0f;
 		}
 	}
 
@@ -121,14 +121,11 @@ void GameScene::Draw() {
 
 		}
 	}
-
-
-	Model::PostDraw();
-
 	skydome_->Draw();
-
 	player_->Draw();
 
+	//描画終了処理処理
+	Model::PostDraw();
 }
 
 

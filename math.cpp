@@ -1,4 +1,4 @@
-#include "math.h"
+#include "Math.h"
 
 Matrix4x4 Multiply(const Matrix4x4& matrix1, const Matrix4x4& matrix2) {
 

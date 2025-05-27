@@ -3,9 +3,9 @@
 #include<vector>
 #include "Skydome.h"
 #include "Player.h"
-#include"math.h"
+#include"Math.h"
 
-
+using namespace KamataEngine;
 // ゲームシーン
 class GameScene {
 

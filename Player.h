@@ -1,6 +1,5 @@
 #pragma once
 #include "KamataEngine.h"
-#include "GameScene.h"
 
 using namespace KamataEngine;
 
@@ -8,7 +7,7 @@ class Player {
 
 	public:
 
-	void Initialize(player_model_, textureHandle_, &camera_);
+	void Initialize(Model* player_model_, Camera* camera_);
 
 	void Update();
 
@@ -21,5 +20,7 @@ class Player {
 	    Model* model_ = nullptr;
 
 		Camera* camera_ = nullptr;
+
+		uint32_t textureHandle_ = 0u;
 };
 
