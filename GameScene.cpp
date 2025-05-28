@@ -1,5 +1,5 @@
 #include "GameScene.h"
-#include"Math.h"
+#include"math.h"
 using namespace KamataEngine;
 
 void GameScene::Initialize() {
@@ -48,8 +48,11 @@ void GameScene::GenerateBlocks() {
 	uint32_t numBlockVirtical = mapChipField_->GetNumBlockVirtical();
 	uint32_t numBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
 
+	//要素数を変更する
+	//列数を設定(縦方向のブロック数)
 	worldTransformBlocks_.resize(numBlockVirtical);
 	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
+		//1列の要素数を設定(横方向のブロック数)
 		worldTransformBlocks_[i].resize(numBlockHorizontal);
 	}
 
@@ -101,10 +104,9 @@ void GameScene::Update() {
 				continue;
 
 			// アフィン変換～DirectXに転送
-			WorldTransformUpdate(*worldTransformBlock);
+			worldTransformUpdate(*worldTransformBlock);
 		}
 	}
-
 	// デバッグカメラの更新
 	debugCamera_->Update();
 }
@@ -122,6 +124,8 @@ void GameScene::Draw() {
 
 	// 天球描画
 	skydome_->Draw();
+
+		
 
 	// ブロックの描画
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
@@ -156,5 +160,6 @@ GameScene::~GameScene() {
 
 	delete debugCamera_;
 	delete modelSkydome_;
+	delete player_;
 	delete mapChipField_;
 }

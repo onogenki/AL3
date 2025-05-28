@@ -1,5 +1,4 @@
 #pragma once
-#include "GameScene.h"
 #include "KamataEngine.h"
 
 using namespace KamataEngine;
@@ -7,18 +6,19 @@ using namespace KamataEngine;
 class Player {
 
 public:
-	void Initialize(Model* model, Camera* camera, const Vector3& position);
+	void Initialize(Model* player_model_, uint32_t textureHandle_, Camera* camera_);
 
 	void Update();
 
 	void Draw();
 
-
 private:
 	// ワールド変換データ
-	KamataEngine::WorldTransform worldTransform_;
+	WorldTransform worldTransform_;
 	// モデル
 	Model* model_ = nullptr;
 
 	Camera* camera_ = nullptr;
+
+	uint32_t textureHandle_ = 0u;
 };
