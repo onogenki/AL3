@@ -6,26 +6,26 @@
 #include <cassert>
 #include <numbers>
 
-void Player::Initialize(Model* model, Camera* camera, const Vector3& position) {
+using namespace KamataEngine;
 
-	assert(model);
+void Player::Initialize(Model* player_model, Camera* camera, const Vector3& position) {
+
+	assert(player_model);
 	// モデル
-	model_ = model;
+	model_ = player_model;
 
 	worldTransform_.Initialize();
 	worldTransform_.translation_ = position;
 	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 2.0f;
 
-	Vector3 playerPosition = MapChipField_->GetMapChipPositionByIndex();
 	camera_ = camera;
-
-	player_->Initialize(modelPlayer_, &camera_, playerPosition);
 }
 
 void Player ::Update() {
 
 	// 移動入力
 	if (onGround_) {
+		//左右移動操作
 		if (Input::GetInstance()->PushKey(DIK_RIGHT) || Input::GetInstance()->PushKey(DIK_LEFT)) {
 
 			// 左右加速
@@ -42,7 +42,9 @@ void Player ::Update() {
 
 				if (lrDirection_ != LRDirection::kRight) {
 					lrDirection_ = LRDirection::kRight;
+					//旋回開始時の角度を記録する
 					turnFirstRotationY_ = worldTransform_.rotation_.y;
+					//旋回タイマーに時間を設定する
 					turnTimer_ = kTimeTurn;
 				}
 			} else if (Input::GetInstance()->PushKey(DIK_LEFT)) {
@@ -56,7 +58,9 @@ void Player ::Update() {
 
 				if (lrDirection_ != LRDirection::kLeft) {
 					lrDirection_ = LRDirection::kLeft;
+					// 旋回開始時の角度を記録する
 					turnFirstRotationY_ = worldTransform_.rotation_.y;
+					// 旋回タイマーに時間を設定する
 					turnTimer_ = kTimeTurn;
 				}
 			}
@@ -86,28 +90,10 @@ void Player ::Update() {
 
 	worldTransform_.translation_ += velocity_;
 
-	//移動入力
-	// 左右移動操作
-	if (Input::GetInstance()->PushKey(DIK_RIGHT) || 
-		Input::GetInstance()->PushKey(DIK_LEFT))
-	{
-		//左右加速
-		Vector3 acceleration = {};
-		if (Input::GetInstance()->PushKey(DIK_RIGHT))
-		{
-			acceleration.x += kAcceleration;
-		} else if (Input::GetInstance()->PushKey(DIK_LEFT))
-		{
-			acceleration.x -= kAcceleration;
-		}
-		//加速/減速
-		velocity_ += acceleration;
-	}
-
-
+	//着地フラグ
 	bool landing = false;
 
-	// 下降あり？
+	// 地面との当たり判定 下降あり？
 	if (velocity_.y < 0) {
 		// Y座標が地面以下になったら着地
 		if (worldTransform_.translation_.y <= 1.0f) {
@@ -124,27 +110,27 @@ void Player ::Update() {
 	} else {
 		// 着地
 		if (landing) {
-			worldTransform_.translation_.y = 1.0f;
-			velocity_.x *= (1.0f - kAttenuation);
-			velocity_.y = 0.0f;
-			onGround_ = true;
+			worldTransform_.translation_.y = 1.0f; //めり込み排訴
+			velocity_.x *= (1.0f - kAttenuation);  //摩擦で横方向速度が減衰する
+			velocity_.y = 0.0f;                    //下方向をリセット
+			onGround_ = true;                      //接地状態に以降
 		}
 	}
 
 	// 旋回制御
 	if (turnTimer_ > 0.0f) {
-		// タイマーを進める
+		// 旋回タイマーを1/60秒だけカウントダウンする
 		turnTimer_ = std::max(turnTimer_ - (1.0f / 60.0f), 0.0f);
-
+		//左右の自キャラ角度テーブル
 		float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
-
+		//状態に応じた目標角度を取得する
 		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
-
+		//自キャラの角度を設定する
 		worldTransform_.rotation_.y = EaseInOut(destinationRotationY, turnFirstRotationY_, turnTimer_ / kTimeTurn);
 	}
 
 	// ワールド行列更新（アフィン変換～DirectXに転送）
-	WorldTransformUpdate(worldTransform_);
+	worldTransformUpdate(worldTransform_);
 }
 
 void Player::Draw() {

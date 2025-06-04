@@ -12,11 +12,9 @@ struct MapChipData {
 	std::vector<std::vector<MapChipType>> data;
 };
 
-
 class MapChipField {
 
-	private:
-
+private:
 	// 1ブロックのサイズ
 	static inline const float kBlockWidth = 1.0f;
 	static inline const float kBlockHeight = 1.0f;
@@ -24,10 +22,7 @@ class MapChipField {
 	static inline const uint32_t kNumBlockVirtical = 20;
 	static inline const uint32_t kNumBlockHorizontal = 100;
 
-	
-	public:
-
-
+public:
 	MapChipData mapChipData_;
 
 	void ResetMapChipData();

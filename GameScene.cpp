@@ -1,5 +1,5 @@
 #include "GameScene.h"
-#include"Math.h"
+#include"math.h"
 using namespace KamataEngine;
 
 void GameScene::Initialize() {
@@ -21,45 +21,12 @@ void GameScene::Initialize() {
 	player_ = new Player();
 	//プレイヤーモデル
 	player_model_ = Model::CreateFromOBJ("player");
-	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(x, y);
-	player_->Initialize(modelPlayer_, &camera_, playerPosition);
+	//0205 座標をマップチップ番号で指定
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2, 18);
+	player_->Initialize(player_model_, &camera_, playerPosition);
 
 	// ブロックモデルの生成
 	block_model_ = Model::CreateFromOBJ("block");
-
-	// ブロックモデル
-	/*blockModel_ = Model::Create();*/
-
-	
-
-	// 要素数
-	const uint32_t kNumBlockVirtical = 10; // 追加
-	const uint32_t kNumBlockHorizontal = 20;
-	// ブロック1個分の横幅
-	const float kBlockWidth = 1.0f;
-	const float kBlockHeight = 1.0f; // 追加
-
-	// 要素数を変更する
-	// 列数を設定(縦方向のブロック数)
-	worldTransformBlocks_.resize(kNumBlockVirtical);
-	// キューブの作成
-	for (uint32_t i = 0; i < kNumBlockVirtical; ++i) {
-		// 1列の要素数を設定(横方向のブロック数)
-		worldTransformBlocks_[i].resize(kNumBlockHorizontal);
-	}
-
-	// ブロックの生成
-	for (uint32_t i = 0; i < kNumBlockVirtical; ++i) {
-		for (uint32_t j = 0; j < kNumBlockHorizontal; ++j) {
-			// 間をあける
-			if ((i + j) % 2 == 1)continue;
-
-			worldTransformBlocks_[i][j] = new WorldTransform();
-			worldTransformBlocks_[i][j]->Initialize();
-			worldTransformBlocks_[i][j]->translation_.x = kBlockWidth * j;
-			worldTransformBlocks_[i][j]->translation_.y = kBlockHeight * i;
-		}
-	}
 
 	// デバックカメラの生成                 画面横幅              画面縦幅
 	debugCamera_ = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight);
@@ -73,7 +40,6 @@ void GameScene::Initialize() {
 
 	mapChipField_ = new MapChipField;
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
-
 	GenerateBlocks();
 
 
@@ -107,9 +73,8 @@ void GameScene::GenerateBlocks() {
 
 void GameScene::Update() {
 
-	skydome_->Update();
-
 	player_->Update();
+	skydome_->Update();
 
 #ifdef _DEBUG
 	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
@@ -133,9 +98,11 @@ void GameScene::Update() {
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
 
-			if (!worldTransformBlock)continue;
-			
-			math_->worldTransformUpdate(*worldTransformBlock);
+			if (!worldTransformBlock)
+				continue;
+
+			// アフィン変換～DirectXに転送
+			worldTransformUpdate(*worldTransformBlock);
 		}
 	}
 
@@ -152,10 +119,11 @@ void GameScene::Draw() {
 	// 3Dオブジェクト描画前処理
 	Model::PreDraw(dxCommon->GetCommandList());
 
-	//天球描画
-	skydome_->Draw();
-
+	// 自キャラの描画
 	player_->Draw();
+
+	// 天球描画
+	skydome_->Draw();
 
 	// ブロックの描画
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
@@ -164,17 +132,13 @@ void GameScene::Draw() {
 				continue;
 
 			block_model_->Draw(*worldTransformBlock, camera_);
-
 		}
 	}
-
 
 	Model::PostDraw();
 
 	// スプライト描画前処理
 	Sprite::PreDraw(dxCommon->GetCommandList());
-
-	sprite_->Draw();
 
 	// スプライト描画後処理
 	Sprite::PostDraw();
@@ -194,5 +158,6 @@ GameScene::~GameScene() {
 
 	delete debugCamera_;
 	delete modelSkydome_;
+	delete player_;
 	delete mapChipField_;
 }

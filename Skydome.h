@@ -1,31 +1,23 @@
 #pragma once
 #include "KamataEngine.h"
-#include "GameScene.h"
+#include "math.h"
 
 using namespace KamataEngine;
 
 class Skydome {
 
-	public:
-	/// <summary>
-	/// 初期化
-	/// </summary>
-	    void Initialize();
+public:
+	void Initialize(Model* modelSkydome_, Camera* camera_);
 
-		/// <summary>
-	    /// 初期化
-	    /// </summary>
-	    void Update();
+	void Update();
 
-		/// <summary>
-	    /// 初期化
-	    /// </summary>
-	    void Draw();
+	void Draw();
 
-		private:
-			//ワールド変換データ
-	        WorldTransform worldTransform_;
-			//モデル
-	        Model* model_ = nullptr;
+private:
+	// ワールド変換データ
+	WorldTransform worldTransform_;
+	// モデル
+	Model* model_ = nullptr;
 
+	Camera* camera_ = nullptr;
 };

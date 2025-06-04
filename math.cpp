@@ -1,8 +1,37 @@
+#include <cmath>
+#include <numbers>
 #include "math.h"
 
+// Velocity_を使えるように
+Vector3& operator+=(Vector3& lhv, const Vector3& rhv) {
+	lhv.x += rhv.x;
+	lhv.y += rhv.y;
+	lhv.z += rhv.z;
+	return lhv;
+}
 
-Matrix4x4 math::Multiply(const Matrix4x4& matrix1, const Matrix4x4& matrix2) 
-{
+Vector3& operator-=(Vector3& lhv, const Vector3& rhv) {
+	lhv.x -= rhv.x;
+	lhv.y -= rhv.y;
+	lhv.z -= rhv.z;
+	return lhv;
+}
+
+Vector3& operator*=(Vector3& v, float s) {
+	v.x *= s;
+	v.y *= s;
+	v.z *= s;
+	return v;
+}
+
+Vector3& operator/=(Vector3& v, float s) {
+	v.x /= s;
+	v.y /= s;
+	v.z /= s;
+	return v;
+}
+
+Matrix4x4 Multiply(const Matrix4x4& matrix1, const Matrix4x4& matrix2) {
 
 	Matrix4x4 result = {};
 
@@ -15,11 +44,10 @@ Matrix4x4 math::Multiply(const Matrix4x4& matrix1, const Matrix4x4& matrix2)
 	}
 
 	return result;
-
 }
 
 // 拡大縮小行列の作成
-Matrix4x4 math::MakeScaleMatrix(const Vector3& scale) {
+Matrix4x4 MakeScaleMatrix(const Vector3& scale) {
 
 	Matrix4x4 result{scale.x, 0.0f, 0.0f, 0.0f, 0.0f, scale.y, 0.0f, 0.0f, 0.0f, 0.0f, scale.z, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
 
@@ -27,7 +55,7 @@ Matrix4x4 math::MakeScaleMatrix(const Vector3& scale) {
 }
 
 // X軸回転行列の作成
-Matrix4x4 math::MakeRotateXMatrix(float theta) {
+Matrix4x4 MakeRotateXMatrix(float theta) {
 	float sin = std::sin(theta);
 	float cos = std::cos(theta);
 
@@ -37,7 +65,7 @@ Matrix4x4 math::MakeRotateXMatrix(float theta) {
 }
 
 // Y軸回転行列の作成
-Matrix4x4 math::MakeRotateYMatrix(float theta) {
+Matrix4x4 MakeRotateYMatrix(float theta) {
 	float sin = std::sin(theta);
 	float cos = std::cos(theta);
 
@@ -47,7 +75,7 @@ Matrix4x4 math::MakeRotateYMatrix(float theta) {
 }
 
 // Z軸回転行列の作成
-Matrix4x4 math::MakeRotateZMatrix(float theta) {
+Matrix4x4 MakeRotateZMatrix(float theta) {
 	float sin = std::sin(theta);
 	float cos = std::cos(theta);
 
@@ -57,14 +85,14 @@ Matrix4x4 math::MakeRotateZMatrix(float theta) {
 }
 
 // 平行移動行列の作成
-Matrix4x4 math::MakeTranslateMatrix(const Vector3& translate) {
+Matrix4x4 MakeTranslateMatrix(const Vector3& translate) {
 	Matrix4x4 result{1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, translate.x, translate.y, translate.z, 1.0f};
 
 	return result;
 }
 
 // 拡大縮小・回転・平行移動行列を使ってアフィン変換行列を作る関数
-Matrix4x4 math::MakeAffineMatrix(const Vector3& scale, const Vector3& rot, const Vector3& translate) {
+Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rot, const Vector3& translate) {
 
 	// スケーリング行列の作成
 	Matrix4x4 matScale = MakeScaleMatrix(scale);
@@ -84,11 +112,19 @@ Matrix4x4 math::MakeAffineMatrix(const Vector3& scale, const Vector3& rot, const
 	return matTransform;
 }
 
+//EaseInOutで必要
+float Lerp(float x1, float x2, float t) { return (1.0f - t) * x1 + t * x2; }
 
+float EaseInOut(float x1, float x2, float t) {
+	float easedT = -(std::cosf(std::numbers::pi_v<float> * t) - 1.0f) / 2.0f;
 
-void math::worldTransformUpdate(WorldTransform& worldTransform) {
+	return Lerp(x1, x2, easedT);
+}
 
-	worldTransform.matWorld_ = math::MakeAffineMatrix(worldTransform.scale_, worldTransform.rotation_, worldTransform.translation_);
+void worldTransformUpdate(WorldTransform& worldTransform) {
+
+	worldTransform.matWorld_ = MakeAffineMatrix(worldTransform.scale_, worldTransform.rotation_, worldTransform.translation_);
 
 	worldTransform.TransferMatrix();
 }
+

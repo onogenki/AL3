@@ -1,32 +1,34 @@
 #pragma once
-#include"KamataEngine.h"
+#include "KamataEngine.h"
 
 using namespace KamataEngine;
 
-class math {
+void worldTransformUpdate(WorldTransform& worldTransform);
 
-	public:
+Matrix4x4 Multiply(const Matrix4x4& matrix1, const Matrix4x4& matrix2);
 
-	void worldTransformUpdate(WorldTransform& worldTransform);
+// 代入演算子オーバーロード
+Vector3& operator+=(Vector3& lhs, const Vector3& rhv);
+Vector3& operator-=(Vector3& lhs, const Vector3& rhv);
+Vector3& operator*=(Vector3& v, float s);
+Vector3& operator/=(Vector3& v, float s);
 
-	Matrix4x4 Multiply(const Matrix4x4& matrix1, const Matrix4x4& matrix2);
-	
+// 拡大縮小行列の作成
+Matrix4x4 MakeScaleMatrix(const Vector3& scale);
 
-	// 拡大縮小行列の作成
-	Matrix4x4 MakeScaleMatrix(const Vector3& scale);
+// X軸回転行列の作成
+Matrix4x4 MakeRotateXMatrix(float theta);
 
-	// X軸回転行列の作成
-	Matrix4x4 MakeRotateXMatrix(float theta);
+// Y軸回転行列の作成
+Matrix4x4 MakeRotateYMatrix(float theta);
 
-	// Y軸回転行列の作成
-	Matrix4x4 MakeRotateYMatrix(float theta);
+// Z軸回転行列の作成
+Matrix4x4 MakeRotateZMatrix(float theta);
 
-	// Z軸回転行列の作成
-	Matrix4x4 MakeRotateZMatrix(float theta);
+// 平行移動行列の作成
+Matrix4x4 MakeTranslateMatrix(const Vector3& translate);
 
-	// 平行移動行列の作成
-	Matrix4x4 MakeTranslateMatrix(const Vector3& translate);
+// 拡大縮小・回転・平行移動行列を使ってアフィン変換行列を作る関数
+Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rot, const Vector3& translate);
 
-	// 拡大縮小・回転・平行移動行列を使ってアフィン変換行列を作る関数
-	Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rot, const Vector3& translate);
-};
+float EaseInOut(float x1, float x2, float t);
