@@ -42,6 +42,14 @@ void GameScene::Initialize() {
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
 	GenerateBlocks();
 
+	// 02_06カメラコントローラ
+	CController_ = new CameraController(); // 生成
+	CController_->Initialize(&camera_);    // 初期化
+	CController_->SetTarget(player_);      // 追従対象セット
+	CController_->Reset();                 // リセット
+
+	CameraController::Rect cameraArea = {12.0f, 100 - 12.0f, 6.0f, 6.0f};
+	CController_->SetMovableArea(cameraArea);
 
 }
 
@@ -75,6 +83,7 @@ void GameScene::Update() {
 
 	player_->Update();
 	skydome_->Update();
+	CController_->Update();
 
 #ifdef _DEBUG
 	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {

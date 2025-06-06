@@ -4,6 +4,8 @@
 #include "Player.h"
 #include "skydome.h"
 #include "MapChipField.h"
+#include "CameraController.h"
+
 using namespace KamataEngine;
 
 // ゲームシーン
@@ -41,6 +43,10 @@ private:
 	//カメラ
 	Camera camera_;
 
+	//プレイヤー
+	Player* player_ = nullptr;
+	Model* player_model_ = nullptr;
+
 	//ブロックモデル
 	Model* block_model_ = nullptr;
 	//もう一度std::vectorを重ねる
@@ -55,8 +61,9 @@ private:
 	Skydome* skydome_ = nullptr;
 	Model* modelSkydome_ = nullptr;
 
-	Player* player_ = nullptr;
-	Model* player_model_ = nullptr;
-
+	//マップチップフィールド
 	MapChipField* mapChipField_;
+
+	//カメラ移動
+	CameraController* CController_ = nullptr;
 };

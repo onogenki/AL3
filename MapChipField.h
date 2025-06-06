@@ -1,5 +1,10 @@
 #pragma once
-#include <KamataEngine.h>
+
+#include <cstdint>
+#include <string>
+#include <vector>
+#include "KamataEngine.h"
+#include "Math.h"
 
 using namespace KamataEngine;
 
@@ -14,17 +19,11 @@ struct MapChipData {
 
 class MapChipField {
 
-private:
+public:
 	// 1ブロックのサイズ
 	static inline const float kBlockWidth = 1.0f;
 	static inline const float kBlockHeight = 1.0f;
-	// ブロックの個数
-	static inline const uint32_t kNumBlockVirtical = 20;
-	static inline const uint32_t kNumBlockHorizontal = 100;
-
-public:
-	MapChipData mapChipData_;
-
+	
 	void ResetMapChipData();
 
 	void LoadMapChipCsv(const std::string& filePath);
@@ -35,4 +34,9 @@ public:
 
 	uint32_t GetNumBlockVirtical() const { return kNumBlockVirtical; }
 	uint32_t GetNumBlockHorizontal() const { return kNumBlockHorizontal; }
+
+	static inline const uint32_t kNumBlockVirtical = 20;
+	static inline const uint32_t kNumBlockHorizontal = 100;
+
+	MapChipData mapChipData_;
 };

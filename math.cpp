@@ -2,6 +2,21 @@
 #include <numbers>
 #include "math.h"
 
+// CameraControllerのUpdateで必要
+const Vector3 operator*(const Vector3& v1, const float f) {
+	Vector3 temp(v1);
+	return temp *= f;
+}
+
+//CameraControllerのUpdate/Reset関数で必要
+const Vector3 operator+(const Vector3& v1, const Vector3& v2) {
+	Vector3 temp(v1);
+	return temp += v2;
+}
+
+//Lerp関数
+Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t) { return Vector3(Lerp(v1.x, v2.x, t), Lerp(v1.y, v2.y, t), Lerp(v1.z, v2.z, t)); }
+
 // Velocity_を使えるように
 Vector3& operator+=(Vector3& lhv, const Vector3& rhv) {
 	lhv.x += rhv.x;
@@ -112,6 +127,35 @@ Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rot, const Vecto
 	return matTransform;
 }
 
+Matrix4x4& operator*=(Matrix4x4& lhm, const Matrix4x4& rhm) {
+	Matrix4x4 result{};
+
+	for (size_t i = 0; i < 4; i++) {
+		for (size_t j = 0; j < 4; j++) {
+			for (size_t k = 0; k < 4; k++) {
+				result.m[i][j] += lhm.m[i][k] * rhm.m[k][j];
+			}
+		}
+	}
+	lhm = result;
+	return lhm;
+}
+
+Matrix4x4 operator*(const Matrix4x4& m1, const Matrix4x4& m2) {
+	Matrix4x4 result = m1;
+
+	return result *= m2;
+}
+
+void worldTransformUpdate(WorldTransform& worldTransform) {
+
+	Matrix4x4 affin_mat = MakeAffineMatrix(worldTransform.scale_, worldTransform.rotation_, worldTransform.translation_);
+
+	worldTransform.matWorld_ = affin_mat;
+
+	worldTransform.TransferMatrix();
+}
+
 //EaseInOutで必要
 float Lerp(float x1, float x2, float t) { return (1.0f - t) * x1 + t * x2; }
 
@@ -120,11 +164,3 @@ float EaseInOut(float x1, float x2, float t) {
 
 	return Lerp(x1, x2, easedT);
 }
-
-void worldTransformUpdate(WorldTransform& worldTransform) {
-
-	worldTransform.matWorld_ = MakeAffineMatrix(worldTransform.scale_, worldTransform.rotation_, worldTransform.translation_);
-
-	worldTransform.TransferMatrix();
-}
-
