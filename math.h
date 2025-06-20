@@ -20,6 +20,9 @@ Vector3& operator-=(Vector3& lhs, const Vector3& rhv);
 Vector3& operator*=(Vector3& v, float s);
 Vector3& operator/=(Vector3& v, float s);
 
+// 単位行列の作成
+Matrix4x4 MakeIdentityMatrix();
+
 Matrix4x4 Multiply(const Matrix4x4& matrix1, const Matrix4x4& matrix2);
 
 // 拡大縮小行列の作成

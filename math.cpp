@@ -15,7 +15,8 @@ const Vector3 operator+(const Vector3& v1, const Vector3& v2) {
 }
 
 //Lerp関数
-Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t) { return Vector3(Lerp(v1.x, v2.x, t), Lerp(v1.y, v2.y, t), Lerp(v1.z, v2.z, t)); }
+Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t) { 
+	return Vector3(Lerp(v1.x, v2.x, t), Lerp(v1.y, v2.y, t), Lerp(v1.z, v2.z, t)); }
 
 // Velocity_を使えるように
 Vector3& operator+=(Vector3& lhv, const Vector3& rhv) {
@@ -45,6 +46,13 @@ Vector3& operator/=(Vector3& v, float s) {
 	v.z /= s;
 	return v;
 }
+
+Matrix4x4 MakeIdentityMatrix() {
+	static const Matrix4x4 result{1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f};
+
+	return result;
+}
+
 
 Matrix4x4 Multiply(const Matrix4x4& matrix1, const Matrix4x4& matrix2) {
 
@@ -149,7 +157,11 @@ Matrix4x4 operator*(const Matrix4x4& m1, const Matrix4x4& m2) {
 
 void worldTransformUpdate(WorldTransform& worldTransform) {
 
-	Matrix4x4 affin_mat = MakeAffineMatrix(worldTransform.scale_, worldTransform.rotation_, worldTransform.translation_);
+	Matrix4x4 affin_mat = MakeAffineMatrix(
+		worldTransform.scale_,
+		worldTransform.rotation_,
+		worldTransform.translation_
+	);
 
 	worldTransform.matWorld_ = affin_mat;
 

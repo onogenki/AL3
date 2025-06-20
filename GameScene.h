@@ -12,6 +12,7 @@ using namespace KamataEngine;
 class GameScene {
 
 	public:
+
 	// 初期化
 	void Initialize();
 
@@ -23,7 +24,7 @@ class GameScene {
 
 	~GameScene();
 
-		void GenerateBlocks();
+	void GenerateBlocks();
 
 private:
 	// テクスチャハンドル
@@ -35,12 +36,10 @@ private:
 	//3Dモデル
 	Model* model_ = nullptr;
 
-	//ブロックモデル
-	Model* blockModel_ = nullptr;
-
-	//ワールドトランスフォーム
+	// ワールドトランスフォーム
 	WorldTransform worldTransform_;
-	//カメラ
+
+	// カメラ
 	Camera camera_;
 
 	//プレイヤー

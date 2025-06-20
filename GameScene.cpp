@@ -17,14 +17,6 @@ void GameScene::Initialize() {
 	// カメラの初期化
 	camera_.Initialize();
 
-	//プレイヤー生成
-	player_ = new Player();
-	//プレイヤーモデル
-	player_model_ = Model::CreateFromOBJ("player");
-	//0205 座標をマップチップ番号で指定
-	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2, 18);
-	player_->Initialize(player_model_, &camera_, playerPosition);
-
 	// ブロックモデルの生成
 	block_model_ = Model::CreateFromOBJ("block");
 
@@ -35,12 +27,24 @@ void GameScene::Initialize() {
 	// skydome生成
 	skydome_ = new Skydome();
 	// 初期化
-	modelSkydome_ = Model::CreateFromOBJ("skydome", true);
+	modelSkydome_ = Model::CreateFromOBJ("Skydome", true);
 	skydome_->Initialize(modelSkydome_, &camera_);
-
+	//マップチップ
 	mapChipField_ = new MapChipField;
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
 	GenerateBlocks();
+
+	//プレイヤー生成
+	player_ = new Player();
+	//プレイヤーモデル
+	player_model_ = Model::CreateFromOBJ("player");
+	//0205 座標をマップチップ番号で指定
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2, 18);
+	
+	//0207
+	player_->SetMapChipField(mapChipField_);
+
+	player_->Initialize(player_model_, &camera_, playerPosition);
 
 	// 02_06カメラコントローラ
 	CController_ = new CameraController(); // 生成
@@ -71,6 +75,7 @@ void GameScene::GenerateBlocks() {
 		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
 			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
 				WorldTransform* worldTransform = new WorldTransform();
+				
 				worldTransform->Initialize();
 				worldTransformBlocks_[i][j] = worldTransform;
 				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);

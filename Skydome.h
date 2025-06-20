@@ -1,13 +1,12 @@
 #pragma once
 #include "KamataEngine.h"
-#include "math.h"
 
 using namespace KamataEngine;
 
 class Skydome {
 
 public:
-	void Initialize(Model* modelSkydome_, Camera* camera_);
+	void Initialize(Model* modelSkydome_, Camera*);
 
 	void Update();
 

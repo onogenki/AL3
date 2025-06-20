@@ -3,12 +3,23 @@
 
 using namespace KamataEngine;
 
+class MapChipField;
+
 class Player {
 public:
 	// 左右
 	enum class LRDirection {
 		kRight,
 		kLeft,
+	};
+
+	//0207角
+	enum Corner { 
+		kRightBottom,
+		kLeftBottom,
+		kRightTop,
+		kLeftTop,
+		kNumCorner
 	};
 
 	/// 初期化
@@ -24,6 +35,11 @@ public:
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
 	const Vector3& GetVelocity() const { return velocity_; }
 
+	//0207
+	void SetMapChipField(MapChipField* mapChipField) {
+		mapChipField_ = mapChipField; }
+
+
 private:
 	// ワールド変換データ
 	WorldTransform worldTransform_;
@@ -35,7 +51,7 @@ private:
 	// 02_05 移動量
 	Vector3 velocity_ = {};
 	//フレームごとの加速度
-	static inline const float kAcceleration = 0.01f;
+	static inline const float kAcceleration = 0.1f;
 	//非入力時の摩擦係数
 	static inline const float kAttenuation = 0.05f;
 	//最高速度
@@ -54,4 +70,31 @@ private:
 	static inline const float kJumpAcceleration = 20.0f;     //重力加速度(下方向)
 	static inline const float kGravityAcceleration = 0.98f;  //最大落下速度(下方向)
 	static inline const float kLimitFallSpeed = 0.5f;        //ジャンプ初速(上方向)
+
+	//0207マップチップによるフィールド
+	MapChipField* mapChipField_ = nullptr;
+	//0207キャラクターの当たり判定サイズ
+	static inline const float kWidth = 0.8f;
+	static inline const float kHeight = 0.8f;
+
+	static inline const float kBlank = 0.04f;
+
+	//0207移動入力
+	void InputMove();
+
+	struct CollisionMapInfo {
+		bool ceiling = false;
+		bool landing = false;
+		bool hitWall = false;
+		Vector3 move;
+	};
+	//0207
+	void CheckMapCollision(CollisionMapInfo& info);
+	
+	void CheckMapCollisionUp(CollisionMapInfo& info);
+	void CheckMapCollisionDown(CollisionMapInfo& info);
+	void CheckMapCollisionRight(CollisionMapInfo& info);
+	void CheckMapCollisionLeft(CollisionMapInfo& info);
+
+	Vector3 CornerPosition(const Vector3& center, Corner corner);
 };
