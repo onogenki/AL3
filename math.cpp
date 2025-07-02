@@ -53,22 +53,6 @@ Matrix4x4 MakeIdentityMatrix() {
 	return result;
 }
 
-
-Matrix4x4 Multiply(const Matrix4x4& matrix1, const Matrix4x4& matrix2) {
-
-	Matrix4x4 result = {};
-
-	for (int i = 0; i < 4; i++) {
-		for (int j = 0; j < 4; j++) {
-			for (int k = 0; k < 4; k++) {
-				result.m[i][j] += matrix1.m[i][k] * matrix2.m[k][j];
-			}
-		}
-	}
-
-	return result;
-}
-
 // 拡大縮小行列の作成
 Matrix4x4 MakeScaleMatrix(const Vector3& scale) {
 
@@ -124,13 +108,13 @@ Matrix4x4 MakeAffineMatrix(const Vector3& scale, const Vector3& rot, const Vecto
 	Matrix4x4 matRotY = MakeRotateYMatrix(rot.y);
 	Matrix4x4 matRotZ = MakeRotateZMatrix(rot.z);
 	// 回転行列の合成
-	Matrix4x4 matRot = Multiply(Multiply(matRotX, matRotY), matRotZ);
+	Matrix4x4 matRot = matRotZ * matRotX * matRotY;
 
 	// 平行移動行列の作成
 	Matrix4x4 matTrans = MakeTranslateMatrix(translate);
 
 	// スケーリング、回転、平行移動の合成
-	Matrix4x4 matTransform = Multiply(Multiply(matScale, matRot), matTrans);
+	Matrix4x4 matTransform = matScale * matRot * matTrans;
 
 	return matTransform;
 }
@@ -155,7 +139,7 @@ Matrix4x4 operator*(const Matrix4x4& m1, const Matrix4x4& m2) {
 	return result *= m2;
 }
 
-void worldTransformUpdate(WorldTransform& worldTransform) {
+void WorldTransformUpdate(WorldTransform& worldTransform) {
 
 	Matrix4x4 affin_mat = MakeAffineMatrix(
 		worldTransform.scale_,

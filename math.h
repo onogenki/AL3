@@ -23,8 +23,6 @@ Vector3& operator/=(Vector3& v, float s);
 // 単位行列の作成
 Matrix4x4 MakeIdentityMatrix();
 
-Matrix4x4 Multiply(const Matrix4x4& matrix1, const Matrix4x4& matrix2);
-
 // 拡大縮小行列の作成
 Matrix4x4 MakeScaleMatrix(const Vector3& scale);
 
@@ -49,7 +47,8 @@ Matrix4x4& operator*=(Matrix4x4& lhm, const Matrix4x4& rhm);
 // 2項演算子オーバーロード
 Matrix4x4 operator*(const Matrix4x4& m1, const Matrix4x4& m2);
 
-void worldTransformUpdate(WorldTransform& worldTransform);
+//ワールドトランスフォーム更新
+void WorldTransformUpdate(WorldTransform& worldTransform);
 
 float Lerp(float x1, float x2, float t);
 
