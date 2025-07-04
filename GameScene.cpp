@@ -55,6 +55,14 @@ void GameScene::Initialize() {
 	CameraController::Rect cameraArea = {12.0f, 100 - 12.0f, 6.0f, 6.0f};
 	CController_->SetMovableArea(cameraArea);
 
+	//0209敵クラス
+	enemy_ = new Enemy();
+	//敵モデル
+	enemy_model_ = Model::CreateFromOBJ("enemy");
+	//敵位置決めて敵クラス初期化
+	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(14, 18);
+	enemy_->Initialize(enemy_model_, &camera_, enemyPosition);
+
 }
 
 
@@ -75,7 +83,6 @@ void GameScene::GenerateBlocks() {
 		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
 			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
 				WorldTransform* worldTransform = new WorldTransform();
-				
 				worldTransform->Initialize();
 				worldTransformBlocks_[i][j] = worldTransform;
 				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
@@ -90,6 +97,7 @@ void GameScene::Update() {
 	skydome_->Update();
 	CController_->Update();
 
+	enemy_->Update();
 #ifdef _DEBUG
 	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 		// フラグをトグル
@@ -149,6 +157,8 @@ void GameScene::Draw() {
 		}
 	}
 
+		enemy_->Draw();
+
 	Model::PostDraw();
 
 	// スプライト描画前処理
@@ -174,4 +184,5 @@ GameScene::~GameScene() {
 	delete modelSkydome_;
 	delete player_;
 	delete mapChipField_;
+	delete enemy_;
 }
