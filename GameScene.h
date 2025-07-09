@@ -26,6 +26,9 @@ public:
 
 	void GenerateBlocks();
 
+	//0210衝突判定と応答
+	void CheckAllCollisions();
+
 private:
 	// テクスチャハンドル
 	uint32_t textureHandle_ = 0;
@@ -67,7 +70,10 @@ private:
 	CameraController* CController_ = nullptr;
 
 	// enemyクラス
-	Enemy* enemy_ = nullptr;
+	//Enemy* enemy_ = nullptr;
 	// enemyモデル
 	Model* enemy_model_ = nullptr;
+
+	//0210敵の複数化
+	std::list<Enemy*> enemies_;
 };

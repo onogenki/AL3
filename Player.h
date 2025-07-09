@@ -1,9 +1,12 @@
 #pragma once
 #include "KamataEngine.h"
+#include "math.h"
 
 using namespace KamataEngine;
 
 class MapChipField;
+//includeの変わり、enemyのクラスのポインタ
+class Enemy;
 
 class Player {
 public:
@@ -38,7 +41,14 @@ public:
 	//0207
 	void SetMapChipField(MapChipField* mapChipField) {
 		mapChipField_ = mapChipField; }
+	
+	//0210ワールド座標を取得
+	Vector3 GetWorldPosition();
+	
+	AABB GetAABB();
 
+	//衝突応答
+	void OnCollision(const Enemy* enemy);
 
 private:
 	// ワールド変換データ

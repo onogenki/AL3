@@ -6,6 +6,11 @@ using namespace KamataEngine;
 // 円周率
 const float PI = 3.141592654f;
 
+struct AABB {
+	Vector3 min;
+	Vector3 max;
+};
+
 //CameraControllerのUpdate/Reset関数で必要
 const Vector3 operator+(const Vector3& lhv, const Vector3& rhv);
 
@@ -53,3 +58,5 @@ void WorldTransformUpdate(WorldTransform& worldTransform);
 float Lerp(float x1, float x2, float t);
 
 float EaseInOut(float x1, float x2, float t);
+
+bool IsCollision(const AABB& aabb1, const AABB& aabb2);
