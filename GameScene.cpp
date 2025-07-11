@@ -73,6 +73,14 @@ void GameScene::Initialize() {
 		newEnemy->Initialize(enemy_model_, &camera_, enemyPosition);
 		enemies_.push_back(newEnemy);
 	}
+
+	//モデル読み込み
+	deathParticle_model_ = Model::CreateFromOBJ("deathParticle");
+
+	//仮の生成処理　後で消す
+	deathParticles_ = new DeathParticles;
+	deathParticles_->Initialize
+	(deathParticle_model_, &camera_, playerPosition);
 }
 
 
@@ -107,9 +115,8 @@ void GameScene::Update() {
 	skydome_->Update();
 	CController_->Update();
 
-	//enemy_->Update();
-	for (Enemy* enemy : enemies_)
-	{
+	// enemy_->Update();
+	for (Enemy* enemy : enemies_) {
 		enemy->Update();
 	}
 
@@ -146,10 +153,14 @@ void GameScene::Update() {
 	// デバッグカメラの更新
 	debugCamera_->Update();
 
-    //0210衝突判定 全ての当たり判定を行う
+	// 0210衝突判定 全ての当たり判定を行う
 	CheckAllCollisions();
-}
 
+	// デスパーティクルあれば更新
+	if (deathParticles_) {
+		deathParticles_->Update();
+	}
+}
 
 void GameScene::Draw() {
 
@@ -179,6 +190,12 @@ void GameScene::Draw() {
 	for (Enemy* enemy : enemies_)
 	{
 		enemy->Draw();
+	}
+
+	//デスパーティクルあれば描画
+	if (deathParticles_)
+	{
+		deathParticles_->Draw();
 	}
 
 	Model::PostDraw();
@@ -237,4 +254,7 @@ GameScene::~GameScene() {
 	for (Enemy* enemy : enemies_) {
 		delete enemy;
 	}
+
+	delete deathParticles_;
+	delete deathParticle_model_;
 }
