@@ -78,11 +78,32 @@ void GameScene::Initialize() {
 	deathParticle_model_ = Model::CreateFromOBJ("deathParticle");
 
 	//仮の生成処理　後で消す
-	deathParticles_ = new DeathParticles;
-	deathParticles_->Initialize
-	(deathParticle_model_, &camera_, playerPosition);
+	//deathParticles_ = new DeathParticles;
+	//deathParticles_->Initialize
+	//(deathParticle_model_, &camera_, playerPosition);
+
+	//0212ゲームプレイフェーズから開始
+	phase_ = Phase::kPlay;
 }
 
+void GameScene::ChangePhase() {
+	switch (phase_) {
+	case Phase::kPlay:
+		// Initialize関数のいきなりパーティクル発生処理は消す
+		if (player_->IsDead()) {
+			// 死亡演出
+			phase_ = Phase::kDeath;
+
+			const Vector3& deathParticlesPosition = player_->GetWorldPosition();
+
+			deathParticles_ = new DeathParticles;
+			deathParticles_->Initialize(deathParticle_model_, &camera_, deathParticlesPosition);
+		}
+		break;
+	case Phase::kDeath:
+		break;
+	}
+}
 
 void GameScene::GenerateBlocks() {
 	uint32_t numBlockVirtical = mapChipField_->GetNumBlockVirtical();
@@ -110,6 +131,20 @@ void GameScene::GenerateBlocks() {
 }
 
 void GameScene::Update() {
+
+	ChangePhase();
+
+	switch (phase_) {
+	case Phase::kPlay:
+		// ゲームプレイフェーズの処理
+		break;
+	case Phase::kDeath://デス演出フェーズの処理
+		//deathParticles_->IsFinished関数をDeathParticles.hに実装
+		if (deathParticles_ && deathParticles_->IsFinished()) {
+			finished_ = true;
+		}
+		break;
+	}
 
 	player_->Update();
 	skydome_->Update();
@@ -171,7 +206,8 @@ void GameScene::Draw() {
 	Model::PreDraw(dxCommon->GetCommandList());
 
 	// 自キャラの描画
-	player_->Draw();
+	if (!player_->IsDead())
+		player_->Draw();
 
 	// 天球描画
 	skydome_->Draw();

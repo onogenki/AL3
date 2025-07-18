@@ -30,7 +30,22 @@ public:
 	// 0210衝突判定と応答
 	void CheckAllCollisions();
 
+	//デスフラグのgetter
+	bool isFinished() const { return finished_; }
+
 private:
+
+	//0212ゲームのフェーズ(型)
+	enum class Phase {
+		kPlay,//ゲームプレイ
+		kDeath,//デス演出
+	};
+
+	//ゲームの現在フェーズ(変数)
+	Phase phase_;
+
+	void ChangePhase();
+	 
 	// テクスチャハンドル
 	uint32_t textureHandle_ = 0;
 
@@ -70,8 +85,6 @@ private:
 	// カメラ移動
 	CameraController* CController_ = nullptr;
 
-	// enemyクラス
-	// Enemy* enemy_ = nullptr;
 	// enemyモデル
 	Model* enemy_model_ = nullptr;
 
@@ -82,4 +95,6 @@ private:
 	DeathParticles* deathParticles_ = nullptr;
 
 	Model* deathParticle_model_ = nullptr;
+	//0212 終了フラグ
+	bool finished_ = false;
 };
