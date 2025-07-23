@@ -4,7 +4,7 @@
 #include"Math.h"
 
 void Enemy::Initialize(Model* enemyModel, Camera* camera, const Vector3& position) {
-
+	//NULLチェック
 	assert(enemyModel); 
 
 	enemyModel_ = enemyModel;

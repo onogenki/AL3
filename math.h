@@ -14,9 +14,9 @@ struct AABB {
 //CameraControllerのUpdate/Reset関数で必要
 const Vector3 operator+(const Vector3& lhv, const Vector3& rhv);
 
-//02_06のLerp関数
+//0206のLerp関数
 Vector3 Lerp(const Vector3& v1, const Vector3& v2, float t);
-//02_06
+//0206
 const Vector3 operator*(const Vector3& v1, const float f);
 
 // 代入演算子オーバーロード
@@ -33,10 +33,8 @@ Matrix4x4 MakeScaleMatrix(const Vector3& scale);
 
 // X軸回転行列の作成
 Matrix4x4 MakeRotateXMatrix(float theta);
-
 // Y軸回転行列の作成
 Matrix4x4 MakeRotateYMatrix(float theta);
-
 // Z軸回転行列の作成
 Matrix4x4 MakeRotateZMatrix(float theta);
 

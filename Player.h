@@ -61,7 +61,7 @@ private:
 	// テクスチャハンドル
 	uint32_t textureHandle_ = 0u;
 	Camera* camera_ = nullptr;
-	// 02_05 移動量
+	// 0205 移動量
 	Vector3 velocity_ = {};
 	//フレームごとの加速度
 	static inline const float kAcceleration = 0.1f;
@@ -111,7 +111,7 @@ private:
 
 	Vector3 CornerPosition(const Vector3& center, Corner corner);
 
-	//0208接地状態の切り替え処理
+	//0208 接地状態の切り替え処理
 	void UpdateOnGround(const CollisionMapInfo& info);
 
 	//壁接触している場合の処理

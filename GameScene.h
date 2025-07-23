@@ -7,6 +7,7 @@
 #include "CameraController.h"
 #include "Enemy.h"
 #include "DeathParticles.h"
+#include"Fade.h"
 
 using namespace KamataEngine;
 
@@ -35,10 +36,12 @@ public:
 
 private:
 
-	//0212ゲームのフェーズ(型)
+	//0212 ゲームのフェーズ(型)
 	enum class Phase {
+		kFadeIn,//フェードイン
 		kPlay,//ゲームプレイ
 		kDeath,//デス演出
+		kFadeOut,//フェードアウト
 	};
 
 	//ゲームの現在フェーズ(変数)
@@ -97,4 +100,7 @@ private:
 	Model* deathParticle_model_ = nullptr;
 	//0212 終了フラグ
 	bool finished_ = false;
+
+	//0213
+	Fade* fade_ = nullptr;
 };

@@ -2,11 +2,6 @@
 #include "Math.h"
 #include <numbers>
 
-TitleScene::~TitleScene() {
-	delete modelPlayer_;
-	delete modelTitle_;
-}
-
 void TitleScene::Initialize() {
 
 	modelTitle_ = Model::CreateFromOBJ("titleFont", true);
@@ -32,13 +27,37 @@ void TitleScene::Initialize() {
 	worldTransformPlayer_.translation_.x = -2.0f;
 
 	worldTransformPlayer_.translation_.y = -10.0f;
+
+	//0213
+	fade_ = new Fade();
+	fade_->Initialize();
+
+	fade_->Start(Fade::Status::FadeIn, 1.0f);
 }
 
 void TitleScene::Update() {
 
-	//27枚目 タイトルシーンの終了条件
-	if (Input::GetInstance()->PushKey(DIK_SPACE)) {
-		finished_ = true;
+	switch (phase_) {
+	case Phase::kFadeIn:
+		fade_->Update();
+
+		if (fade_->IsFinished()) {
+			phase_ = Phase::kMain;
+		}
+		break;
+	case Phase::kMain:
+		//タイトルシーンの終了条件
+		if (Input::GetInstance()->PushKey(DIK_SPACE)) {
+			fade_->Start(Fade::Status::FadeOut, 1.0f);
+			phase_ = Phase::kFadeOut;
+		}
+		break;
+	case Phase::kFadeOut:
+		fade_->Update();
+		if (fade_->IsFinished()) {
+			finished_ = true;
+		}
+		break;
 	}
 
 	counter_ += 1.0f / 60.0f;
@@ -69,4 +88,14 @@ void TitleScene::Draw() {
 	modelPlayer_->Draw(worldTransformPlayer_, camera_);
 
 	Model::PostDraw();
+
+	//0213
+	fade_->Draw();
+}
+
+TitleScene::~TitleScene() {
+	delete modelPlayer_;
+	delete modelTitle_;
+	//0213
+	delete fade_;
 }

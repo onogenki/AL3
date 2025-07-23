@@ -105,10 +105,10 @@ void Player ::InputMove() {
 		CheckMapCollisionLeft(info);
 	}
 
-	//0207上下左右全て
+	//0207 上下左右全て
     void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
 
-	    // 0207上昇あり?
+	    // 0207 上昇あり?
 	    if (info.move.y <= 0) {
 		    return;
 	    }
@@ -322,7 +322,7 @@ void Player ::InputMove() {
 	        }
         }
 
-        //02_08
+        //0208
         void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 
 	        if (info.move.x >= 0) {

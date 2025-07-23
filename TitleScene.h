@@ -1,11 +1,19 @@
 #pragma once
 #include "KamataEngine.h"
+#include "Fade.h"
 
 using namespace KamataEngine;
 
 //タイトルシーン
 class TitleScene {
 public:
+
+	enum class Phase {
+		kFadeIn, //フェードイン
+		kMain,   //メイン部
+		kFadeOut,//フェードアウト
+	};
+
 	~TitleScene();
 	
 	void Initialize();
@@ -14,7 +22,7 @@ public:
 
 	void Draw();
 
-	//26枚目 デスフラグのgetter
+	//デスフラグのgetter
 	bool IsFinished() const { return finished_; }
 
 private:
@@ -29,6 +37,10 @@ private:
 	Model* modelTitle_ = nullptr;
 
 	float counter_ = 0.0f;
-	//26枚目 終了フラグ
+	//0212 終了フラグ
 	bool finished_ = false;
+	//0213
+	Fade* fade_ = nullptr;
+	//現在のフェーズ
+	Phase phase_ = Phase::kFadeIn;
 };
