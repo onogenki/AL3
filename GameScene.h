@@ -103,4 +103,6 @@ private:
 
 	//0213
 	Fade* fade_ = nullptr;
+
+	int finishedTimer;
 };

@@ -86,6 +86,11 @@ void GameScene::Initialize() {
 
 void GameScene::ChangePhase() {
 	switch (phase_) {
+	case Phase::kFadeIn:
+			if (fade_->IsFinished()) {
+			phase_ = Phase::kPlay;
+		}
+		    break;
 	case Phase::kPlay:
 		// Initialize関数のいきなりパーティクル発生処理は消す
 		if (player_->IsDead()) {
@@ -96,11 +101,16 @@ void GameScene::ChangePhase() {
 
 			deathParticles_ = new DeathParticles;
 			deathParticles_->Initialize(deathParticle_model_, &camera_, deathParticlesPosition);
+
+			fade_->Start(Fade::Status::FadeOut, 3.0f);
 		}
 		break;
 	case Phase::kDeath:
-		fade_->Start(Fade::Status::FadeOut, 3.0f);
-
+		finishedTimer++;
+		if (finishedTimer > 180)
+		{
+			finished_ = true;
+		}
 		break;
 	}
 }
@@ -138,10 +148,7 @@ void GameScene::Update() {
 	switch (phase_) {
 	case Phase::kFadeIn:
 		fade_->Update();
-		if (fade_->IsFinished()) {
-			fade_->Start(Fade::Status::FadeOut, 1.0f);
-			phase_ = Phase::kPlay;
-		}
+	
 
 		skydome_->Update();
 		CController_->Update();
