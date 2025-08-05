@@ -16,7 +16,7 @@ void GameScene::Initialize() {
 
 	// カメラの初期化
 	camera_.Initialize();
-
+	
 	// ブロックモデルの生成
 	block_model_ = Model::CreateFromOBJ("block");
 
@@ -38,13 +38,13 @@ void GameScene::Initialize() {
 	player_ = new Player();
 	//プレイヤーモデル
 	player_model_ = Model::CreateFromOBJ("player");
+	modelAttack_ = Model::CreateFromOBJ("attack_effect");
 	//0205 座標をマップチップ番号で指定
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2, 18);
-	
 	//0207
 	player_->SetMapChipField(mapChipField_);
 
-	player_->Initialize(player_model_, &camera_, playerPosition);
+	player_->Initialize(player_model_,modelAttack_, &camera_, playerPosition);
 
 	//0206 カメラコントローラ
 	CController_ = new CameraController(); // 生成
@@ -63,7 +63,7 @@ void GameScene::Initialize() {
 	{
 		Enemy* newEnemy = new Enemy();
 		//                                     2体ずつ異なる座標をセット
-		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(14 + i * 2, 18);
+		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(30 + i * 2, 18);
 
 		newEnemy->Initialize(enemy_model_, &camera_, enemyPosition);
 		enemies_.push_back(newEnemy);
@@ -82,6 +82,7 @@ void GameScene::Initialize() {
 	fade_->Initialize();
 	fade_->Start(Fade::Status::FadeIn, 1.0f);
 
+	
 }
 
 void GameScene::ChangePhase() {
@@ -163,7 +164,7 @@ void GameScene::Update() {
 #ifdef _DEBUG
 		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 			// フラグをトグル
-			isDebugCameraActive_ = !isDebugCameraActive_;
+			//isDebugCameraActive_ = !isDebugCameraActive_;
 		}
 #endif
 
@@ -204,7 +205,7 @@ void GameScene::Update() {
 #ifdef _DEBUG
 		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 			// フラグをトグル
-			isDebugCameraActive_ = !isDebugCameraActive_;
+		//	isDebugCameraActive_ = !isDebugCameraActive_;
 		}
 #endif
 

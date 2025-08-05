@@ -103,6 +103,7 @@ private:
 
 	//0213
 	Fade* fade_ = nullptr;
-
+	//死んだ後のフェードタイム
 	int finishedTimer;
+	Model* modelAttack_ = nullptr;
 };

@@ -72,7 +72,7 @@ void DeathParticles::Draw() {
 	}
 
 	for (auto& worldTransform : worldTransforms_) {
-		//&onjectColor_を追加
+		//&objectColor_を追加
 		deathParticleModel_->Draw(worldTransform, *camera_, &objectColor_);
 	}
 }

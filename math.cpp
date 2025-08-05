@@ -2,6 +2,10 @@
 #include <numbers>
 #include "math.h"
 
+//0214 単項演算子オーバーロード
+Vector3 operator+(const Vector3& v) { return v; }
+Vector3 operator-(const Vector3& v) { return Vector3(-v.x, -v.y, -v.z); }
+
 // CameraControllerのUpdateで必要
 const Vector3 operator*(const Vector3& v1, const float f) {
 	Vector3 temp(v1);
@@ -154,6 +158,18 @@ void WorldTransformUpdate(WorldTransform& worldTransform) {
 
 //EaseInOutで必要
 float Lerp(float x1, float x2, float t) { return (1.0f - t) * x1 + t * x2; }
+
+float EaseIn(float x1, float x2, float t) {
+	float easedT = t * t;
+
+	return Lerp(x1, x2, easedT);
+}
+
+float EaseOut(float x1, float x2, float t) {
+	float easedT = 1.0f - std::powf(1.0f - t, 3.0f);
+
+	return Lerp(x1, x2, easedT);
+}
 
 float EaseInOut(float x1, float x2, float t) {
 	float easedT = -(std::cosf(std::numbers::pi_v<float> * t) - 1.0f) / 2.0f;

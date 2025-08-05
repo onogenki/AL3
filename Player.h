@@ -25,8 +25,28 @@ public:
 		kNumCorner
 	};
 
+	//0214 振るまい
+	enum class Behavior {
+		kUnknown = -1,
+		kRoot,   // 通常状態
+		kAttack, // 攻撃中
+	};
+
+	//0214 攻撃フェーズ
+	enum class AttackPhase {
+		kUnknown = -1, // 無効な状態
+
+		kAnticipation, // 予備動作
+		kAction,       // 前進動作
+		kRecovery,     // 余韻動作
+	};
+
+	//0214エフェクト用
+	Model* modelAttack_ = nullptr;
+	WorldTransform worldTransformAttack_;
+
 	/// 初期化
-	void Initialize(Model* player_model, Camera* camera, const Vector3& position);
+	void Initialize(Model* player_model, Model* modelAttack, Camera* camera, const Vector3& position);
 
 	/// 更新
 	void Update();
@@ -52,6 +72,18 @@ public:
 
 	//0212 デスフラグのgetter
 	bool IsDead() const { return isDead_; }
+
+	//0214 通常行動更新
+	void BehaviorRootUpdate();
+
+	//0214 攻撃行動更新
+	void BehaviorAttackUpdate();
+
+	//0214 通常行動初期化
+	void BehaviorRootInitialize();
+
+	//0214 攻撃行動初期化
+	void BehaviorAttackInitialize();
 
 private:
 	// ワールド変換データ
@@ -125,4 +157,24 @@ private:
 	static inline const float kAttenuationWall = 0.2f;
 	//0212 デスフラグ
 	bool isDead_ = false;
+
+	//0214 振るまい
+	Behavior behavior_ = Behavior::kRoot;
+
+	//次の振るまいリクエスト
+	Behavior behaviorRequest_ = Behavior::kUnknown;
+
+	//攻撃ギミックの経過時間カウンター
+	uint32_t attackParameter_ = 0;
+
+	//攻撃フェーズ
+	AttackPhase attackPhase_ = AttackPhase::kUnknown;
+
+	//予備動作の時間
+	static inline const uint32_t kAnticipationTime = 8;
+	//前進動作の時間
+	static inline const uint32_t kActionTime = 5;
+	//余韻動作の時間
+	static inline const uint32_t kRecoveryTime = 12;
+
 };
