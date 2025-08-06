@@ -41,10 +41,6 @@ public:
 		kRecovery,     // 余韻動作
 	};
 
-	//0214エフェクト用
-	Model* modelAttack_ = nullptr;
-	WorldTransform worldTransformAttack_;
-
 	/// 初期化
 	void Initialize(Model* player_model, Model* modelAttack, Camera* camera, const Vector3& position);
 
@@ -84,6 +80,12 @@ public:
 
 	//0214 攻撃行動初期化
 	void BehaviorAttackInitialize();
+
+	//0215
+	bool IsAttack() const { return behavior_ == Behavior::kAttack && attackPhase_ == AttackPhase::kAction; }
+
+	//0215
+	bool IsCollisionDisabled() const { return isCollisionDisabled_; }
 
 private:
 	// ワールド変換データ
@@ -177,4 +179,10 @@ private:
 	//余韻動作の時間
 	static inline const uint32_t kRecoveryTime = 12;
 
+	// 02_14 34枚目 攻撃エフェクト
+	Model* modelAttack_ = nullptr;
+	WorldTransform worldTransformAttack_;
+
+	// 02_15 20枚目
+	bool isCollisionDisabled_ = false; // 衝突無効化
 };

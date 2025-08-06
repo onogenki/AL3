@@ -624,7 +624,16 @@ AABB Player::GetAABB() {
 }
 
 void Player::OnCollision(const Enemy* enemy) {
+	
+		//0215
+	if (IsAttack()) {
+		return; // 攻撃中はダメージ無効
+	}
+	//不使用
 	(void)enemy;
 	//0212 書き換え
 	isDead_ = true;
+
+	//0215
+	isCollisionDisabled_ = true; // 衝突無効化
 }

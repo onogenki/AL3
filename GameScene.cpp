@@ -38,9 +38,10 @@ void GameScene::Initialize() {
 	player_ = new Player();
 	//プレイヤーモデル
 	player_model_ = Model::CreateFromOBJ("player");
-	modelAttack_ = Model::CreateFromOBJ("attack_effect");
-	//0205 座標をマップチップ番号で指定
+	// 0205 座標をマップチップ番号で指定
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2, 18);
+	//プレイヤー攻撃エフェクトモデル
+	modelAttack_ = Model::CreateFromOBJ("attack_effect");
 	//0207
 	player_->SetMapChipField(mapChipField_);
 
@@ -63,7 +64,7 @@ void GameScene::Initialize() {
 	{
 		Enemy* newEnemy = new Enemy();
 		//                                     2体ずつ異なる座標をセット
-		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(30 + i * 2, 18);
+		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(30 + i * 10, 18);
 
 		newEnemy->Initialize(enemy_model_, &camera_, enemyPosition);
 		enemies_.push_back(newEnemy);
@@ -143,13 +144,25 @@ void GameScene::GenerateBlocks() {
 
 void GameScene::Update() {
 
+		//0215 デスフラグの立った敵を削除
+	enemies_.remove_if([](Enemy* enemy) {
+		if (enemy->IsDead()) {
+			delete enemy;
+			return true;
+		}
+		return false;
+	});
+
 	fade_->Update();
 	ChangePhase();
 
 	switch (phase_) {
 	case Phase::kFadeIn:
 		fade_->Update();
-	
+		if (fade_->IsFinished()) {
+			fade_->Start(Fade::Status::FadeOut, 1.0f);
+			phase_ = Phase::kPlay;
+		}
 
 		skydome_->Update();
 		CController_->Update();
@@ -164,7 +177,7 @@ void GameScene::Update() {
 #ifdef _DEBUG
 		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 			// フラグをトグル
-			//isDebugCameraActive_ = !isDebugCameraActive_;
+			isDebugCameraActive_ = !isDebugCameraActive_;
 		}
 #endif
 
@@ -202,12 +215,12 @@ void GameScene::Update() {
 			enemy->Update();
 		}
 
-#ifdef _DEBUG
-		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+//#ifdef _DEBUG
+		//if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 			// フラグをトグル
 		//	isDebugCameraActive_ = !isDebugCameraActive_;
-		}
-#endif
+		//}
+//#endif
 
 		// カメラの処理
 		if (isDebugCameraActive_) {
@@ -253,6 +266,7 @@ void GameScene::Update() {
 
 		break;
 	case Phase::kFadeOut:
+		fade_->Update();
 		if (fade_->IsFinished()) {
 			finished_ = true;
 		}
@@ -339,6 +353,10 @@ void GameScene::CheckAllCollisions() {
 				player_->OnCollision(enemy);
 				// "敵"の衝突時関数を呼び出す
 				enemy->OnCollision(player_);
+			}
+			if (enemy->IsCollisionDisabled())
+			{
+				continue;//コリジョン無効の敵はスキップ
 			}
 		}
 	}

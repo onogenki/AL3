@@ -2,6 +2,8 @@
 #include <numbers>
 #include "Enemy.h"
 #include"Math.h"
+#include "Player.h"
+#include "GameScene.h"
 
 void Enemy::Initialize(Model* enemyModel, Camera* camera, const Vector3& position) {
 	//NULLチェック
@@ -23,18 +25,53 @@ void Enemy::Initialize(Model* enemyModel, Camera* camera, const Vector3& positio
 
 void Enemy::Update() {
 
-	//移動
-	worldTransform_.translation_ += velocity_;
+	//0215 変更リクエストがあったら
+	if (behaviorRequest_ != Behavior::kUnknown) {
+		// 振るまいを変更する
+		behavior_ = behaviorRequest_;
 
-	walkTimer += 1.0f / 60.0f;
+		// 各振るまいごとの初期化を実行
+		switch (behavior_) {
+		case Behavior::kDefeated:
+		default:
+			counter_ = 0;
+			break;
+		}
 
-	//回転アニメーション
-	worldTransform_.rotation_.x = std::sin(std::numbers::pi_v<float> * 2.0f * walkTimer / kWalkMotionTime);
+		// 振るまいリクエストをリセット
+		behaviorRequest_ = Behavior::kUnknown;
+	}
 
+	//0215
+	switch (behavior_) {
+	// 歩行
+	case Behavior::kWalk:
+		// 移動
+		worldTransform_.translation_ += velocity_;
 
+		walkTimer += 1.0f / 60.0f;
 
-	//ワールド行列更新
-	WorldTransformUpdate(worldTransform_);
+		// 回転アニメーション
+		worldTransform_.rotation_.x = std::sin(std::numbers::pi_v<float> * 2.0f * walkTimer / kWalkMotionTime);
+
+		// ワールド行列更新
+		WorldTransformUpdate(worldTransform_);
+		break;
+	// やられ
+	case Behavior::kDefeated:
+		//0215　アニメーションのタイマーを加算
+		counter_ += 1.0f / 60.0f;
+		//y,x軸回りの回転角をイージングで変化
+		worldTransform_.rotation_.y += 0.3f;
+		worldTransform_.rotation_.x = EaseOut(ToRadians(kDefeatedMotionAngleStart), ToRadians(kDefeatedMotionAngleEnd), counter_ / kDefeatedTime);
+		//ワールドトランスフォームの行列更新
+		WorldTransformUpdate(worldTransform_);
+		//アニメーションのタイマーが一定時間に達したらデスフラグ
+		if (counter_ >= kDefeatedTime) {
+			isDead_ = true;
+		}
+		break;
+	}
 }
 
 void Enemy::Draw() {
@@ -66,5 +103,18 @@ return worldPos;
 
 void Enemy::OnCollision(const Player *player) 
 {
-	(void)player;
+	if (behavior_ == Behavior::kDefeated) {
+		// 敵がやられているなら何もしない
+		return;
+	}
+
+	// プレイヤーが攻撃中なら敵が死ぬ
+	// player.hをインクルード
+	if (player->IsAttack()) {
+		// 敵の振るまいをやられに変更
+		behaviorRequest_ = Behavior::kDefeated;
+
+		//0215 衝突を無効化
+		isCollisionDisabled_ = true;
+	}
 }
