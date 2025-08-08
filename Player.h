@@ -58,8 +58,8 @@ public:
 	void SetMapChipField(MapChipField* mapChipField) {
 		mapChipField_ = mapChipField; }
 	
-	//0210ワールド座標を取得
-	Vector3 GetWorldPosition();
+	//0210ワールド座標を取得 constメンバ関数とする
+	Vector3 GetWorldPosition() const;
 	
 	AABB GetAABB();
 
@@ -185,4 +185,5 @@ private:
 
 	// 02_15 20枚目
 	bool isCollisionDisabled_ = false; // 衝突無効化
+
 };

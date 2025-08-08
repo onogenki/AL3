@@ -98,7 +98,7 @@ Vector3 Enemy::GetWorldPosition() { Vector3 worldPos;
 worldPos.x = worldTransform_.matWorld_.m[3][0];
 worldPos.y = worldTransform_.matWorld_.m[3][1];
 worldPos.z = worldTransform_.matWorld_.m[3][2];
-return worldPos;
+return worldTransform_.translation_;
 }
 
 void Enemy::OnCollision(const Player *player) 
@@ -111,6 +111,21 @@ void Enemy::OnCollision(const Player *player)
 	// プレイヤーが攻撃中なら敵が死ぬ
 	// player.hをインクルード
 	if (player->IsAttack()) {
+		//0216
+		if (gameScene_) {
+
+			Vector3 enemyPos = GetWorldPosition();
+			Vector3 playerPos = player->GetWorldPosition();
+
+			// 敵と自キャラの中間位置にエフェクトを生成
+			Vector3 effectPos;
+
+			//敵とplayerの中間位置にエフェクトを生成
+			effectPos.x = (enemyPos.x + playerPos.x) / 2.0f;
+			effectPos.y = (enemyPos.y + playerPos.y) / 2.0f;
+			effectPos.z = (enemyPos.z + playerPos.z) / 2.0f;
+			gameScene_->CreateEffect(effectPos);
+		}
 		// 敵の振るまいをやられに変更
 		behaviorRequest_ = Behavior::kDefeated;
 

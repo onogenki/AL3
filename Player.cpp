@@ -233,7 +233,7 @@ void Player ::InputMove() {
 					velocity_.x *= (1.0f - kAttenuation);
 				}
 
-				acceleration.x += kAcceleration / 40.0f;
+				acceleration.x += kAcceleration / 55.0f;
 
 				if (lrDirection_ != LRDirection::kRight) {
 					lrDirection_ = LRDirection::kRight;
@@ -249,7 +249,7 @@ void Player ::InputMove() {
 					velocity_.x *= (1.0f - kAttenuation);
 				}
 
-				acceleration.x -= kAcceleration / 40.0f;
+				acceleration.x -= kAcceleration / 55.0f;
 
 				if (lrDirection_ != LRDirection::kLeft) {
 					lrDirection_ = LRDirection::kLeft;
@@ -600,15 +600,15 @@ void Player::Draw() {
 	}
 }
 
-//0210 ワールド座標を取得
-Vector3 Player::GetWorldPosition() {
+//0210 ワールド座標を取得 constを付けてオブジェクト変更しない
+Vector3 Player::GetWorldPosition()const {
 	//ワールド座標を入れる変数
 	Vector3 worldPos;
 	// ワールド行列の平行移動成分を取得
 	worldPos.x = worldTransform_.matWorld_.m[3][0];
 	worldPos.y = worldTransform_.matWorld_.m[3][1];
 	worldPos.z = worldTransform_.matWorld_.m[3][2];
-	return worldPos;
+	return worldTransform_.translation_;
 }
 
 AABB Player::GetAABB() {

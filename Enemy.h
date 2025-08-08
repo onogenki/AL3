@@ -1,11 +1,12 @@
 #pragma once
 
 #include "KamataEngine.h"
+#include "Player.h"
 #include "math.h"
 
 using namespace KamataEngine;
 
-class Player;
+class GameScene;
 
 class Enemy {
 public:
@@ -35,6 +36,9 @@ public:
 	bool IsDead() const { return isDead_; }
 
 	bool IsCollisionDisabled() const { return isCollisionDisabled_; }
+
+	//0216
+	void SetGameScene(GameScene* gameScene) { gameScene_ = gameScene; }
 
 private:
 	//ワールド
@@ -77,4 +81,7 @@ private:
 
 	//0215
 	bool isCollisionDisabled_ = false;
+
+	//0216
+	GameScene* gameScene_ = nullptr;
 };

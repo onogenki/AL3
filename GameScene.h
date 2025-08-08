@@ -8,6 +8,7 @@
 #include "Enemy.h"
 #include "DeathParticles.h"
 #include"Fade.h"
+#include "HitEffect.h"
 
 using namespace KamataEngine;
 
@@ -33,6 +34,9 @@ public:
 
 	//デスフラグのgetter
 	bool isFinished() const { return finished_; }
+
+	// エフェクトを生成  発生座標
+	void CreateEffect(const Vector3& position);
 
 private:
 
@@ -106,4 +110,10 @@ private:
 	//死んだ後のフェードタイム
 	int finishedTimer;
 	Model* modelAttack_ = nullptr;
+
+	// 0216
+	//ヒットエフェクトのリスト
+	std::list<HitEffect*> hitEffects_;
+
+	Model* particle_model_ = nullptr;
 };

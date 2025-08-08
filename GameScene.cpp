@@ -2,6 +2,13 @@
 #include"math.h"
 using namespace KamataEngine;
 
+// エフェクトを生成
+void GameScene::CreateEffect(const Vector3& position) {
+	HitEffect* newHitEffect = HitEffect::Create(position,&camera_);
+
+	hitEffects_.push_back(newHitEffect);
+}
+
 void GameScene::Initialize() {
 	// ファイル名を指定してテクスチャを読み込み
 	textureHandle_ = TextureManager::Load("sample.png");
@@ -67,14 +74,16 @@ void GameScene::Initialize() {
 		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(30 + i * 10, 18);
 
 		newEnemy->Initialize(enemy_model_, &camera_, enemyPosition);
+		//0216
+		newEnemy->SetGameScene(this);
 		enemies_.push_back(newEnemy);
 	}
 
 	//モデル読み込み
 	deathParticle_model_ = Model::CreateFromOBJ("deathParticle");
 
-	//0212ゲームプレイフェーズから開始
-	//phase_ = Phase::kPlay;
+	// 02_16
+	particle_model_ = Model::CreateFromOBJ("particle");
 
 	phase_ = Phase::kFadeIn;
 
@@ -83,7 +92,9 @@ void GameScene::Initialize() {
 	fade_->Initialize();
 	fade_->Start(Fade::Status::FadeIn, 1.0f);
 
-	
+	//0216
+	HitEffect::SetModel(particle_model_);
+	HitEffect::SetCamera(&camera_);
 }
 
 void GameScene::ChangePhase() {
@@ -144,7 +155,17 @@ void GameScene::GenerateBlocks() {
 
 void GameScene::Update() {
 
-		//0215 デスフラグの立った敵を削除
+	//0216 デスフラグの立ったエフェクトを削除
+	hitEffects_.remove_if([](HitEffect* hitEffect) {
+		if (hitEffect->IsDead()) {
+			delete hitEffect;
+
+			return true;
+		}
+		return false;
+	});
+
+	//0215 デスフラグの立った敵を削除
 	enemies_.remove_if([](Enemy* enemy) {
 		if (enemy->IsDead()) {
 			delete enemy;
@@ -152,6 +173,17 @@ void GameScene::Update() {
 		}
 		return false;
 	});
+
+	// エフェクトの更新
+	for (auto it = hitEffects_.begin(); it != hitEffects_.end();) {
+		(*it)->Update();
+		if ((*it)->IsDead()) {
+			delete *it;
+			it = hitEffects_.erase(it); // 死んだら削除
+		} else {
+			++it;
+		}
+	}
 
 	fade_->Update();
 	ChangePhase();
@@ -169,15 +201,18 @@ void GameScene::Update() {
 
 		player_->Update();
 
-		// enemy_->Update();
 		for (Enemy* enemy : enemies_) {
 			enemy->Update();
+		}
+		// ヒットエフェクトリストの更新をfor文で行う
+		for (HitEffect* hitEffect : hitEffects_) {
+			hitEffect->Update();
 		}
 
 #ifdef _DEBUG
 		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 			// フラグをトグル
-			isDebugCameraActive_ = !isDebugCameraActive_;
+			//isDebugCameraActive_ = !isDebugCameraActive_;
 		}
 #endif
 
@@ -203,6 +238,10 @@ void GameScene::Update() {
 				WorldTransformUpdate(*worldTransformBlock);
 			}
 		}
+		// ヒットエフェクトリストの更新をfor文で行う
+		for (HitEffect* hitEffect : hitEffects_) {
+			hitEffect->Update();
+		}
 		break;
 	case Phase::kPlay:
 		skydome_->Update();
@@ -218,7 +257,7 @@ void GameScene::Update() {
 //#ifdef _DEBUG
 		//if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 			// フラグをトグル
-		//	isDebugCameraActive_ = !isDebugCameraActive_;
+			//isDebugCameraActive_ = !isDebugCameraActive_;
 		//}
 //#endif
 
@@ -241,7 +280,7 @@ void GameScene::Update() {
 					continue;
 
 				// アフィン変換～DirectXに転送
-				WorldTransformUpdate(*worldTransformBlock);
+				//WorldTransformUpdate(*worldTransformBlock);
 			}
 		}
 
@@ -263,7 +302,10 @@ void GameScene::Update() {
 		if (deathParticles_) {
 			deathParticles_->Update();
 		}
-
+		//ヒットエフェクトリストの更新をfor文で行う
+		for (HitEffect* hitEffect : hitEffects_) {
+			hitEffect->Update();
+		}
 		break;
 	case Phase::kFadeOut:
 		fade_->Update();
@@ -318,6 +360,11 @@ void GameScene::Draw() {
 		deathParticles_->Draw();
 	}
 
+	//ヒットエフェクトリストの描画をfor文で行う
+	for (HitEffect* hitEffect : hitEffects_) {
+		hitEffect->Draw();
+	}
+
 	Model::PostDraw();
 
 	// スプライト描画前処理
@@ -344,6 +391,10 @@ void GameScene::CheckAllCollisions() {
 
 		//自キャラと敵弾全ての当たり判定
 		for (Enemy* enemy : enemies_) {
+			
+			// コリジョン無効の敵はスキップ
+			if (enemy->IsCollisionDisabled())
+				continue; 
 			//敵弾の座標
 			aabb2 = enemy->GetAABB();
 
@@ -353,10 +404,6 @@ void GameScene::CheckAllCollisions() {
 				player_->OnCollision(enemy);
 				// "敵"の衝突時関数を呼び出す
 				enemy->OnCollision(player_);
-			}
-			if (enemy->IsCollisionDisabled())
-			{
-				continue;//コリジョン無効の敵はスキップ
 			}
 		}
 	}
@@ -385,4 +432,9 @@ GameScene::~GameScene() {
 
 	delete deathParticles_;
 	delete deathParticle_model_;
+
+	//0216
+	for (HitEffect* hitEffect : hitEffects_) {
+		delete hitEffect;
+	}
 }
