@@ -331,12 +331,12 @@ void GameScene::Draw() {
 	// 3Dオブジェクト描画前処理
 	Model::PreDraw(dxCommon->GetCommandList());
 
+	// 天球描画
+	skydome_->Draw();
+
 	// 自キャラの描画
 	if (!player_->IsDead())
 		player_->Draw();
-
-	// 天球描画
-	skydome_->Draw();
 
 	// ブロックの描画
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
