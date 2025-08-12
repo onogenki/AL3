@@ -1,15 +1,17 @@
 #pragma once
-#include <vector>
+#include "CameraController.h"
 #include "KamataEngine.h"
+#include "MapChipField.h"
 #include "Player.h"
 #include "skydome.h"
-#include "MapChipField.h"
+#include <vector>
+
 using namespace KamataEngine;
 
 // ゲームシーン
 class GameScene {
 
-	public:
+public:
 	// 初期化
 	void Initialize();
 
@@ -21,42 +23,47 @@ class GameScene {
 
 	~GameScene();
 
-		void GenerateBlocks();
+	void GenerateBlocks();
 
 private:
 	// テクスチャハンドル
 	uint32_t textureHandle_ = 0;
 
-	//スプライト
+	// スプライト
 	Sprite* sprite_ = nullptr;
 
-	//3Dモデル
+	// 3Dモデル
 	Model* model_ = nullptr;
 
-	//ブロックモデル
+	// ブロックモデル
 	Model* blockModel_ = nullptr;
 
-	//ワールドトランスフォーム
+	// ワールドトランスフォーム
 	WorldTransform worldTransform_;
-	//カメラ
+	// カメラ
 	Camera camera_;
 
-	//ブロックモデル
+	// プレイヤー
+	Player* player_ = nullptr;
+	Model* player_model_ = nullptr;
+
+	// ブロックモデル
 	Model* block_model_ = nullptr;
-	//もう一度std::vectorを重ねる
+	// もう一度std::vectorを重ねる
 	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
 
-	//デバックカメラ有効
+	// デバックカメラ有効
 	bool isDebugCameraActive_ = false;
 
 	DebugCamera* debugCamera_ = nullptr;
 
-	//0203天球
+	// 0203天球
 	Skydome* skydome_ = nullptr;
 	Model* modelSkydome_ = nullptr;
 
-	Player* player_ = nullptr;
-	Model* player_model_ = nullptr;
-
+	// マップチップフィールド
 	MapChipField* mapChipField_;
+
+	// カメラ移動
+	CameraController* CController_ = nullptr;
 };

@@ -1,27 +1,27 @@
 #include "GameScene.h"
-#include"math.h"
+#include "math.h"
 using namespace KamataEngine;
 
 void GameScene::Initialize() {
 	// ファイル名を指定してテクスチャを読み込み
 	textureHandle_ = TextureManager::Load("sample.png");
 
-	//スプライトの生成
+	// スプライトの生成
 	sprite_ = Sprite::Create(textureHandle_, {100, 50});
 
-	//3Dモデルの生成	
+	// 3Dモデルの生成
 	model_ = Model::Create();
-	//ワールドトランスフォームの初期化
+	// ワールドトランスフォームの初期化
 	worldTransform_.Initialize();
 
 	// カメラの初期化
 	camera_.Initialize();
 
-	//プレイヤー生成
+	// プレイヤー生成
 	player_ = new Player();
-	//プレイヤーモデル
+	// プレイヤーモデル
 	player_model_ = Model::CreateFromOBJ("player");
-	//0205 座標をマップチップ番号で指定
+	// 0205 座標をマップチップ番号で指定
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2, 18);
 	player_->Initialize(player_model_, &camera_, playerPosition);
 
@@ -42,9 +42,15 @@ void GameScene::Initialize() {
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
 	GenerateBlocks();
 
+	// 02_06カメラコントローラ
+	CController_ = new CameraController(); // 生成
+	CController_->Initialize(&camera_);    // 初期化
+	CController_->SetTarget(player_);      // 追従対象セット
+	CController_->Reset();                 // リセット
 
+	CameraController::Rect cameraArea = {12.0f, 100 - 12.0f, 6.0f, 6.0f};
+	CController_->SetMovableArea(cameraArea);
 }
-
 
 void GameScene::GenerateBlocks() {
 	uint32_t numBlockVirtical = mapChipField_->GetNumBlockVirtical();
@@ -75,6 +81,7 @@ void GameScene::Update() {
 
 	player_->Update();
 	skydome_->Update();
+	CController_->Update();
 
 #ifdef _DEBUG
 	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
@@ -109,7 +116,6 @@ void GameScene::Update() {
 	// デバッグカメラの更新
 	debugCamera_->Update();
 }
-
 
 void GameScene::Draw() {
 

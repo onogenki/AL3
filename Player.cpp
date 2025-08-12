@@ -25,7 +25,7 @@ void Player ::Update() {
 
 	// 移動入力
 	if (onGround_) {
-		//左右移動操作
+		// 左右移動操作
 		if (Input::GetInstance()->PushKey(DIK_RIGHT) || Input::GetInstance()->PushKey(DIK_LEFT)) {
 
 			// 左右加速
@@ -42,9 +42,9 @@ void Player ::Update() {
 
 				if (lrDirection_ != LRDirection::kRight) {
 					lrDirection_ = LRDirection::kRight;
-					//旋回開始時の角度を記録する
+					// 旋回開始時の角度を記録する
 					turnFirstRotationY_ = worldTransform_.rotation_.y;
-					//旋回タイマーに時間を設定する
+					// 旋回タイマーに時間を設定する
 					turnTimer_ = kTimeTurn;
 				}
 			} else if (Input::GetInstance()->PushKey(DIK_LEFT)) {
@@ -90,7 +90,7 @@ void Player ::Update() {
 
 	worldTransform_.translation_ += velocity_;
 
-	//着地フラグ
+	// 着地フラグ
 	bool landing = false;
 
 	// 地面との当たり判定 下降あり？
@@ -110,10 +110,10 @@ void Player ::Update() {
 	} else {
 		// 着地
 		if (landing) {
-			worldTransform_.translation_.y = 1.0f; //めり込み排訴
-			velocity_.x *= (1.0f - kAttenuation);  //摩擦で横方向速度が減衰する
-			velocity_.y = 0.0f;                    //下方向をリセット
-			onGround_ = true;                      //接地状態に以降
+			worldTransform_.translation_.y = 1.0f; // めり込み排訴
+			velocity_.x *= (1.0f - kAttenuation);  // 摩擦で横方向速度が減衰する
+			velocity_.y = 0.0f;                    // 下方向をリセット
+			onGround_ = true;                      // 接地状態に以降
 		}
 	}
 
@@ -121,11 +121,11 @@ void Player ::Update() {
 	if (turnTimer_ > 0.0f) {
 		// 旋回タイマーを1/60秒だけカウントダウンする
 		turnTimer_ = std::max(turnTimer_ - (1.0f / 60.0f), 0.0f);
-		//左右の自キャラ角度テーブル
+		// 左右の自キャラ角度テーブル
 		float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
-		//状態に応じた目標角度を取得する
+		// 状態に応じた目標角度を取得する
 		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
-		//自キャラの角度を設定する
+		// 自キャラの角度を設定する
 		worldTransform_.rotation_.y = EaseInOut(destinationRotationY, turnFirstRotationY_, turnTimer_ / kTimeTurn);
 	}
 
