@@ -130,7 +130,7 @@ void Player ::Update() {
 	}
 
 	// ワールド行列更新（アフィン変換～DirectXに転送）
-	worldTransformUpdate(worldTransform_);
+	WorldTransformUpdate(worldTransform_);
 }
 
 void Player::Draw() {

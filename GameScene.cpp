@@ -102,7 +102,7 @@ void GameScene::Update() {
 				continue;
 
 			// アフィン変換～DirectXに転送
-			worldTransformUpdate(*worldTransformBlock);
+			WorldTransformUpdate(*worldTransformBlock);
 		}
 	}
 
