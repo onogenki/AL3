@@ -46,7 +46,7 @@ void GameScene::Initialize() {
 	//プレイヤーモデル
 	player_model_ = Model::CreateFromOBJ("player");
 	// 0205 座標をマップチップ番号で指定
-	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2, 18);
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(5, 16);
 	//プレイヤー攻撃エフェクトモデル
 	modelAttack_ = Model::CreateFromOBJ("attack_effect");
 	//0207

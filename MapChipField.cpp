@@ -8,7 +8,7 @@
 // 内部リンゲージ
 namespace {
 std::map<std::string, MapChipType> mapChipTable = {
-    {"0", MapChipType::kBlank},
+    {"0", MapChipType::kNone},
     {"1", MapChipType::kBlock},
 };
 }
@@ -65,10 +65,10 @@ Vector3 MapChipField::GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex
 }
 MapChipType MapChipField::GetMapChipTypeByIndex(uint32_t xIndex, uint32_t yIndex) {
 	if (xIndex < 0 || kNumBlockHorizontal - 1 < xIndex) {
-		return MapChipType::kBlank;
+		return MapChipType::kNone;
 	}
 	if (yIndex < 0 || kNumBlockVirtical - 1 < yIndex) {
-		return MapChipType::kBlank;
+		return MapChipType::kNone;
 	}
 	return mapChipData_.data[yIndex][xIndex];
 }

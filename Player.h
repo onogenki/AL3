@@ -111,8 +111,6 @@ private:
 	float turnTimer_ = 0.0f;
 	//旋回時間 <秒>
 	static inline const float kTimeTurn = 0.3f;
-	//着地フラグ
-	bool onGround_ = true;
 	//ジャンプ定数
 	static inline const float kJumpAcceleration = 20.0f;     //重力加速度(下方向)
 	static inline const float kGravityAcceleration = 0.98f;  //最大落下速度(下方向)
@@ -124,7 +122,7 @@ private:
 	static inline const float kWidth = 0.8f;
 	static inline const float kHeight = 0.8f;
 
-	static inline const float kBlank = 0.04f;
+	static inline const float kNone = 0.04f;
 
 	//0207移動入力
 	void InputMove();
@@ -144,12 +142,6 @@ private:
 	void CheckMapCollisionLeft(CollisionMapInfo& info);
 
 	Vector3 CornerPosition(const Vector3& center, Corner corner);
-
-	//0208 接地状態の切り替え処理
-	void UpdateOnGround(const CollisionMapInfo& info);
-
-	//壁接触している場合の処理
-	void UpdateOnWall(const CollisionMapInfo& info);
 
 	//着地時の速度減衰率
 	static inline const float kAttenuationLanding = 0.0f;
