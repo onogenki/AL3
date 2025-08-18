@@ -46,7 +46,7 @@ void GameScene::Initialize() {
 	//プレイヤーモデル
 	player_model_ = Model::CreateFromOBJ("player");
 	// 0205 座標をマップチップ番号で指定
-	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(5, 16);
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2, 16);
 	//プレイヤー攻撃エフェクトモデル
 	modelAttack_ = Model::CreateFromOBJ("attack_effect");
 	//0207
@@ -95,6 +95,21 @@ void GameScene::Initialize() {
 	//0216
 	HitEffect::SetModel(particle_model_);
 	HitEffect::SetCamera(&camera_);
+
+	//アイテム
+	startItem_model_ = Model::Create();
+	playerItem_model_ = Model::Create();
+	enemyItem_model_ = Model::Create();
+
+	item_ = new Item();
+	//座標をマップチップ番号で指定(if文でモデルを変える)
+	Vector3 itemPosition = mapChipField_->GetMapChipPositionByIndex(10, 16);
+	item_->Initialize(startItem_model_, playerItem_model_, enemyItem_model_, &camera_, itemPosition);
+
+	startItem_model_ = Model::CreateFromOBJ("startItem");
+	playerItem_model_ = Model::CreateFromOBJ("playerItem");
+	enemyItem_model_ = Model::CreateFromOBJ("enemyItem");
+
 }
 
 void GameScene::ChangePhase() {
@@ -148,6 +163,10 @@ void GameScene::GenerateBlocks() {
 				worldTransform->Initialize();
 				worldTransformBlocks_[i][j] = worldTransform;
 				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
+			
+				//奥に配置する
+				worldTransformBlocks_[i][j]->translation_.z += 1.0f;
+			
 			}
 		}
 	}
@@ -437,4 +456,10 @@ GameScene::~GameScene() {
 	for (HitEffect* hitEffect : hitEffects_) {
 		delete hitEffect;
 	}
+
+	//アイテム
+	delete item_;
+	delete startItem_model_;
+	delete playerItem_model_;
+	delete enemyItem_model_;
 }

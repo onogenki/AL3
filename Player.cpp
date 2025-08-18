@@ -51,35 +51,22 @@ void Player ::Update() {
 	// 通常行動更新
     void Player::BehaviorRootUpdate() {
 
-	    const float moveSpeed = 0.1f;
-	    Vector3 move = {};
+	   // 0207 移動入力
+	    InputMove();
 
-	    // 入力取得（上下左右）
-	    if (Input::GetInstance()->PushKey(DIK_W)) {
-		    move.y += moveSpeed; // 上
-	    }
-	    if (Input::GetInstance()->PushKey(DIK_S)) {
-		    move.y -= moveSpeed; // 下
-	    }
-	    if (Input::GetInstance()->PushKey(DIK_A)) {
-		    move.x -= moveSpeed; // 左
-		                         // 旋回
-		    if (lrDirection_ != LRDirection::kLeft) {
-			    lrDirection_ = LRDirection::kLeft;
-			    turnFirstRotationY_ = worldTransform_.rotation_.y;
-			    turnTimer_ = kTimeTurn;
-		    }
-	    }
-	    if (Input::GetInstance()->PushKey(DIK_D)) {
-		    move.x += moveSpeed; // 右
-		    if (lrDirection_ != LRDirection::kRight) {
-			    lrDirection_ = LRDirection::kRight;
-			    turnFirstRotationY_ = worldTransform_.rotation_.y;
-			    turnTimer_ = kTimeTurn;
-		    }
-	    }
+	    // 衝突情報を初期化
+	    CollisionMapInfo collisionMapInfo = {};
+	    collisionMapInfo.move = velocity_;
+	    collisionMapInfo.landing = false;
+	    collisionMapInfo.hitWall = false;
 
-	    // 旋回タイマー
+	    // マップ衝突チェック
+	    CheckMapCollision(collisionMapInfo);
+
+	    // 修正された移動量で実際に移動
+	    worldTransform_.translation_ += collisionMapInfo.move;
+
+		// 旋回タイマー
 	    if (turnTimer_ > 0.0f) {
 		    turnTimer_ = std::max(turnTimer_ - (1.0f / 60.0f), 0.0f);
 		    float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
@@ -92,37 +79,6 @@ void Player ::Update() {
 		    behaviorRequest_ = Behavior::kAttack;
 	    }
 
-	    // 入力がないなら何もしない
-	    if (move.x == 0.0f && move.y == 0.0f) {
-		    return;
-	    }
-
-	    // 移動候補位置
-	    Vector3 nextPos = worldTransform_.translation_ + move;
-
-	    // 4隅の座標を取得
-	    std::array<Vector3, kNumCorner> corners;
-	    for (uint32_t i = 0; i < kNumCorner; ++i) {
-		    corners[i] = CornerPosition(nextPos, static_cast<Corner>(i));
-	    }
-
-	    // 全部ブロックか
-	    bool canMove = true;
-	    for (const auto& c : corners) {
-		    MapChipField::IndexSet idx = mapChipField_->GetMapChipIndexSetByPosition(c);
-		    MapChipType chip = mapChipField_->GetMapChipTypeByIndex(idx.xIndex, idx.yIndex);
-		    if (chip == MapChipType::kNone) {
-			    canMove = false;
-			    break;
-		    }
-	    }
-
-	    // 移動可否で分岐
-	    if (canMove) {
-		    worldTransform_.translation_ = nextPos;
-	    } else {
-		    velocity_ = {}; // 動かない
-	    }
     }
     //0214 攻撃行動初期化
 void Player::BehaviorAttackInitialize() {
@@ -247,56 +203,59 @@ void Player::Initialize(Model* player_model, Model* modelAttack, Camera* camera,
 
 //0207 移動入力
 void Player ::InputMove() {
-	// 上下左右移動操作
-	if (Input::GetInstance()->PushKey(DIK_RIGHT) || Input::GetInstance()->PushKey(DIK_LEFT) || Input::GetInstance()->PushKey(DIK_UP) || Input::GetInstance()->PushKey(DIK_DOWN)) {
 
-			// 左右加速
-			Vector3 acceleration = {};
-			if (Input::GetInstance()->PushKey(DIK_RIGHT)) {
+		// 左右加速
+		Vector3 acceleration = {};
+		if (Input::GetInstance()->PushKey(DIK_D)) {
 
-				// 左移動中の右入力
-				if (velocity_.x < 0.0f) {
-					// 速度と逆方向に入力中は急ブレーキ
-					velocity_.x *= (1.0f - kAttenuation);
-				}
+			// 左移動中の右入力
+			if (velocity_.x < 0.0f) {
+				// 速度と逆方向に入力中は急ブレーキ
+				velocity_.x *= (1.0f - kAttenuation);
+			}
 
-				acceleration.x += kAcceleration / 55.0f;
+			acceleration.x += kAcceleration / 55.0f;
 
-				if (lrDirection_ != LRDirection::kRight) {
-					lrDirection_ = LRDirection::kRight;
-					// 旋回開始時の角度を記録する
-					turnFirstRotationY_ = worldTransform_.rotation_.y;
-					// 旋回タイマーに時間を設定する
-					turnTimer_ = kTimeTurn;
-				}
-		    } else if (Input::GetInstance()->PushKey(DIK_LEFT)) {
+			if (lrDirection_ != LRDirection::kRight) {
+				lrDirection_ = LRDirection::kRight;
+				// 旋回開始時の角度を記録する
+				turnFirstRotationY_ = worldTransform_.rotation_.y;
+				// 旋回タイマーに時間を設定する
+				turnTimer_ = kTimeTurn;
+			}
+		} else if (!Input::GetInstance()->PushKey(DIK_D))
+		{
 
-			    // 右移動中の左入力
-			    if (velocity_.x > 0.0f) {
-				    // 速度と逆方向に入力中は急ブレーキ
-				    velocity_.x *= (1.0f - kAttenuation);
-			    }
+		}
+		if (Input::GetInstance()->PushKey(DIK_A)) {
 
-			    acceleration.x -= kAcceleration / 55.0f;
+			// 右移動中の左入力
+			if (velocity_.x > 0.0f) {
+				// 速度と逆方向に入力中は急ブレーキ
+				velocity_.x *= (1.0f - kAttenuation);
+			}
 
-			    if (lrDirection_ != LRDirection::kLeft) {
-				    lrDirection_ = LRDirection::kLeft;
-				    // 旋回開始時の角度を記録する
-				    turnFirstRotationY_ = worldTransform_.rotation_.y;
-				    // 旋回タイマーに時間を設定する
-				    turnTimer_ = kTimeTurn;
-			    }
-		    } else if (Input::GetInstance()->PushKey(DIK_UP)) {
+			acceleration.x -= kAcceleration / 55.0f;
 
-			    // 上移動中の左入力
-			    if (velocity_.y < 0.0f) {
-				    // 速度と逆方向に入力中は急ブレーキ
-				    velocity_.y *= (1.0f - kAttenuation);
-			    }
+			if (lrDirection_ != LRDirection::kLeft) {
+				lrDirection_ = LRDirection::kLeft;
+				// 旋回開始時の角度を記録する
+				turnFirstRotationY_ = worldTransform_.rotation_.y;
+				// 旋回タイマーに時間を設定する
+				turnTimer_ = kTimeTurn;
+			}
+		}
+	    if (Input::GetInstance()->PushKey(DIK_W)) {
 
-			    acceleration.y += kAcceleration / 55.0f;
+		    // 上移動中の左入力
+		    if (velocity_.y < 0.0f) {
+			    // 速度と逆方向に入力中は急ブレーキ
+			    velocity_.y *= (1.0f - kAttenuation);
+		    }
 
-		    } else if (Input::GetInstance()->PushKey(DIK_DOWN)) {
+		    acceleration.y += kAcceleration / 55.0f;
+	    }
+	if (Input::GetInstance()->PushKey(DIK_S)) {
 
 			    // 下移動中の左入力
 			    if (velocity_.y > 0.0f) {
@@ -314,16 +273,23 @@ void Player ::InputMove() {
 			velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
 		    velocity_.y = std::clamp(velocity_.y, -kLimitRunSpeed, kLimitRunSpeed);
 
-		} else {
-			// 非入力時は移動減衰をかける
-			velocity_.x *= (1.0f - kAttenuation);
-		    velocity_.y *= (1.0f - kAttenuation);
-		}
+			  velocity_ *= (1.030f - kAttenuation);
+			// 入力がない軸だけ減衰
+	        if (!Input::GetInstance()->PushKey(DIK_D) && !Input::GetInstance()->PushKey(DIK_A)) {
+		        velocity_.x *= (1.0f - kAttenuation);
+	        }
+	        if (!Input::GetInstance()->PushKey(DIK_W) && !Input::GetInstance()->PushKey(DIK_S)) {
+		        velocity_.y *= (1.0f - kAttenuation);
+	        }
 
 		// ほぼ0の場合に0にする
 		if (std::abs(velocity_.x) <= 0.0001f) {
 			velocity_.x = 0.0f;
 		}
+
+		if (std::abs(velocity_.y) <= 0.0001f) {
+	        velocity_.y = 0.0f;
+        }
 
 	// 移動先の角4点の座標を計算
 	std::array<Vector3, kNumCorner> positionsNew;
@@ -331,12 +297,12 @@ void Player ::InputMove() {
 		positionsNew[i] = CornerPosition(worldTransform_.translation_ + velocity_, static_cast<Corner>(i));
 	}
 
-	// 4点すべてのブロックか確認
+	// 4点すべての壁か確認
 	bool allBlock = true;
 	for (const auto& pos : positionsNew) {
 		MapChipField::IndexSet idx = mapChipField_->GetMapChipIndexSetByPosition(pos);
 		MapChipType chip = mapChipField_->GetMapChipTypeByIndex(idx.xIndex, idx.yIndex);
-		if (chip != MapChipType::kBlock) {
+		if (chip == MapChipType::kNone) {
 			allBlock = false;
 			break;
 		}

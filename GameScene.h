@@ -9,6 +9,7 @@
 #include "DeathParticles.h"
 #include"Fade.h"
 #include "HitEffect.h"
+#include "Item.h"
 
 using namespace KamataEngine;
 
@@ -116,4 +117,11 @@ private:
 	std::list<HitEffect*> hitEffects_;
 
 	Model* particle_model_ = nullptr;
+
+	//アイテム
+	Item* item_ = nullptr;
+	Model* startItem_model_ = nullptr;
+	Model* playerItem_model_ = nullptr;
+	Model* enemyItem_model_ = nullptr;
+
 };
