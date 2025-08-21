@@ -64,7 +64,7 @@ void Player ::Update() {
 	    CheckMapCollision(collisionMapInfo);
 
 	    // 修正された移動量で実際に移動
-	    worldTransform_.translation_ += collisionMapInfo.move;
+	    //worldTransform_.translation_ += collisionMapInfo.move;
 
 		// 旋回タイマー
 	    if (turnTimer_ > 0.0f) {
@@ -164,7 +164,7 @@ void Player::BehaviorAttackUpdate() {
 	CheckMapCollision(collisionMapInfo);
 
 	// 移動
-	worldTransform_.translation_ += collisionMapInfo.move;
+	//worldTransform_.translation_ += collisionMapInfo.move;
 
 	if (turnTimer_ > 0.0f) {
 		// タイマーを進める
@@ -204,125 +204,115 @@ void Player::Initialize(Model* player_model, Model* modelAttack, Camera* camera,
 //0207 移動入力
 void Player ::InputMove() {
 
-		// 左右加速
-		Vector3 acceleration = {};
-		if (Input::GetInstance()->PushKey(DIK_D)) {
+	// 左右加速
+	Vector3 acceleration = {};
+	if (Input::GetInstance()->PushKey(DIK_D)) {
 
-			// 左移動中の右入力
-			if (velocity_.x < 0.0f) {
-				// 速度と逆方向に入力中は急ブレーキ
-				velocity_.x *= (1.0f - kAttenuation);
-			}
-
-			acceleration.x += kAcceleration / 55.0f;
-
-			if (lrDirection_ != LRDirection::kRight) {
-				lrDirection_ = LRDirection::kRight;
-				// 旋回開始時の角度を記録する
-				turnFirstRotationY_ = worldTransform_.rotation_.y;
-				// 旋回タイマーに時間を設定する
-				turnTimer_ = kTimeTurn;
-			}
-		} else if (!Input::GetInstance()->PushKey(DIK_D))
-		{
-
+		// 左移動中の右入力
+		if (velocity_.x < 0.0f) {
+			// 速度と逆方向に入力中は急ブレーキ
+			velocity_.x *= (1.0f - kAttenuation);
 		}
-		if (Input::GetInstance()->PushKey(DIK_A)) {
 
-			// 右移動中の左入力
-			if (velocity_.x > 0.0f) {
-				// 速度と逆方向に入力中は急ブレーキ
-				velocity_.x *= (1.0f - kAttenuation);
-			}
+		acceleration.x += kAcceleration / 55.0f;
 
-			acceleration.x -= kAcceleration / 55.0f;
-
-			if (lrDirection_ != LRDirection::kLeft) {
-				lrDirection_ = LRDirection::kLeft;
-				// 旋回開始時の角度を記録する
-				turnFirstRotationY_ = worldTransform_.rotation_.y;
-				// 旋回タイマーに時間を設定する
-				turnTimer_ = kTimeTurn;
-			}
+		if (lrDirection_ != LRDirection::kRight) {
+			lrDirection_ = LRDirection::kRight;
+			// 旋回開始時の角度を記録する
+			turnFirstRotationY_ = worldTransform_.rotation_.y;
+			// 旋回タイマーに時間を設定する
+			turnTimer_ = kTimeTurn;
 		}
-	    if (Input::GetInstance()->PushKey(DIK_W)) {
+	}
+	if (Input::GetInstance()->PushKey(DIK_A)) {
 
-		    // 上移動中の左入力
-		    if (velocity_.y < 0.0f) {
-			    // 速度と逆方向に入力中は急ブレーキ
-			    velocity_.y *= (1.0f - kAttenuation);
-		    }
+		// 右移動中の左入力
+		if (velocity_.x > 0.0f) {
+			// 速度と逆方向に入力中は急ブレーキ
+			velocity_.x *= (1.0f - kAttenuation);
+		}
 
-		    acceleration.y += kAcceleration / 55.0f;
-	    }
+		acceleration.x -= kAcceleration / 55.0f;
+
+		if (lrDirection_ != LRDirection::kLeft) {
+			lrDirection_ = LRDirection::kLeft;
+			// 旋回開始時の角度を記録する
+			turnFirstRotationY_ = worldTransform_.rotation_.y;
+			// 旋回タイマーに時間を設定する
+			turnTimer_ = kTimeTurn;
+		}
+	}
+	if (Input::GetInstance()->PushKey(DIK_W)) {
+
+		// 上移動中の左入力
+		if (velocity_.y < 0.0f) {
+			// 速度と逆方向に入力中は急ブレーキ
+			velocity_.y *= (1.0f - kAttenuation);
+		}
+
+		acceleration.y += kAcceleration / 55.0f;
+	}
 	if (Input::GetInstance()->PushKey(DIK_S)) {
 
-			    // 下移動中の左入力
-			    if (velocity_.y > 0.0f) {
-				    // 速度と逆方向に入力中は急ブレーキ
-				    velocity_.y *= (1.0f - kAttenuation);
-			    }
-
-			    acceleration.y -= kAcceleration / 55.0f;
-
-		    }
-
-			// 加速/減速
-			velocity_ += acceleration;
-			// 最大速度制限
-			velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
-		    velocity_.y = std::clamp(velocity_.y, -kLimitRunSpeed, kLimitRunSpeed);
-
-			  velocity_ *= (1.030f - kAttenuation);
-			// 入力がない軸だけ減衰
-	        if (!Input::GetInstance()->PushKey(DIK_D) && !Input::GetInstance()->PushKey(DIK_A)) {
-		        velocity_.x *= (1.0f - kAttenuation);
-	        }
-	        if (!Input::GetInstance()->PushKey(DIK_W) && !Input::GetInstance()->PushKey(DIK_S)) {
-		        velocity_.y *= (1.0f - kAttenuation);
-	        }
-
-		// ほぼ0の場合に0にする
-		if (std::abs(velocity_.x) <= 0.0001f) {
-			velocity_.x = 0.0f;
+		// 下移動中の左入力
+		if (velocity_.y > 0.0f) {
+			// 速度と逆方向に入力中は急ブレーキ
+			velocity_.y *= (1.0f - kAttenuation);
 		}
 
-		if (std::abs(velocity_.y) <= 0.0001f) {
-	        velocity_.y = 0.0f;
-        }
+		acceleration.y -= kAcceleration / 55.0f;
+	}
+
+	// 加速/減速
+	velocity_ += acceleration;
+	// 最大速度制限
+	velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
+	velocity_.y = std::clamp(velocity_.y, -kLimitRunSpeed, kLimitRunSpeed);
+
+	velocity_ *= (1.030f - kAttenuation);
+	// 入力がない軸だけ減衰
+	if (!Input::GetInstance()->PushKey(DIK_D) && !Input::GetInstance()->PushKey(DIK_A)) {
+		velocity_.x *= (1.0f - kAttenuation);
+	}
+	if (!Input::GetInstance()->PushKey(DIK_W) && !Input::GetInstance()->PushKey(DIK_S)) {
+		velocity_.y *= (1.0f - kAttenuation);
+	}
+
+	// ほぼ0の場合に0にする
+	if (std::abs(velocity_.x) <= 0.0001f) {
+		velocity_.x = 0.0f;
+	}
+
+	if (std::abs(velocity_.y) <= 0.0001f) {
+		velocity_.y = 0.0f;
+	}
 
 	// 移動先の角4点の座標を計算
 	std::array<Vector3, kNumCorner> positionsNew;
 	for (uint32_t i = 0; i < positionsNew.size(); ++i) {
 		positionsNew[i] = CornerPosition(worldTransform_.translation_ + velocity_, static_cast<Corner>(i));
 	}
-
-	// 4点すべての壁か確認
-	bool allBlock = true;
-	for (const auto& pos : positionsNew) {
-		MapChipField::IndexSet idx = mapChipField_->GetMapChipIndexSetByPosition(pos);
-		MapChipType chip = mapChipField_->GetMapChipTypeByIndex(idx.xIndex, idx.yIndex);
-		if (chip == MapChipType::kNone) {
-			allBlock = false;
-			break;
-		}
-	}
-
-	if (allBlock) {
-		worldTransform_.translation_ += velocity_;
-	} else {
-		// ブロック外なら移動しない
-		velocity_ = {};
-	}
 }
-//0207
+    //移動判定(壁に沿って移動できる処理)
 	void Player::CheckMapCollision(CollisionMapInfo & info) {
+		
+		//y方向の移動判定
+		CollisionMapInfo collisionY = {};
+	    collisionY.move = {0, info.move.y, 0};//動くy方向のみ取り出す
+	    CheckMapCollisionUp(collisionY);
+	    CheckMapCollisionDown(collisionY);
+	    worldTransform_.translation_ += collisionY.move;//y更新
+		//x方向の移動判定
+	    CollisionMapInfo collisionX = {};
+	    collisionX.move = {info.move.x, 0, 0};//動くx方向のみ取り出す
+	    CheckMapCollisionRight(collisionX);//yを動かした後の位置から壁に当たるか
+	    CheckMapCollisionLeft(collisionX);
+	    worldTransform_.translation_ += collisionX.move;//x更新
 
-		CheckMapCollisionUp(info);
-		CheckMapCollisionDown(info);
-		CheckMapCollisionRight(info);
-		CheckMapCollisionLeft(info);
+		info.move.x = collisionX.move.x;
+	    info.move.y = collisionY.move.y;
 	}
+
 
 	//0207 上下左右全て
 	void Player::CheckMapCollisionUp(CollisionMapInfo & info) {

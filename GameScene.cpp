@@ -97,18 +97,15 @@ void GameScene::Initialize() {
 	HitEffect::SetCamera(&camera_);
 
 	//アイテム
-	startItem_model_ = Model::Create();
-	playerItem_model_ = Model::Create();
-	enemyItem_model_ = Model::Create();
+	startItem_model_ = Model::CreateFromOBJ("needle_Body");
+	playerItem_model_ = Model::CreateFromOBJ("playerItem");
+	enemiesItem_model_ = Model::CreateFromOBJ("enemyItem");
 
 	item_ = new Item();
 	//座標をマップチップ番号で指定(if文でモデルを変える)
-	Vector3 itemPosition = mapChipField_->GetMapChipPositionByIndex(10, 16);
-	item_->Initialize(startItem_model_, playerItem_model_, enemyItem_model_, &camera_, itemPosition);
+	Vector3 itemPosition = mapChipField_->GetMapChipPositionByIndex(10, 12);
 
-	startItem_model_ = Model::CreateFromOBJ("startItem");
-	playerItem_model_ = Model::CreateFromOBJ("playerItem");
-	enemyItem_model_ = Model::CreateFromOBJ("enemyItem");
+	item_->Initialize(startItem_model_, playerItem_model_, enemiesItem_model_, &camera_, itemPosition);
 
 }
 
@@ -223,6 +220,12 @@ void GameScene::Update() {
 		for (Enemy* enemy : enemies_) {
 			enemy->Update();
 		}
+
+		// アイテムの更新
+		if (item_) {
+			item_->Update(player_, enemies_);
+		}
+
 		// ヒットエフェクトリストの更新をfor文で行う
 		for (HitEffect* hitEffect : hitEffects_) {
 			hitEffect->Update();
@@ -269,11 +272,17 @@ void GameScene::Update() {
 		// 自キャラの更新
 		player_->Update();
 
+		//敵の更新
 		for (Enemy* enemy : enemies_) {
 			enemy->Update();
 		}
 
-//#ifdef _DEBUG
+		//アイテムの更新
+		if (item_) {
+			item_->Update(player_, enemies_);
+		}
+
+		// #ifdef _DEBUG
 		//if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 			// フラグをトグル
 			//isDebugCameraActive_ = !isDebugCameraActive_;
@@ -384,6 +393,11 @@ void GameScene::Draw() {
 		hitEffect->Draw();
 	}
 
+	if (item_)
+	{
+		item_->Draw();
+	}
+
 	Model::PostDraw();
 
 	// スプライト描画前処理
@@ -461,5 +475,5 @@ GameScene::~GameScene() {
 	delete item_;
 	delete startItem_model_;
 	delete playerItem_model_;
-	delete enemyItem_model_;
+	delete enemiesItem_model_;
 }

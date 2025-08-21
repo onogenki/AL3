@@ -8,12 +8,13 @@ using namespace KamataEngine;
 class Item {
 	public:
 
-		void Initialize(Model* startItem_model,Model* playerItem_model, Model* enemyItem_model, Camera* camera, const Vector3& position);
+		void Initialize(Model* startItem_model,Model* playerItem_model, Model* enemiesItem_model, Camera* camera, const Vector3& position);
 
-		void Update(Player* player, Enemy* enemy);
+		void Update(Player* player, const std::list<Enemy*>& enemies);
 
 		void Draw();
 
+		//当たり判定
 		AABB GetAABB();
 
 		Vector3 GetWorldPosition() const;
@@ -22,9 +23,10 @@ class Item {
 
 		WorldTransform worldTransform_;
 
+		//モデル
 		Model* startItem_model_ = nullptr;
 	    Model* playerItem_model_ = nullptr;
-	    Model* enemyItem_model_ = nullptr;
+	    Model* enemiesItem_model_ = nullptr;
 
 		Camera* camera_ = nullptr;
 
@@ -36,5 +38,5 @@ class Item {
 
 		bool isStartColor_ = false;//初期陣
 	    bool isPlayerColor_ = false;//playerが当たったかどうか(色の変化)
-	    bool isEnemyColor_ = false;//enemyが当たったかどうか
+	    bool isEnemiesColor_ = false;//enemyが当たったかどうか
 };

@@ -122,6 +122,6 @@ private:
 	Item* item_ = nullptr;
 	Model* startItem_model_ = nullptr;
 	Model* playerItem_model_ = nullptr;
-	Model* enemyItem_model_ = nullptr;
+	Model* enemiesItem_model_ = nullptr;
 
 };

@@ -1,9 +1,9 @@
 #include "Item.h"
 
-void Item::Initialize(Model* startItem_model,Model* playerItem_model, Model* enemyItem_model, Camera* camera, const Vector3& position) {
+void Item::Initialize(Model* startItem_model,Model* playerItem_model, Model* enemiesItem_model, Camera* camera, const Vector3& position) {
 	startItem_model_ = startItem_model;//所属しない陣
 	playerItem_model_ = playerItem_model;//player陣
-	enemyItem_model_ = enemyItem_model;//敵陣
+	enemiesItem_model_ = enemiesItem_model;//敵陣
 
 	camera_ = camera;
 	worldTransform_.Initialize();
@@ -12,25 +12,28 @@ void Item::Initialize(Model* startItem_model,Model* playerItem_model, Model* ene
 	// 初期は誰にも属してない陣(startItem)
 	isStartColor_ = true;
 	isPlayerColor_ = false;
-	isEnemyColor_ = false;
+	isEnemiesColor_ = false;
+
+	WorldTransformUpdate(worldTransform_);
 }
 
-void Item::Update(Player *player, Enemy* enemy) { 
-	if (!isPlayerColor_&&!isStartColor_) {//player陣
+void Item::Update(Player *player, const std::list<Enemy*>& enemies) { 
+	if (!isPlayerColor_) {//player陣
 		if (IsCollision(GetAABB(), player->GetAABB()))
 		{
 			isPlayerColor_ = true;
-			isEnemyColor_ = false;
+			isEnemiesColor_ = false;
 			isStartColor_ = false;
 		}
 	}
-	if (!isEnemyColor_&&!isStartColor_)//敵陣
+	if (!isEnemiesColor_)//敵陣
 	{
-		if (IsCollision(GetAABB(), enemy->GetAABB()))
-		{
-			isEnemyColor_ = true;
-			isPlayerColor_ = false;
-			isStartColor_ = false;
+		for (Enemy* enemy : enemies) {
+			if (IsCollision(GetAABB(), enemy->GetAABB())) {
+				isEnemiesColor_ = true;
+				isPlayerColor_ = false;
+				isStartColor_ = false;
+			}
 		}
 	}
 }
@@ -41,8 +44,8 @@ void Item::Draw() {
 	}
 	else if (isPlayerColor_) {
 		playerItem_model_->Draw(worldTransform_, *camera_);
-	} else if (isEnemyColor_) {
-		enemyItem_model_->Draw(worldTransform_, *camera_);
+	} else if (isEnemiesColor_) {
+		enemiesItem_model_->Draw(worldTransform_, *camera_);
 	}
 }
 
