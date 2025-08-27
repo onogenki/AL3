@@ -1,8 +1,8 @@
-#include "TitleScene.h"
 #include "Math.h"
+#include "Result.h"
 #include <numbers>
 
-void TitleScene::Initialize() {
+void Result::Initialize() {
 
 	modelTitle_ = Model::CreateFromOBJ("titleFont", true);
 	modelPlayer_ = Model::CreateFromOBJ("player");
@@ -28,14 +28,14 @@ void TitleScene::Initialize() {
 
 	worldTransformPlayer_.translation_.y = -10.0f;
 
-	//0213
+	// 0213
 	fade_ = new Fade();
 	fade_->Initialize();
 
 	fade_->Start(Fade::Status::FadeIn, 1.0f);
 }
 
-void TitleScene::Update() {
+void Result::Update() {
 
 	switch (phase_) {
 	case Phase::kFadeIn:
@@ -46,7 +46,7 @@ void TitleScene::Update() {
 		}
 		break;
 	case Phase::kMain:
-		//タイトルシーンの終了条件
+		// タイトルシーンの終了条件
 		if (Input::GetInstance()->PushKey(DIK_SPACE)) {
 			fade_->Start(Fade::Status::FadeOut, 1.0f);
 			phase_ = Phase::kFadeOut;
@@ -69,17 +69,17 @@ void TitleScene::Update() {
 
 	camera_.TransferMatrix();
 
-	//アフィン変換～DirectXに転送(タイトル座標)
+	// アフィン変換～DirectXに転送(タイトル座標)
 	WorldTransformUpdate(worldTransformTitle_);
 
-	//アフィン変換～DirectXに転送（プレイヤー座標）
+	// アフィン変換～DirectXに転送（プレイヤー座標）
 	WorldTransformUpdate(worldTransformPlayer_);
 }
 
-void TitleScene::Draw() {
+void Result::Draw() {
 
 	DirectXCommon* dxCommon_ = DirectXCommon::GetInstance();
-	//コマンドリストの取得
+	// コマンドリストの取得
 	ID3D12GraphicsCommandList* commandList = dxCommon_->GetCommandList();
 
 	Model::PreDraw(commandList);
@@ -89,13 +89,13 @@ void TitleScene::Draw() {
 
 	Model::PostDraw();
 
-	//0213
+	// 0213
 	fade_->Draw();
 }
 
-TitleScene::~TitleScene() {
+Result::~Result() {
 	delete modelPlayer_;
 	delete modelTitle_;
-	//0213
+	// 0213
 	delete fade_;
 }

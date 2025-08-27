@@ -10,7 +10,7 @@ GameScene* gameScene = nullptr;
 
 //シーン(型)
 enum class Scene {
-	kUnknown = 0, kTitle, kGame,
+	kUnknown = 0, kTitle, kGame,kResult
 };
 
 //現在シーン(型)
@@ -34,7 +34,7 @@ void ChangeScene() {
 	case Scene::kGame:
 		if (gameScene->isFinished()) {
 			// シーン変更
-			scene = Scene::kTitle;
+			scene = Scene::kResult;
 			delete gameScene;
 			gameScene = nullptr;
 			titleScene = new TitleScene;

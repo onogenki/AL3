@@ -18,25 +18,22 @@ void Item::Initialize(Model* startItem_model,Model* playerItem_model, Model* ene
 }
 
 void Item::Update(Player *player, const std::list<Enemy*>& enemies) { 
-	if (!isPlayerColor_) {//player陣
 		if (IsCollision(GetAABB(), player->GetAABB()))
 		{
 			isPlayerColor_ = true;
 			isEnemiesColor_ = false;
 			isStartColor_ = false;
+		    return;//playerに触れたら敵の判定は行わない
 		}
-	}
-	if (!isEnemiesColor_)//敵陣
-	{
 		for (Enemy* enemy : enemies) {
 			if (IsCollision(GetAABB(), enemy->GetAABB())) {
 				isEnemiesColor_ = true;
 				isPlayerColor_ = false;
 				isStartColor_ = false;
+			    break;//敵に触れたらいちいちチェックするのを防ぐ
 			}
 		}
 	}
-}
 
 void Item::Draw() {
 	if (isStartColor_) {
@@ -50,14 +47,14 @@ void Item::Draw() {
 }
 
 Vector3 Item::GetWorldPosition() const{
-	// Vector3 worldPos;
+	Vector3 worldPos;
 
 	// ワールド行列の平行移動成分を取得(ワールド座標)
 
-	// worldPos.x = worldTransform_.matWorld_.m[3][0];
-	// worldPos.y = worldTransform_.matWorld_.m[3][1];
-	// worldPos.z = worldTransform_.matWorld_.m[3][2];
-	return worldTransform_.translation_;
+	worldPos.x = worldTransform_.matWorld_.m[3][0];
+	worldPos.y = worldTransform_.matWorld_.m[3][1];
+	worldPos.z = worldTransform_.matWorld_.m[3][2];
+	return worldPos;
 }
 
 AABB Item::GetAABB()

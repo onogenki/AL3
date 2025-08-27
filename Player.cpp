@@ -12,6 +12,19 @@ using namespace KamataEngine;
 
 void Player ::Update() {
 
+	if (isDead_) {
+		respawnTimer_ += 1.00f / 60.0f;
+
+		if (respawnTimer_ >= respawnCountTime_) {
+			isDead_ = false;
+			respawnTimer_ = 0.0f;
+			worldTransform_.translation_ = respawnPosition_;
+
+			velocity_ = {0.0f, 0.0f, 0.0f};
+		}
+		return;
+	}
+
 	//behaviorRequestにリクエストがきていたらbehaviorを変更し、初期化関数を1度呼び出す
 	if (behaviorRequest_ != Behavior::kUnknown) {
 		// 振るまいを変更する
@@ -199,6 +212,12 @@ void Player::Initialize(Model* player_model, Model* modelAttack, Camera* camera,
 	worldTransformAttack_.rotation_ = worldTransform_.rotation_;
 
 	camera_ = camera;
+
+	respawnPosition_ = position;
+
+	isDead_ = false;
+
+	respawnTimer_ = 0.0f;
 }
 
 //0207 移動入力
@@ -269,7 +288,7 @@ void Player ::InputMove() {
 	velocity_.x = std::clamp(velocity_.x, -kLimitRunSpeed, kLimitRunSpeed);
 	velocity_.y = std::clamp(velocity_.y, -kLimitRunSpeed, kLimitRunSpeed);
 
-	velocity_ *= (1.030f - kAttenuation);
+	velocity_ *= (1.04f - kAttenuation);
 	// 入力がない軸だけ減衰
 	if (!Input::GetInstance()->PushKey(DIK_D) && !Input::GetInstance()->PushKey(DIK_A)) {
 		velocity_.x *= (1.0f - kAttenuation);
@@ -541,12 +560,12 @@ void Player::Draw() {
 //0210 ワールド座標を取得 constを付けてオブジェクト変更しない
 Vector3 Player::GetWorldPosition()const {
 	//ワールド座標を入れる変数
-	//Vector3 worldPos;
+	Vector3 worldPos;
 	// ワールド行列の平行移動成分を取得
-	//worldPos.x = worldTransform_.matWorld_.m[3][0];
-	//worldPos.y = worldTransform_.matWorld_.m[3][1];
-	//worldPos.z = worldTransform_.matWorld_.m[3][2];
-	return worldTransform_.translation_;
+	worldPos.x = worldTransform_.matWorld_.m[3][0];
+	worldPos.y = worldTransform_.matWorld_.m[3][1];
+	worldPos.z = worldTransform_.matWorld_.m[3][2];
+	return worldPos;
 }
 
 AABB Player::GetAABB() {
@@ -562,16 +581,20 @@ AABB Player::GetAABB() {
 }
 
 void Player::OnCollision(const Enemy* enemy) {
-	
-		//0215
+
+	if (isDead_) {
+		return;
+	}
+	// 0215
 	if (IsAttack()) {
 		return; // 攻撃中はダメージ無効
 	}
-	//不使用
-	(void)enemy;
-	//0212 書き換え
-	isDead_ = true;
+		respawnTimer_ = 0.0f;
+		// 不使用
+		(void)enemy;
+		// 0212 書き換え
+		isDead_ = true;
 
-	//0215
-	isCollisionDisabled_ = true; // 衝突無効化
+		// 0215
+		isCollisionDisabled_ = true; // 衝突無効化
 }

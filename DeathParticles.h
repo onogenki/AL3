@@ -28,10 +28,10 @@ public:
 	    Camera* camera_ = nullptr;
 
 		//存続時間(消滅までの時間)<秒>
-	    static inline const float kDuration_ = 2.0f;
+	    static inline const float kDuration_ = 1.0f;
 
 		//移動の速さ
-	    static inline const float kSpeed_ = 0.05f;
+	    static inline const float kSpeed_ = 0.10f;
 
 		//分割した1個分の角度
 	    static inline const float kAngleUint_ = 2.0f * std::numbers::pi_v<float> / kNumParticles;

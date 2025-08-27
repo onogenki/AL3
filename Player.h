@@ -87,6 +87,8 @@ public:
 	//0215
 	bool IsCollisionDisabled() const { return isCollisionDisabled_; }
 
+	void Reset();
+
 private:
 	// ワールド変換データ
 	WorldTransform worldTransform_;
@@ -121,7 +123,7 @@ private:
 	//0207キャラクターの当たり判定サイズ
 	static inline const float kWidth = 0.8f;
 	static inline const float kHeight = 0.8f;
-
+	//壁抜け防ぎ
 	static inline const float kNone = 0.04f;
 
 	//0207移動入力
@@ -177,5 +179,10 @@ private:
 
 	// 02_15 20枚目
 	bool isCollisionDisabled_ = false; // 衝突無効化
+
+	// 復活
+	Vector3 respawnPosition_;             // 復活する位置
+	float respawnTimer_ = 0.0f;           // 復活まで測る時間
+	const float respawnCountTime_ = 2.0f; // 復活までのカウントダウン
 
 };

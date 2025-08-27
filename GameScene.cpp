@@ -17,7 +17,7 @@ void GameScene::Initialize() {
 	sprite_ = Sprite::Create(textureHandle_, {100, 50});
 
 	//3Dモデルの生成	
-	model_ = Model::Create();
+	//model_ = Model::Create();
 	//ワールドトランスフォームの初期化
 	worldTransform_.Initialize();
 
@@ -46,7 +46,7 @@ void GameScene::Initialize() {
 	//プレイヤーモデル
 	player_model_ = Model::CreateFromOBJ("player");
 	// 0205 座標をマップチップ番号で指定
-	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2, 16);
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(3, 16);
 	//プレイヤー攻撃エフェクトモデル
 	modelAttack_ = Model::CreateFromOBJ("attack_effect");
 	//0207
@@ -66,16 +66,22 @@ void GameScene::Initialize() {
 	//敵モデル
 	enemy_model_ = Model::CreateFromOBJ("enemy");
 
+	const int32_t enemyYPositions[] = {9, 17};
 	//0210
 	for (int32_t i = 0; i < 2; ++i)
 	{
 		Enemy* newEnemy = new Enemy();
 		//                                     2体ずつ異なる座標をセット
-		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(30 + i * 10, 18);
+		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(10 + i*10, enemyYPositions[i]);
 
 		newEnemy->Initialize(enemy_model_, &camera_, enemyPosition);
+		
+		//MapChipFieldを修正
+		 newEnemy->SetMapChipField(mapChipField_);
+
 		//0216
 		newEnemy->SetGameScene(this);
+
 		enemies_.push_back(newEnemy);
 	}
 
@@ -97,15 +103,26 @@ void GameScene::Initialize() {
 	HitEffect::SetCamera(&camera_);
 
 	//アイテム
-	startItem_model_ = Model::CreateFromOBJ("needle_Body");
-	playerItem_model_ = Model::CreateFromOBJ("playerItem");
+	startItem_model_ = Model::CreateFromOBJ("startFlag");
+	playerItem_model_ = Model::CreateFromOBJ("playerFlag");
 	enemiesItem_model_ = Model::CreateFromOBJ("enemyItem");
 
-	item_ = new Item();
 	//座標をマップチップ番号で指定(if文でモデルを変える)
-	Vector3 itemPosition = mapChipField_->GetMapChipPositionByIndex(10, 12);
+	Vector3 itemPositionU = mapChipField_->GetMapChipPositionByIndex(13, 9);
+	Vector3 itemPositionU2 = mapChipField_->GetMapChipPositionByIndex(18, 9);
+	Vector3 itemPositionD = mapChipField_->GetMapChipPositionByIndex(14, 17);
 
-	item_->Initialize(startItem_model_, playerItem_model_, enemiesItem_model_, &camera_, itemPosition);
+	Item* newItem1 = new Item();
+	newItem1->Initialize(startItem_model_, playerItem_model_, enemiesItem_model_, &camera_, itemPositionU);
+	items_.push_back(newItem1);
+
+	Item* newItem2 = new Item();
+	newItem2->Initialize(startItem_model_, playerItem_model_, enemiesItem_model_, &camera_, itemPositionU2);
+	items_.push_back(newItem2);
+
+	Item* newItem3 = new Item();
+	newItem3->Initialize(startItem_model_, playerItem_model_, enemiesItem_model_, &camera_, itemPositionD);
+	items_.push_back(newItem3);
 
 }
 
@@ -127,14 +144,16 @@ void GameScene::ChangePhase() {
 			deathParticles_ = new DeathParticles;
 			deathParticles_->Initialize(deathParticle_model_, &camera_, deathParticlesPosition);
 
-			fade_->Start(Fade::Status::FadeOut, 3.0f);
-		}
+			fade_->Start(Fade::Status::FadeOut, 1.0f);
+			}
 		break;
 	case Phase::kDeath:
-		finishedTimer++;
-		if (finishedTimer > 180)
-		{
-			finished_ = true;
+		if (fade_->IsFinished()) {
+			Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(3, 16);
+			player_->Initialize(player_model_, modelAttack_, &camera_, playerPosition);
+
+			fade_->Start(Fade::Status::FadeIn, 1.0f);
+			phase_ = Phase::kPlay;
 		}
 		break;
 	}
@@ -162,7 +181,7 @@ void GameScene::GenerateBlocks() {
 				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
 			
 				//奥に配置する
-				worldTransformBlocks_[i][j]->translation_.z += 1.0f;
+				worldTransformBlocks_[i][j]->translation_.z += 0.8f;
 			
 			}
 		}
@@ -175,20 +194,19 @@ void GameScene::Update() {
 	hitEffects_.remove_if([](HitEffect* hitEffect) {
 		if (hitEffect->IsDead()) {
 			delete hitEffect;
-
 			return true;
 		}
 		return false;
 	});
 
 	//0215 デスフラグの立った敵を削除
-	enemies_.remove_if([](Enemy* enemy) {
-		if (enemy->IsDead()) {
-			delete enemy;
-			return true;
-		}
-		return false;
-	});
+	//enemies_.remove_if([](Enemy* enemy) {
+	//	if (enemy->IsDead()) {
+	//		delete enemy;
+	//		return true;
+	//	}
+	//	return false;
+	//});
 
 	// エフェクトの更新
 	for (auto it = hitEffects_.begin(); it != hitEffects_.end();) {
@@ -222,8 +240,8 @@ void GameScene::Update() {
 		}
 
 		// アイテムの更新
-		if (item_) {
-			item_->Update(player_, enemies_);
+		for (Item* item : items_) {
+			item->Update(player_, enemies_);
 		}
 
 		// ヒットエフェクトリストの更新をfor文で行う
@@ -278,8 +296,8 @@ void GameScene::Update() {
 		}
 
 		//アイテムの更新
-		if (item_) {
-			item_->Update(player_, enemies_);
+		for (Item* item : items_) {
+			item->Update(player_, enemies_);
 		}
 
 		// #ifdef _DEBUG
@@ -393,9 +411,8 @@ void GameScene::Draw() {
 		hitEffect->Draw();
 	}
 
-	if (item_)
-	{
-		item_->Draw();
+	for (Item* item : items_) {
+		item->Draw();
 	}
 
 	Model::PostDraw();
@@ -424,19 +441,26 @@ void GameScene::CheckAllCollisions() {
 
 		//自キャラと敵弾全ての当たり判定
 		for (Enemy* enemy : enemies_) {
-			
+
 			// コリジョン無効の敵はスキップ
-			if (enemy->IsCollisionDisabled())
-				continue; 
+			if (enemy->IsCollisionDisabled()) {
+				continue;
+			}
 			//敵弾の座標
 			aabb2 = enemy->GetAABB();
 
 			// AABB同士の交差判定
+			//死んだときに分けてるため、どちらも初期化されることを防いでる
 			if (IsCollision(aabb1, aabb2)) {
-				// "自キャラ"の衝突時関数を呼び出す
-				player_->OnCollision(enemy);
-				// "敵"の衝突時関数を呼び出す
-				enemy->OnCollision(player_);
+				if (player_->IsAttack()) {
+
+					enemy->OnCollision(player_);
+				} else {
+					// "自キャラ"の衝突時関数を呼び出す
+					player_->OnCollision(enemy);
+					// "敵"の衝突時関数を呼び出す
+					// enemy->OnCollision(player_);
+				}
 			}
 		}
 	}
@@ -445,7 +469,7 @@ void GameScene::CheckAllCollisions() {
 
 GameScene::~GameScene() {
 	delete sprite_;
-	delete model_;
+	//delete model_;
 
 	delete block_model_;
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
@@ -472,7 +496,9 @@ GameScene::~GameScene() {
 	}
 
 	//アイテム
-	delete item_;
+	for (Item* item : items_) {
+		delete item;
+	}
 	delete startItem_model_;
 	delete playerItem_model_;
 	delete enemiesItem_model_;

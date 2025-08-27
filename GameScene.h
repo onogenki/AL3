@@ -119,7 +119,7 @@ private:
 	Model* particle_model_ = nullptr;
 
 	//アイテム
-	Item* item_ = nullptr;
+	std::list<Item*> items_;
 	Model* startItem_model_ = nullptr;
 	Model* playerItem_model_ = nullptr;
 	Model* enemiesItem_model_ = nullptr;
