@@ -116,8 +116,10 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MapChipField.cpp" />
     <ClCompile Include="math.cpp" />
+    <ClCompile Include="PauseScene.cpp" />
     <ClCompile Include="Player.cpp" />
-    <ClCompile Include="Result.cpp" />
+    <ClCompile Include="ResultScene.cpp" />
+    <ClCompile Include="RuleScene.cpp" />
     <ClCompile Include="Skydome.cpp" />
     <ClCompile Include="TitleScene.cpp" />
   </ItemGroup>
@@ -206,8 +208,10 @@
     <ClInclude Include="Item.h" />
     <ClInclude Include="MapChipField.h" />
     <ClInclude Include="math.h" />
+    <ClInclude Include="PauseScene.h" />
     <ClInclude Include="Player.h" />
-    <ClInclude Include="Result.h" />
+    <ClInclude Include="ResultScene.h" />
+    <ClInclude Include="RuleScene.h" />
     <ClInclude Include="Skydome.h" />
     <ClInclude Include="TitleScene.h" />
   </ItemGroup>

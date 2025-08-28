@@ -14,26 +14,31 @@ void Item::Initialize(Model* startItem_model,Model* playerItem_model, Model* ene
 	isPlayerColor_ = false;
 	isEnemiesColor_ = false;
 
+	owner_ = Owner::kNone;
+
 	WorldTransformUpdate(worldTransform_);
 }
 
-void Item::Update(Player *player, const std::list<Enemy*>& enemies) { 
-		if (IsCollision(GetAABB(), player->GetAABB()))
-		{
-			isPlayerColor_ = true;
-			isEnemiesColor_ = false;
+void Item::Update(Player* player, const std::list<Enemy*>& enemies) {
+	if (IsCollision(GetAABB(), player->GetAABB())) {
+		// owner_メンバ変数を更新
+		SetOwner(Owner::kPlayer);
+		isPlayerColor_ = true;
+		isEnemiesColor_ = false;
+		isStartColor_ = false;
+		return; // playerに触れたら敵の判定は行わない
+	}
+	for (Enemy* enemy : enemies) {
+		if (IsCollision(GetAABB(), enemy->GetAABB())) {
+			// owner_メンバ変数を更新
+			SetOwner(Owner::kEnemy);
+			isEnemiesColor_ = true;
+			isPlayerColor_ = false;
 			isStartColor_ = false;
-		    return;//playerに触れたら敵の判定は行わない
-		}
-		for (Enemy* enemy : enemies) {
-			if (IsCollision(GetAABB(), enemy->GetAABB())) {
-				isEnemiesColor_ = true;
-				isPlayerColor_ = false;
-				isStartColor_ = false;
-			    break;//敵に触れたらいちいちチェックするのを防ぐ
-			}
+			break; // 敵に触れたらいちいちチェックするのを防ぐ
 		}
 	}
+}
 
 void Item::Draw() {
 	if (isStartColor_) {

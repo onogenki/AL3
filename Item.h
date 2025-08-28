@@ -8,6 +8,13 @@ using namespace KamataEngine;
 class Item {
 	public:
 
+		//陣取りの所有者を区別する
+		enum class Owner {
+		    kNone, // 誰も所有していない状態
+			kPlayer,
+		    kEnemy
+	    };
+
 		void Initialize(Model* startItem_model,Model* playerItem_model, Model* enemiesItem_model, Camera* camera, const Vector3& position);
 
 		void Update(Player* player, const std::list<Enemy*>& enemies);
@@ -18,6 +25,11 @@ class Item {
 		AABB GetAABB();
 
 		Vector3 GetWorldPosition() const;
+
+		//陣の所有者を設定する
+		void SetOwner(Owner owner) { owner_ = owner; }
+	    //陣の所有者を取得する
+		Owner GetOwner() const { return owner_; }
 
 		private:
 
@@ -39,4 +51,6 @@ class Item {
 		bool isStartColor_ = false;//初期陣
 	    bool isPlayerColor_ = false;//playerが当たったかどうか(色の変化)
 	    bool isEnemiesColor_ = false;//enemyが当たったかどうか
+
+		Owner owner_ = Owner::kNone;//陣の初期値
 };

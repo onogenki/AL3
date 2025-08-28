@@ -5,6 +5,7 @@
 void TitleScene::Initialize() {
 
 	modelTitle_ = Model::CreateFromOBJ("titleFont", true);
+	modelSpace_ = Model::CreateFromOBJ("spaceFont", true);
 	modelPlayer_ = Model::CreateFromOBJ("player");
 
 	// カメラ初期化
@@ -15,6 +16,14 @@ void TitleScene::Initialize() {
 	worldTransformTitle_.Initialize();
 
 	worldTransformTitle_.scale_ = {kPlayerTitle, kPlayerTitle, kPlayerTitle};
+
+	worldTransformSpace_.Initialize();
+
+	worldTransformSpace_.translation_.x = -2.0f;
+
+	worldTransformSpace_.translation_.y = -19.0f;
+
+	worldTransformSpace_.scale_ = {kPlayerTitle, kPlayerTitle, kPlayerTitle};
 
 	const float kPlayerScale = 20.0f;
 
@@ -27,6 +36,13 @@ void TitleScene::Initialize() {
 	worldTransformPlayer_.translation_.x = -2.0f;
 
 	worldTransformPlayer_.translation_.y = -10.0f;
+
+	// 0203天球
+	// skydome生成
+	skydome_ = new Skydome();
+	// 初期化
+	modelSkydome_ = Model::CreateFromOBJ("sky_sphere", true);
+	skydome_->Initialize(modelSkydome_, &camera_);
 
 	//0213
 	fade_ = new Fade();
@@ -71,6 +87,7 @@ void TitleScene::Update() {
 
 	//アフィン変換～DirectXに転送(タイトル座標)
 	WorldTransformUpdate(worldTransformTitle_);
+	WorldTransformUpdate(worldTransformSpace_);
 
 	//アフィン変換～DirectXに転送（プレイヤー座標）
 	WorldTransformUpdate(worldTransformPlayer_);
@@ -84,7 +101,11 @@ void TitleScene::Draw() {
 
 	Model::PreDraw(commandList);
 
+	// 天球描画
+	skydome_->Draw();
+
 	modelTitle_->Draw(worldTransformTitle_, camera_);
+	modelSpace_->Draw(worldTransformSpace_, camera_);
 	modelPlayer_->Draw(worldTransformPlayer_, camera_);
 
 	Model::PostDraw();
@@ -96,6 +117,9 @@ void TitleScene::Draw() {
 TitleScene::~TitleScene() {
 	delete modelPlayer_;
 	delete modelTitle_;
+	delete modelSpace_;
+
+	delete modelSkydome_;
 	//0213
 	delete fade_;
 }

@@ -1,16 +1,20 @@
 #include "GameScene.h"
 #include "KamataEngine.h"
 #include"TitleScene.h"
+#include"ResultScene.h"
+#include"RuleScene.h"
 #include <Windows.h>
 using namespace KamataEngine;
 
 //0212
 TitleScene* titleScene = nullptr;
+RuleScene* ruleScene = nullptr;
 GameScene* gameScene = nullptr;
+ResultScene* resultScene = nullptr;
 
 //シーン(型)
 enum class Scene {
-	kUnknown = 0, kTitle, kGame,kResult
+	kUnknown = 0, kTitle,kRule, kGame,kResult
 };
 
 //現在シーン(型)
@@ -22,21 +26,46 @@ void ChangeScene() {
 	case Scene::kTitle:
 		if (titleScene->IsFinished()) {
 			//シーン変更
-			scene = Scene::kGame;
+			scene = Scene::kRule;
 			//旧シーンの解放
 			delete titleScene;
 			titleScene = nullptr;
 			//新シーンの生成と初期化
+			ruleScene = new RuleScene;
+			ruleScene->Initialize();
+		}
+		break;
+	case Scene::kRule:
+		if (ruleScene->IsFinished()) {
+			// シーン変更
+			scene = Scene::kGame;
+			delete ruleScene;
+			ruleScene = nullptr;
 			gameScene = new GameScene;
 			gameScene->Initialize();
 		}
 		break;
 	case Scene::kGame:
 		if (gameScene->isFinished()) {
-			// シーン変更
-			scene = Scene::kResult;
+			gameScene->CountItems();
+			// ゲーム終了時に勝敗を判定
+			bool isPlayerWinner = gameScene->IsPlayerWinner();
 			delete gameScene;
 			gameScene = nullptr;
+			resultScene = new ResultScene;
+			// ResultSceneに勝敗情報を渡す
+			resultScene->SetPlayerWinner(isPlayerWinner);
+			resultScene->Initialize();
+			// シーン変更
+			scene = Scene::kResult;
+		}
+		break;
+	case Scene::kResult:
+		if (resultScene->IsFinished())
+		{
+			scene = Scene::kTitle;
+			delete resultScene;
+			resultScene = nullptr;
 			titleScene = new TitleScene;
 			titleScene->Initialize();
 		}
@@ -49,8 +78,14 @@ void UpdateScene() {
 	case Scene::kTitle:
 		titleScene->Update();
 		break;
+	case Scene::kRule:
+		ruleScene->Update();
+		break;
 	case Scene::kGame:
 		gameScene->Update();
+		break;
+	case Scene::kResult:
+		resultScene->Update();
 		break;
 	}
 }
@@ -60,8 +95,14 @@ void DrawScene() {
 	case Scene::kTitle:
 		titleScene->Draw();
 		break;
+	case Scene::kRule:
+		ruleScene->Draw();
+		break;
 	case Scene::kGame:
 		gameScene->Draw();
+		break;
+	case Scene::kResult:
+		resultScene->Draw();
 		break;
 	}
 }
@@ -134,7 +175,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// ゲームシーンの解放
 	delete titleScene;
+	delete ruleScene;
 	delete gameScene;
+	delete resultScene;
 	// nullptrの代入
 	//gameScene = nullptr;
 

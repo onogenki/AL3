@@ -34,7 +34,7 @@ void GameScene::Initialize() {
 	// skydome生成
 	skydome_ = new Skydome();
 	// 初期化
-	modelSkydome_ = Model::CreateFromOBJ("Skydome", true);
+	modelSkydome_ = Model::CreateFromOBJ("sky_sphere", true);
 	skydome_->Initialize(modelSkydome_, &camera_);
 	//マップチップ
 	mapChipField_ = new MapChipField;
@@ -105,7 +105,7 @@ void GameScene::Initialize() {
 	//アイテム
 	startItem_model_ = Model::CreateFromOBJ("startFlag");
 	playerItem_model_ = Model::CreateFromOBJ("playerFlag");
-	enemiesItem_model_ = Model::CreateFromOBJ("enemyItem");
+	enemiesItem_model_ = Model::CreateFromOBJ("enemyFlag");
 
 	//座標をマップチップ番号で指定(if文でモデルを変える)
 	Vector3 itemPositionU = mapChipField_->GetMapChipPositionByIndex(13, 9);
@@ -123,6 +123,10 @@ void GameScene::Initialize() {
 	Item* newItem3 = new Item();
 	newItem3->Initialize(startItem_model_, playerItem_model_, enemiesItem_model_, &camera_, itemPositionD);
 	items_.push_back(newItem3);
+
+	//timer
+	gameTimer_ = 0.0f;
+
 
 }
 
@@ -284,6 +288,14 @@ void GameScene::Update() {
 		}
 		break;
 	case Phase::kPlay:
+
+		gameTimer_ += 1.0f / 60.0f;
+		if (gameTimer_ >= gameTimeOver_ || player_->IsDead())
+		{
+			fade_->Start(Fade::Status::FadeOut, 3.0f);
+			phase_ = Phase::kFadeOut;
+		}
+
 		skydome_->Update();
 		CController_->Update();
 
@@ -335,6 +347,7 @@ void GameScene::Update() {
 
 	case Phase::kDeath:
 		if (deathParticles_ && deathParticles_->IsFinished()) {
+			fade_->Start(Fade::Status::FadeOut, 3.0f);
 			phase_ = Phase::kDeath;
 		}
 
@@ -356,6 +369,8 @@ void GameScene::Update() {
 	case Phase::kFadeOut:
 		fade_->Update();
 		if (fade_->IsFinished()) {
+			//ゲーム終了時に陣確認
+			CountItems();//関数を呼び出す
 			finished_ = true;
 		}
 
@@ -467,6 +482,29 @@ void GameScene::CheckAllCollisions() {
 #pragma endregion
 }
 
+//陣確認
+void GameScene::CountItems() {
+	int32_t playerCount = 0;//player陣の変数
+	int32_t enemyCount = 0;//enemy陣の変数
+
+	// 陣リストをループして所有者ごとにカウント
+	for (Item* item : items_) {
+		if (item->GetOwner() == Item::Owner::kPlayer) {//player陣が見つかったら+1
+			playerCount++;
+		} else if (item->GetOwner() == Item::Owner::kEnemy) {//enemy陣なら+1
+			enemyCount++;
+		}
+	}
+
+	// カウント結果を元に勝利判定
+	if (playerCount > enemyCount)
+	{
+		isPlayerWinner_ = true;
+	} else {
+		isPlayerWinner_ = false;
+	}
+}
+
 GameScene::~GameScene() {
 	delete sprite_;
 	//delete model_;
@@ -499,7 +537,4 @@ GameScene::~GameScene() {
 	for (Item* item : items_) {
 		delete item;
 	}
-	delete startItem_model_;
-	delete playerItem_model_;
-	delete enemiesItem_model_;
 }

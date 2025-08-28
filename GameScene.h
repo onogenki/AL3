@@ -39,6 +39,15 @@ public:
 	// エフェクトを生成  発生座標
 	void CreateEffect(const Vector3& position);
 
+
+	// 陣
+	// 陣の数を数える関数
+	void CountItems();
+
+	//勝利結果
+	bool IsPlayerWinner() const { return isPlayerWinner_; }
+
+
 private:
 
 	//0212 ゲームのフェーズ(型)
@@ -123,5 +132,12 @@ private:
 	Model* startItem_model_ = nullptr;
 	Model* playerItem_model_ = nullptr;
 	Model* enemiesItem_model_ = nullptr;
+
+	//タイマー
+	float gameTimer_ = 0.0f;
+	const float gameTimeOver_ = 30.0f;//30秒で強制終了
+
+	//勝利フラグ
+	bool isPlayerWinner_ = false;//勝利判定結果を保持
 
 };

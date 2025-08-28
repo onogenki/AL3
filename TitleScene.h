@@ -1,5 +1,6 @@
 #pragma once
 #include "KamataEngine.h"
+#include "skydome.h"
 #include "Fade.h"
 
 using namespace KamataEngine;
@@ -31,10 +32,16 @@ private:
 	//ビュープロジェクション
 	Camera camera_;
 	WorldTransform worldTransformTitle_;
+	WorldTransform worldTransformSpace_;
 	WorldTransform worldTransformPlayer_;
+
+	// 0203天球
+	Skydome* skydome_ = nullptr;
+	Model* modelSkydome_ = nullptr;
 
 	Model* modelPlayer_ = nullptr;
 	Model* modelTitle_ = nullptr;
+	Model* modelSpace_ = nullptr;
 
 	float counter_ = 0.0f;
 	//0212 終了フラグ

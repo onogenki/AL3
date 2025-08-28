@@ -80,7 +80,7 @@ private:
 	//最初の角度
 	static inline const float kWalkMotionAngleStart = 0.0f;
 	//最後の角度
-	static inline const float kWalkMotionAngleEnd = 30.0f;
+	static inline const float kWalkMotionAngleEnd = 5.0f;
 	//アニメーションの周期となる時間
 	static inline const float kWalkMotionTime = 1.0f;
 	//経過時間
