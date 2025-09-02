@@ -1,6 +1,7 @@
 #include <cmath>
 #include <numbers>
 #include "math.h"
+#include <cassert>
 
 //0214 単項演算子オーバーロード
 Vector3 operator+(const Vector3& v) { return v; }

@@ -1,4 +1,5 @@
 #include "Skydome.h"
+#include <cassert>
 using namespace KamataEngine;
 
 void Skydome::Initialize(Model* modelSkydome_, Camera* camera) {
