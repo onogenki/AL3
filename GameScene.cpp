@@ -3,26 +3,27 @@
 using namespace KamataEngine;
 
 void GameScene::Initialize() {
-	// ファイル名を指定してテクスチャを読み込み
-	textureHandle_ = TextureManager::Load("mario.jpg");
-	//スプライトインスタンスの生成
-	sprite_ = Sprite::Create(textureHandle_, {100, 50});
+	// ファイル名を指定してテクスチャを読み込み(2D,3Dどちらも可能)
+	textureHandle_ = TextureManager::Load("maguuNormalSpeed.png");
+	//スプライトインスタンスの生成(2Dキャラ)
+	sprite_ = Sprite::Create(textureHandle_, {100.0f, 50.0f});
 	// 3Dモデルの生成
-	model_ = Model::Create();
+	model_ = Model::CreateFromOBJ("enemyModel");
 	// ワールドトランスフォーマーの初期化
 	worldTransform_.Initialize();
 	// カメラの初期化
 	camera_.Initialize();
-	//サウンドデータの読み込み
-	soundDataHandle_ = Audio::GetInstance()->LoadWave("mokugyo.wav");
-	//音声再生
-	Audio::GetInstance()->PlayWave(soundDataHandle_);
-	//音声再生
-	voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_, true);
 	//ライン描画が参照するカメラを指定する(アドレス渡し)
 	PrimitiveDrawer::GetInstance()->SetCamera(&camera_);
 	//デバックカメラの生成
 	debugCamera_ = new DebugCamera(1280, 720);
+
+	// サウンドデータの読み込み
+	soundDataHandle_ = Audio::GetInstance()->LoadWave("mokugyo.wav");
+	// 音声再生
+	Audio::GetInstance()->PlayWave(soundDataHandle_);
+	// 音声再生
+	voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_, true);
 
 	//軸方向の表示を有効化にする
 	AxisIndicator::GetInstance()->SetVisible(true);
@@ -63,13 +64,29 @@ void GameScene::Update() {
 
 void GameScene::Draw() {
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
+
 	//スプライト描画処理前処理
+	Sprite::PreDraw(dxCommon->GetCommandList());
+
+	// ここにスプライトインスタンスの(2Dキャラ)描画処理を記述する
+	//sprite_->Draw();
+	
+	// スプライト描画後処理
+	Sprite::PostDraw();
+
+
+
+	// 3Dモデル描画前処理
 	Model::PreDraw(dxCommon->GetCommandList());
-	model_->Draw(worldTransform_, debugCamera_->GetCamera(), textureHandle_);
-	//ここにスプライトインスタンスの描画処理を記述する
+
 	//model_->Draw(worldTransform_, camera_, textureHandle_);
+	model_->Draw(worldTransform_, debugCamera_->GetCamera());
+	
 	// 3Dモデル描画後処理
 	Model::PostDraw();
+
+
+
 	// ラインを描画する                         始点座標   終点座標     色(RGBA)
 	PrimitiveDrawer::GetInstance()->DrawLine3d({0, 0, 0}, {0, 10, 0}, {1.0f, 0.0f, 0.0f, 1.0f});
 }
