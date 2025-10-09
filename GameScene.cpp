@@ -6,13 +6,28 @@ void GameScene::Initialize() {
 	// ファイル名を指定してテクスチャを読み込み(2D,3Dどちらも可能)
 	textureHandle_ = TextureManager::Load("maguuNormalSpeed.png");
 	//スプライトインスタンスの生成(2Dキャラ)
-	sprite_ = Sprite::Create(textureHandle_, {100.0f, 50.0f});
+	//sprite_ = Sprite::Create(textureHandle_, {100.0f, 50.0f});
+	
 	// 3Dモデルの生成
-	model_ = Model::CreateFromOBJ("enemyModel");
+	//player
+	player_ = new Player();
+	playerModel_ = Model::CreateFromOBJ("needle_Body");
+	player_->Initialize(playerModel_,textureHandle_,&camera_);
 	// ワールドトランスフォーマーの初期化
 	worldTransform_.Initialize();
 	// カメラの初期化
 	camera_.Initialize();
+
+	//要素数
+	const uint32_t kNumBlockVirtical = 10;
+	const uint32_t kNumBlockHorizontal = 20;
+	//ブロック1個分の横幅
+	const float kBlockWidth = 2.0f;
+	const float kBlockHeight = 2.0f;
+
+	//要素数を変更する
+
+
 	//ライン描画が参照するカメラを指定する(アドレス渡し)
 	PrimitiveDrawer::GetInstance()->SetCamera(&camera_);
 	//デバックカメラの生成
@@ -20,9 +35,9 @@ void GameScene::Initialize() {
 
 	// サウンドデータの読み込み
 	soundDataHandle_ = Audio::GetInstance()->LoadWave("mokugyo.wav");
-	// 音声再生
-	Audio::GetInstance()->PlayWave(soundDataHandle_);
-	// 音声再生
+	// 音声1回だけ再生(SE)
+	//voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_); 
+	// 音声ループ再生(BGM)
 	voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_, true);
 
 	//軸方向の表示を有効化にする
@@ -33,33 +48,42 @@ void GameScene::Initialize() {
 
 void GameScene::Update() {
 	// スプライトの今の座標を取得
-	Vector2 position = sprite_->GetPosition();
-	position.x += 2.0f;
-	position.y += 1.0f;
+	//Vector2 position = sprite_->GetPosition();
+	//position.x += 2.0f;
+	//position.y += 1.0f;
 	// 移動した座標をスプライトに反映
-	sprite_->SetPosition(position);
-	//音声再生
-	if (Input::GetInstance()->TriggerKey(DIK_SPACE))
-	{
-		//音声停止
-		Audio::GetInstance()->StopWave(voiceHandle_);
-	}
+	//sprite_->SetPosition(position);
+	
+
+	player_->Update();
+
+
+#ifdef _DEBUG // デバックビルドのみ見れる
+
+	//ImGuiのウィンドウ作成
 	ImGui::Begin("Debug1");
-	#ifdef _DEBUG
 	//デバックテキストの表示
-	ImGui::Text("Kamata Tarou %d,%d,%d", 2050, 12, 31);
-	#endif
+	ImGui::Text("Player");
 	//float3入力ボックス
 	ImGui::InputFloat3("InputFloat3", inputFloat3);
 	//float3スライダー
 	ImGui::SliderFloat3("SliderFloat3", inputFloat3, 0.0f, 1.0f);
 	ImGui::End();
-	
 	//デモウィンドウの表示を有効化
 	ImGui::ShowDemoWindow();
 
+#endif // デバックビルドのみ見れる
+
 	//デバックカメラの更新
 	debugCamera_->Update();
+
+	// 音声再生
+	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+		// 音声停止
+		Audio::GetInstance()->StopWave(voiceHandle_);
+	}
+
+
 }
 
 void GameScene::Draw() {
@@ -80,20 +104,22 @@ void GameScene::Draw() {
 	Model::PreDraw(dxCommon->GetCommandList());
 
 	//model_->Draw(worldTransform_, camera_, textureHandle_);
-	model_->Draw(worldTransform_, debugCamera_->GetCamera());
+	player_->Draw();
 	
+
+	// ラインを描画する                         始点座標   終点座標     色(RGBA)
+	PrimitiveDrawer::GetInstance()->DrawLine3d({0, 0, 0}, {0, 10, 0}, {1.0f, 0.0f, 0.0f, 1.0f});
+
 	// 3Dモデル描画後処理
 	Model::PostDraw();
 
 
 
-	// ラインを描画する                         始点座標   終点座標     色(RGBA)
-	PrimitiveDrawer::GetInstance()->DrawLine3d({0, 0, 0}, {0, 10, 0}, {1.0f, 0.0f, 0.0f, 1.0f});
 }
 
 //デストラクタ
 GameScene::~GameScene() {
-	delete sprite_;
-	delete model_;
+	//delete sprite_;
+	delete player_;
 	delete debugCamera_;
 }
