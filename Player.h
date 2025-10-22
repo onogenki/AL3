@@ -5,7 +5,7 @@ using namespace KamataEngine;
 
 class Player {
 public:
-	void Initialize(Model* playerModel, uint32_t textureHandle, Camera* camera);
+	void Initialize(Model* playerModel, Camera* camera);
 
 	void Update();
 
@@ -15,8 +15,7 @@ private:
 	WorldTransform worldTransform_;
 	//モデル
 	Model* model_ = nullptr;
-	//テクスチャハンドル
-	uint32_t textureHandle_ = 0u;
+
 	Camera* camera_ = nullptr;
 
 };

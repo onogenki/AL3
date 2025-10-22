@@ -13,8 +13,8 @@ void GameScene::Initialize() {
 	// player
 	player_ = new Player(); // 生成
 	//3Dモデルファイルを読み込む(OBJとフォルダ名を一致させること)
-	playerModel_ = Model::CreateFromOBJ("mogu");
-	player_->Initialize(playerModel_, textureHandle_, &camera_); // 初期化
+	playerModel_ = Model::CreateFromOBJ("player");
+	player_->Initialize(playerModel_, &camera_); // 初期化
 	// ワールドトランスフォーマーの初期化
 	worldTransform_.Initialize();
 	// カメラの初期化
