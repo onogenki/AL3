@@ -2,6 +2,8 @@
 #include "KamataEngine.h"
 #include <vector>
 #include"Player.h"
+#include"Skydome.h"
+#include"Math.h"
 using namespace KamataEngine;
 
 // ゲームシーン
@@ -33,9 +35,18 @@ private:
 	Camera camera_;
 
 	//ブロック
-	Model* block_model_ = nullptr;
+	Model* blockModel_ = nullptr;
+	//std::Vectorで可変個配列 それを2個使うことで2次元配列に
 	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
 
+	Skydome* skydome_ = nullptr;
+
+	Model* skyDomeModel_ = nullptr;
+	
+
+	//デバックカメラ有効
+	bool isDebugCameraActive_ = false;
+	
 	// デバックカメラの生成
 	DebugCamera* debugCamera_ = nullptr;
 

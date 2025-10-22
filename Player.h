@@ -18,4 +18,5 @@ private:
 	//テクスチャハンドル
 	uint32_t textureHandle_ = 0u;
 	Camera* camera_ = nullptr;
+
 };
