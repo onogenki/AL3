@@ -22,9 +22,9 @@ void GameScene::Initialize() {
 
 	// ブロック
 	//単純な立方体モデルを自動生成(軽量で作れる)
-	//blockModel_ = Model::Create();
+	blockModel_ = Model::Create();
 
-	blockModel_ = Model::CreateFromOBJ("block");
+	//blockModel_ = Model::CreateFromOBJ("block");
 
 	//天球
 	skydome_ = new Skydome();
