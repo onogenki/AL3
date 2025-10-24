@@ -13,7 +13,7 @@ void GameScene::Initialize() {
 	// player
 	player_ = new Player(); // 生成
 	//3Dモデルファイルを読み込む(OBJとフォルダ名を一致させること)
-	playerModel_ = Model::CreateFromOBJ("player");
+	playerModel_ = Model::CreateFromOBJ("needle_Body");
 	player_->Initialize(playerModel_, &camera_); // 初期化
 	// ワールドトランスフォーマーの初期化
 	worldTransform_.Initialize();
@@ -22,39 +22,21 @@ void GameScene::Initialize() {
 
 	// ブロック
 	//単純な立方体モデルを自動生成(軽量で作れる)
-	blockModel_ = Model::Create();
+	//blockModel_ = Model::Create();
 
-	// 要素数
-	const uint32_t kNumBlockVirtical = 10;
-	const uint32_t kNumBlockHorizontal = 20;
-	// ブロック1個分の縦横幅
-	const float kBlockWidth = 2.0f;
-	const float kBlockHeight = 2.0f;
-
-	// 要素数を変更する
-	// 列数を設定(縦方向のブロック数)
-	worldTransformBlocks_.resize(kNumBlockVirtical);
-	for (uint32_t i = 0; i < kNumBlockVirtical; ++i) {
-		worldTransformBlocks_[i].resize(kNumBlockHorizontal);
-	}
-	// ブロックの生成
-	for (uint32_t i = 0; i < kNumBlockVirtical; ++i) {
-		for (uint32_t j = 0; j < kNumBlockHorizontal; ++j) { // 間をあける
-			if ((i + j) % 2 == 1)
-				continue;
-
-			worldTransformBlocks_[i][j] = new WorldTransform();
-			worldTransformBlocks_[i][j]->Initialize();
-			worldTransformBlocks_[i][j]->translation_.x = kBlockWidth * j;
-			worldTransformBlocks_[i][j]->translation_.y = kBlockHeight * i;
-		}
-	}
+	blockModel_ = Model::CreateFromOBJ("block");
 
 	//天球
 	skydome_ = new Skydome();
 	//trueにすると反転描画になり、内側から見れる(天球用)
 	skyDomeModel_ = Model::CreateFromOBJ("sky_sphere", true);
 	skydome_->Initialize(skyDomeModel_, &camera_);
+
+	//マップチップフィールド
+	mapChipField_ = new MapChipField;
+	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
+
+	GeneratedBlocks();
 
 	// ライン描画が参照するカメラを指定する(アドレス渡し)
 	PrimitiveDrawer::GetInstance()->SetCamera(&camera_);
@@ -78,6 +60,35 @@ void GameScene::Initialize() {
 		AxisIndicator::GetInstance()->SetTargetCamera(&camera_);
 	}
 }
+
+
+void GameScene::GeneratedBlocks() {
+	// 要素数
+	uint32_t numBlockVirtical = mapChipField_->GetNumBlockVirtical();
+	uint32_t numBlockHorizontal = mapChipField_->GetNumBlockHorizontal();
+
+	// 要素数を変更する
+	// 列数を設定(縦方向のブロック数)
+	worldTransformBlocks_.resize(numBlockVirtical);
+	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
+		// 1列の要素数を設定(横方向のブロック数)
+		worldTransformBlocks_[i].resize(numBlockHorizontal);
+	}
+
+	// ブロックの生成
+	for (uint32_t i = 0; i < numBlockVirtical; ++i) {
+		for (uint32_t j = 0; j < numBlockHorizontal; ++j) {
+			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
+				WorldTransform* worldTransform = new WorldTransform();
+				worldTransform->Initialize();
+				worldTransformBlocks_[i][j] = worldTransform;
+				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
+			}
+		}
+	}
+}
+
+
 
 void GameScene::Update() {
 	// スプライトの今の座標を取得
@@ -169,8 +180,7 @@ void GameScene::Draw() {
 		for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
 			if (!worldTransformBlock)
 				continue;
-
-			blockModel_->Draw(*worldTransformBlock, camera_);
+				blockModel_->Draw(*worldTransformBlock, camera_);
 		}
 	}
 
@@ -197,4 +207,5 @@ GameScene::~GameScene() {
 	}
 	worldTransformBlocks_.clear();
 	delete skyDomeModel_;
+	delete mapChipField_;
 }

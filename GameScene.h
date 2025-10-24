@@ -3,6 +3,7 @@
 #include <vector>
 #include"Player.h"
 #include"Skydome.h"
+#include"MapChipField.h"
 #include"Math.h"
 using namespace KamataEngine;
 
@@ -20,12 +21,17 @@ public:
 
 	~GameScene();
 
+	// ブロック生成
+	void GeneratedBlocks();
+
+	void GetNumBlockHorizontal();
+
 private:
 	// テクスチャハンドル(リソース読み込むために必要なもの)
 	uint32_t textureHandle_ = 0;
 	// スプライト(2D表示物)
 	// Sprite* sprite_ = nullptr;
-	//
+	
 	//  3Dモデル
 	Player* player_ = nullptr;
 	Model* playerModel_ = nullptr;
@@ -39,10 +45,12 @@ private:
 	//std::Vectorで可変個配列 それを2個使うことで2次元配列に
 	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
 
+	//天球
 	Skydome* skydome_ = nullptr;
-
 	Model* skyDomeModel_ = nullptr;
 	
+	//マップチップフィールド
+	MapChipField* mapChipField_;
 
 	//デバックカメラ有効
 	bool isDebugCameraActive_ = false;
