@@ -9,12 +9,20 @@ void GameScene::Initialize() {
 	// スプライトインスタンスの生成(2Dキャラ)
 	// sprite_ = Sprite::Create(textureHandle_, {100.0f, 50.0f});
 
+
+	//まずマップを読み込む
+	// マップチップフィールド
+	mapChipField_ = new MapChipField;
+	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
+
+
 	// 3Dモデルの生成
 	// player
 	player_ = new Player(); // 生成
 	//3Dモデルファイルを読み込む(OBJとフォルダ名を一致させること)
 	playerModel_ = Model::CreateFromOBJ("needle_Body");
-	player_->Initialize(playerModel_, &camera_); // 初期化
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(5, 13);
+	player_->Initialize(playerModel_, &camera_,playerPosition); // 初期化
 	// ワールドトランスフォーマーの初期化
 	worldTransform_.Initialize();
 	// カメラの初期化
@@ -31,10 +39,6 @@ void GameScene::Initialize() {
 	//trueにすると反転描画になり、内側から見れる(天球用)
 	skyDomeModel_ = Model::CreateFromOBJ("sky_sphere", true);
 	skydome_->Initialize(skyDomeModel_, &camera_);
-
-	//マップチップフィールド
-	mapChipField_ = new MapChipField;
-	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
 
 	GeneratedBlocks();
 
@@ -112,6 +116,7 @@ void GameScene::Update() {
 	ImGui::InputFloat3("InputFloat3", inputFloat3);
 	// float3スライダー
 	ImGui::SliderFloat3("SliderFloat3", inputFloat3, 0.0f, 1.0f);
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(15, 13);
 	ImGui::End();
 	// デモウィンドウの表示を有効化
 	ImGui::ShowDemoWindow();
@@ -121,18 +126,6 @@ void GameScene::Update() {
 	}
 
 #endif // デバックビルドのみ見れる
-
-	// ブロックの更新
-	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
-		for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
-			if (!worldTransformBlock)
-				continue;
-			WorldTransformUpdate(*worldTransformBlock);
-
-			// 定数バッファに転送する
-			worldTransformBlock->TransferMatrix();
-		}
-	}
 
 	// デバックカメラの更新
 	if (isDebugCameraActive_) {
@@ -145,6 +138,20 @@ void GameScene::Update() {
 		camera_.UpdateMatrix();
 	}
 	camera_.TransferMatrix();
+
+
+
+	// ブロックの更新
+	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+		for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
+			if (!worldTransformBlock)
+				continue;
+			// アフィン変換～DirectXに転送
+			WorldTransformUpdate(*worldTransformBlock);
+
+		}
+	}
+
 
 	// 音声再生
 	if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {

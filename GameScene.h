@@ -24,8 +24,6 @@ public:
 	// ブロック生成
 	void GeneratedBlocks();
 
-	void GetNumBlockHorizontal();
-
 private:
 	// テクスチャハンドル(リソース読み込むために必要なもの)
 	uint32_t textureHandle_ = 0;
