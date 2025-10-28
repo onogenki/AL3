@@ -15,5 +15,5 @@ void Skydome::Update() {
 	worldTransform_.rotation_ = {0.0f, 0.0f, 0.0f};
 }
 
-void Skydome::Draw()
-{ model_->Draw(worldTransform_, *camera_); }
+void Skydome::Draw() {}
+//model_->Draw(worldTransform_, *camera_);}

@@ -28,7 +28,7 @@ private:
 	// テクスチャハンドル(リソース読み込むために必要なもの)
 	uint32_t textureHandle_ = 0;
 	// スプライト(2D表示物)
-	// Sprite* sprite_ = nullptr;
+	 Sprite* sprite_ = nullptr;
 	
 	//  3Dモデル
 	Player* player_ = nullptr;

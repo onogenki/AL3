@@ -5,9 +5,9 @@ using namespace KamataEngine;
 
 void GameScene::Initialize() {
 	// ファイル名を指定してテクスチャを読み込み(2D,3Dどちらも可能)
-	// textureHandle_ = TextureManager::Load("maguuNormalSpeed.png");
+	 textureHandle_ = TextureManager::Load("title.png");
 	// スプライトインスタンスの生成(2Dキャラ)
-	// sprite_ = Sprite::Create(textureHandle_, {100.0f, 50.0f});
+	 sprite_ = Sprite::Create(textureHandle_, {100.0f, 50.0f});
 
 
 	//まずマップを読み込む
@@ -37,8 +37,8 @@ void GameScene::Initialize() {
 	//天球
 	skydome_ = new Skydome();
 	//trueにすると反転描画になり、内側から見れる(天球用)
-	skyDomeModel_ = Model::CreateFromOBJ("sky_sphere", true);
-	skydome_->Initialize(skyDomeModel_, &camera_);
+	//skyDomeModel_ = Model::CreateFromOBJ("sky_sphere", true);
+	//skydome_->Initialize(skyDomeModel_, &camera_);
 
 	GeneratedBlocks();
 
@@ -96,13 +96,13 @@ void GameScene::GeneratedBlocks() {
 
 void GameScene::Update() {
 	// スプライトの今の座標を取得
-	// Vector2 position = sprite_->GetPosition();
+	 Vector2 position = sprite_->GetPosition();
 	// position.x += 2.0f;
 	// position.y += 1.0f;
 	// 移動した座標をスプライトに反映
 	// sprite_->SetPosition(position);
 
-	skydome_->Update();
+	//skydome_->Update();
 
 	player_->Update();
 
@@ -168,7 +168,7 @@ void GameScene::Draw() {
 	Sprite::PreDraw(dxCommon->GetCommandList());
 
 	// ここにスプライトインスタンスの(2Dキャラ)描画処理を記述する
-	//sprite_->Draw();
+	sprite_->Draw();
 	
 	// スプライト描画後処理
 	Sprite::PostDraw();
@@ -178,7 +178,7 @@ void GameScene::Draw() {
 	// 3Dモデル描画前処理
 	Model::PreDraw(dxCommon->GetCommandList());
 
-	skydome_->Draw();
+	//skydome_->Draw();
 	//model_->Draw(worldTransform_, camera_, textureHandle_);
 	player_->Draw();
 
@@ -203,7 +203,7 @@ void GameScene::Draw() {
 
 //デストラクタ
 GameScene::~GameScene() {
-	//delete sprite_;
+	delete sprite_;
 	delete player_;
 	delete debugCamera_;
 	delete blockModel_;
