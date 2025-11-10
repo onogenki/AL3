@@ -34,7 +34,7 @@ void GameScene::Initialize() {
 	// skydome生成
 	skydome_ = new Skydome();
 	// 初期化
-	modelSkydome_ = Model::CreateFromOBJ("Skydome", true);
+	modelSkydome_ = Model::CreateFromOBJ("sky_sphere", true);
 	skydome_->Initialize(modelSkydome_, &camera_);
 	//マップチップ
 	mapChipField_ = new MapChipField;
