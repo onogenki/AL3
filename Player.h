@@ -29,9 +29,9 @@ private:
 	// フレームごとの加速度
 	static inline const float kAcceleration = 0.01f;
 	// 非入力時の摩擦係数
-	static inline const float kAttenuation = 0.05f;
+	static inline const float kAttenuation = 0.13f;
 	// 最高速度
-	static inline const float kLimitRunSpeed = 0.3f;
+	static inline const float kLimitRunSpeed = 0.25f;
 	// 顔の向き
 	LRDirection lrDirection_ = LRDirection::kRight;
 	// 旋回開始時の角度
@@ -43,7 +43,7 @@ private:
 	// 着地フラグ
 	bool onGround_ = true;
 	// ジャンプ定数
-	static inline const float kJumpAcceleration = 20.0f;    // 重力加速度(下方向)
-	static inline const float kGravityAcceleration = 0.98f; // 最大落下速度(下方向)
-	static inline const float kLimitFallSpeed = 0.5f;       // ジャンプ初速(上方向)
+	static inline const float kGravityAcceleration = 0.98f / 60.0f;// 重力加速度(下方向)
+	static inline const float kLimitFallSpeed = 0.5f;              // 最大落下速度(下方向)
+	static inline const float kJumpAcceleration = 20.0f / 60.0f;   // ジャンプ初速(上方向)
 };

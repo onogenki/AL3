@@ -17,7 +17,7 @@ void Player::Initialize(Model* playerModel, Camera* camera,const Vector3& positi
 	worldTransform_.translation_ = position;//引数で受け取った初期座標を代入
 
 	//Y軸周りに回転する(左右)
-	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 4.0f;
+	worldTransform_.rotation_.y = std::numbers::pi_v<float> / 1.5f;
 	//引数の内容をメンバ変数に記録
 	camera_ = camera;
 }
@@ -39,9 +39,10 @@ void Player::Update()
 					// 速度と逆方向に入力中は急ブレーキ
 					velocity_.x *= (1.0f - kAttenuation);
 				}
-
+				//右加速
 				acceleration.x += kAcceleration;
 
+				//右に向く
 				if (lrDirection_ != LRDirection::kRight) {
 					lrDirection_ = LRDirection::kRight;
 					// 旋回開始時の角度を記録する
@@ -55,9 +56,10 @@ void Player::Update()
 					// 速度と逆方向に入力中は急ブレーキ
 					velocity_.x *= (1.0f - kAttenuation);
 				}
-
+				//左加速
 				acceleration.x -= kAcceleration;
 
+				//左に向く
 				if (lrDirection_ != LRDirection::kLeft) {
 					lrDirection_ = LRDirection::kLeft;
 					// 旋回開始時の角度を記録する
@@ -79,13 +81,13 @@ void Player::Update()
 
 		if (Input::GetInstance()->PushKey(DIK_W)) {
 			// ジャンプ初速
-			velocity_ += Vector3(0, kJumpAcceleration / 60.0f, 0);
+			velocity_ += Vector3(0, kJumpAcceleration, 0);
 		}
 	}
 	// 空中
 	else {
 		// 落下速度
-		velocity_ += Vector3(0, -kGravityAcceleration / 60.0f, 0);
+		velocity_ += Vector3(0, -kGravityAcceleration, 0);
 		// 落下速度制限
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
 	}
@@ -107,15 +109,16 @@ void Player::Update()
 	if (onGround_) {
 		// ジャンプ開始
 		if (velocity_.y > 0.0f) {
+			//空中状態に移行
 			onGround_ = false;
 		}
 	} else {
 		// 着地
 		if (landing) {
-			worldTransform_.translation_.y = 1.0f; // めり込み排訴
+			worldTransform_.translation_.y = 1.0f; // めり込み排斥
 			velocity_.x *= (1.0f - kAttenuation);  // 摩擦で横方向速度が減衰する
-			velocity_.y = 0.0f;                    // 下方向をリセット
-			onGround_ = true;                      // 接地状態に以降
+			velocity_.y = 0.0f;                    // 下方向速度をリセット
+			onGround_ = true;                      // 接地状態に移行
 		}
 	}
 
@@ -124,14 +127,14 @@ void Player::Update()
 		// 旋回タイマーを1/60秒だけカウントダウンする
 		turnTimer_ = std::max(turnTimer_ - (1.0f / 60.0f), 0.0f);
 		// 左右の自キャラ角度テーブル
-		float destinationRotationYTable[] = {std::numbers::pi_v<float> / 2.0f, std::numbers::pi_v<float> * 3.0f / 2.0f};
+		float destinationRotationYTable[] = {std::numbers::pi_v<float> / 1.5f, std::numbers::pi_v<float> * 3.0f / 2.32f};
 		// 状態に応じた目標角度を取得する
 		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];
-		// 自キャラの角度を設定する
+		// 旋回タイマーを使って角度補間
 		worldTransform_.rotation_.y = EaseInOut(destinationRotationY, turnFirstRotationY_, turnTimer_ / kTimeTurn);
 	}
 
-	//これがないとワールド座標の関係上、playerが動かない
+	//これがないとワールド座標の関係上、playerが動かない  行列の更新
 	WorldTransformUpdate(worldTransform_);
 }
 

@@ -21,7 +21,7 @@ void GameScene::Initialize() {
 	player_ = new Player(); // 生成
 	//3Dモデルファイルを読み込む(OBJとフォルダ名を一致させること)
 	playerModel_ = Model::CreateFromOBJ("needle_Body");
-	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(5, 13);
+	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2, 18);
 	player_->Initialize(playerModel_, &camera_,playerPosition); // 初期化
 	// ワールドトランスフォーマーの初期化
 	worldTransform_.Initialize();
