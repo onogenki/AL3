@@ -37,7 +37,7 @@ void GameScene::Initialize() {
 	//天球
 	skydome_ = new Skydome();
 	//trueにすると反転描画になり、内側から見れる(天球用)
-	skyDomeModel_ = Model::CreateFromOBJ("sky_sphere", true);
+	skyDomeModel_ = Model::CreateFromOBJ("skydome", true);
 	skydome_->Initialize(skyDomeModel_, &camera_);
 
 	GeneratedBlocks();
@@ -191,8 +191,39 @@ void GameScene::Draw() {
 		}
 	}
 
-	// ラインを描画する                         始点座標   終点座標     色(RGBA)
-	//PrimitiveDrawer::GetInstance()->DrawLine3d({0, 0, 0}, {0, 10, 0}, {1.0f, 0.0f, 0.0f, 1.0f});
+	// ラインを描画する
+
+	PrimitiveDrawer* drawer = PrimitiveDrawer::GetInstance();
+
+	//1マスのサイズ(マップチップ1ブロック分)
+	float gridSize = 1.0f;
+
+	int numRows = mapChipField_->GetNumBlockVirtical();//縦方向
+	int numCols = mapChipField_->GetNumBlockHorizontal();//横方向
+
+	//横線
+	for (int row = 0; row <= numRows; ++row) {
+		float y = 0.0f + row * gridSize;
+		drawer->DrawLine3d(
+			{0.0f, y, 0.0f},
+			{0.0f + numCols * gridSize, y, 0.0f},
+			{0.6f, 0.6f, 0.6f, 1.0f}//グレー
+		);
+	}
+
+	//縦線
+	for (int col = 0; col <= numCols; ++col) 
+	{
+		float x = 0.0f + col * gridSize;
+		drawer->DrawLine3d(
+			{x, 0.0f, 0.0f},
+			{x, 0.0f + numRows * gridSize, 0.0f},
+			{0.6f, 0.6f, 0.6f, 1.0f}
+		);
+	}
+
+
+
 
 	// 3Dモデル描画後処理
 	Model::PostDraw();
