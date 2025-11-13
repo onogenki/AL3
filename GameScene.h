@@ -5,6 +5,7 @@
 #include"Skydome.h"
 #include"MapChipField.h"
 #include"Math.h"
+#include "CameraController.h"
 using namespace KamataEngine;
 
 // ゲームシーン

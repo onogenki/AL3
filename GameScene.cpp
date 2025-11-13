@@ -14,7 +14,7 @@ void GameScene::Initialize() {
 	// マップチップフィールド
 	mapChipField_ = new MapChipField;
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
-
+	GeneratedBlocks();
 
 	// 3Dモデルの生成
 	// player
@@ -40,8 +40,6 @@ void GameScene::Initialize() {
 	skyDomeModel_ = Model::CreateFromOBJ("skydome", true);
 	skydome_->Initialize(skyDomeModel_, &camera_);
 
-	GeneratedBlocks();
-
 	// ライン描画が参照するカメラを指定する(アドレス渡し)
 	PrimitiveDrawer::GetInstance()->SetCamera(&camera_);
 	// デバックカメラの生成
@@ -63,6 +61,9 @@ void GameScene::Initialize() {
 	} else {
 		AxisIndicator::GetInstance()->SetTargetCamera(&camera_);
 	}
+
+	//カメラコントローラ
+
 }
 
 
