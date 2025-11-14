@@ -4,6 +4,8 @@
 
 using namespace KamataEngine;
 
+class GameScene;
+
 class MapChipField;
 //includeの変わり、enemyのクラスのポインタ
 class Enemy;
@@ -18,11 +20,19 @@ public:
 
 	//0207角
 	enum Corner { 
-		kRightBottom,
-		kLeftBottom,
-		kRightTop,
-		kLeftTop,
-		kNumCorner
+		kRightBottom, // 右下
+		kLeftBottom,  // 左下
+		kRightTop,    // 右上
+		kLeftTop,     // 左上
+		kNumCorner    // 要素数
+	};
+
+	// マップとの当たり判定情報
+	struct CollisionMapInfo {
+		bool ceiling = false; // 天井衝突
+		bool landing = false; // 着地
+		bool hitWall = false; // 壁接触
+		Vector3 move;         // 移動量
 	};
 
 	//0214 振るまい
@@ -129,12 +139,6 @@ private:
 	//0207移動入力
 	void InputMove();
 
-	struct CollisionMapInfo {
-		bool ceiling = false;
-		bool landing = false;
-		bool hitWall = false;
-		Vector3 move;
-	};
 	//0207
 	void CheckMapCollision(CollisionMapInfo& info);
 	
