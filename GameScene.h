@@ -53,7 +53,6 @@ private:
 
 	//デバックカメラ有効
 	bool isDebugCameraActive_ = false;
-	
 	// デバックカメラの生成
 	DebugCamera* debugCamera_ = nullptr;
 
@@ -64,4 +63,7 @@ private:
 
 	// ImGuiで値を入力する変数
 	float inputFloat3[3] = {0, 0, 0};
+
+	//カメラ移動
+	CameraController* CController_ = nullptr;
 };

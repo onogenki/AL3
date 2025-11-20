@@ -18,6 +18,10 @@ public:
 
 	void Draw();
 
+	//geeter
+	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
+	const Vector3& GetVelocity() const { return velocity_; }//速度
+
 private:
 	WorldTransform worldTransform_;
 	//モデル

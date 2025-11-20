@@ -63,7 +63,13 @@ void GameScene::Initialize() {
 	}
 
 	//カメラコントローラ
+	CController_ = new CameraController();//生成
+	CController_->Initialize(&camera_);//初期化
+	CController_->SetTarget(player_);//追尾対象セット
+	CController_->Reset();//リセット
 
+	CameraController::Rect cameraArea = {12.0f, 100 - 12.0f, 6.0f, 6.0f};
+	CController_->SetMovableArea(cameraArea);
 }
 
 
@@ -104,8 +110,8 @@ void GameScene::Update() {
 	// sprite_->SetPosition(position);
 
 	skydome_->Update();
-
 	player_->Update();
+	CController_->Update();
 
 #ifdef _DEBUG // デバックビルドのみ見れる
 
@@ -138,7 +144,6 @@ void GameScene::Update() {
 	} else {
 		camera_.UpdateMatrix();
 	}
-	camera_.TransferMatrix();
 
 
 
@@ -160,6 +165,7 @@ void GameScene::Update() {
 		Audio::GetInstance()->StopWave(voiceHandle_);
 	}
 
+	debugCamera_->Update();
 }
 
 void GameScene::Draw() {
