@@ -92,8 +92,22 @@ void GameScene::GeneratedBlocks() {
 			if (mapChipField_->GetMapChipTypeByIndex(j, i) == MapChipType::kBlock) {
 				WorldTransform* worldTransform = new WorldTransform();
 				worldTransform->Initialize();
+				
+				//マップチップの左下座標
+				Vector3 pos = mapChipField_->GetMapChipPositionByIndex(j, i);
+
+				//block.obj は中心が原点なので 0.5f ずらす
+				pos.x += 0.5f;
+				pos.y += 0.5f;
+
+				worldTransform->translation_ = pos;
 				worldTransformBlocks_[i][j] = worldTransform;
-				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
+				
+				
+				
+				
+				//worldTransformBlocks_[i][j] = worldTransform;
+				//worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
 			}
 		}
 	}
