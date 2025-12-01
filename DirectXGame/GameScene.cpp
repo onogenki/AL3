@@ -96,6 +96,8 @@ void GameScene::GeneratedBlocks() {
 				//マップチップの左下座標
 				Vector3 pos = mapChipField_->GetMapChipPositionByIndex(j, i);
 
+
+
 				//block.obj は中心が原点なので 0.5f ずらす
 				pos.x += 0.5f;
 				pos.y += 0.5f;
@@ -105,7 +107,7 @@ void GameScene::GeneratedBlocks() {
 				
 				
 				
-				
+				//ずらしてないときの処理はこっち
 				//worldTransformBlocks_[i][j] = worldTransform;
 				//worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
 			}
