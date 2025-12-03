@@ -2,6 +2,8 @@
 
 #include "Player.h"
 #include "Math.h"
+#include "MapChipField.h"
+
 #include <algorithm>
 #include <cassert>
 #include <numbers>
@@ -22,8 +24,8 @@ void Player::Initialize(Model* playerModel, Camera* camera,const Vector3& positi
 	camera_ = camera;
 }
 
-void Player::Update() 
-{ 
+//移動入力
+void Player ::InputMove() {
 
 	// 移動入力
 	if (onGround_) {
@@ -39,10 +41,10 @@ void Player::Update()
 					// 速度と逆方向に入力中は急ブレーキ
 					velocity_.x *= (1.0f - kAttenuation);
 				}
-				//右加速
+				// 右加速
 				acceleration.x += kAcceleration;
 
-				//右に向く
+				// 右に向く
 				if (lrDirection_ != LRDirection::kRight) {
 					lrDirection_ = LRDirection::kRight;
 					// 旋回開始時の角度を記録する
@@ -56,10 +58,10 @@ void Player::Update()
 					// 速度と逆方向に入力中は急ブレーキ
 					velocity_.x *= (1.0f - kAttenuation);
 				}
-				//左加速
+				// 左加速
 				acceleration.x -= kAcceleration;
 
-				//左に向く
+				// 左に向く
 				if (lrDirection_ != LRDirection::kLeft) {
 					lrDirection_ = LRDirection::kLeft;
 					// 旋回開始時の角度を記録する
@@ -91,8 +93,86 @@ void Player::Update()
 		// 落下速度制限
 		velocity_.y = std::max(velocity_.y, -kLimitFallSpeed);
 	}
+}
 
-	worldTransform_.translation_ += velocity_;
+
+//上下左右判定
+void Player::CheckMapCollision(CollisionMapInfo& info) {
+	CheckMapCollisionUp(info);
+	CheckMapCollisionDown(info);
+	CheckMapCollisionRight(info);
+	CheckMapCollisionLeft(info);
+}
+
+
+//上方向判定
+void Player::CheckMapCollisionUp(CollisionMapInfo& info) {
+
+	// 上昇ありか
+	if (info.move.y <= 0) {
+		return;
+	}
+
+	// 移動後の4つの角の座標
+	std::array<Vector3, kNumCorner> positionsNew;
+	// 移動後の自キャラの4つの角をfor文でまとめて計算
+	for (uint32_t i = 0; i < positionsNew.size(); ++i) {
+		positionsNew[i] = CornerPosition(worldTransform_.translation_ + info.move, static_cast<Corner>(i));
+	}
+
+	MapChipType mapChipType;
+	MapChipType mapChipTypeNext;
+	// 真上の当たり判定を行う
+	bool hit = false;
+	// 左上点の判定
+	MapChipField::IndexSet indexSet;
+	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kLeftTop]);
+	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+	mapChipTypeNext = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex + 1);
+	if (mapChipType == MapChipType::kBlock && mapChipTypeNext != MapChipType::kBlock) {
+		hit = true;
+	}
+	indexSet = mapChipField_->GetMapChipIndexSetByPosition(positionsNew[kRightTop]);
+	mapChipType = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex);
+	mapChipTypeNext = mapChipField_->GetMapChipTypeByIndex(indexSet.xIndex, indexSet.yIndex + 1);
+	if (mapChipType == MapChipType::kBlock && mapChipTypeNext != MapChipType::kBlock) {
+		hit = true;
+	}
+
+	// ブロックにヒットか
+	if (hit) {
+		// めり込みを排除する方向に移動量を設定する
+		indexSet = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_ + info.move + Vector3(0, +kHeight / 2.0f, 0));
+		// 現在座標が壁の外か判定
+		MapChipField::IndexSet indexSetNow;
+		indexSetNow = mapChipField_->GetMapChipIndexSetByPosition(worldTransform_.translation_ + Vector3(0, +kHeight / 2.0f, 0));
+		if (indexSetNow.yIndex != indexSet.yIndex) {
+			// めり込みを排除する方向に移動量を設定する
+			MapChipField::Rect rect = mapChipField_->GetRectByIndex(indexSet.xIndex, indexSet.yIndex);
+			info.move.y = std::max(0.0f, rect.bottom - worldTransform_.translation_.y - (kHeight / 2.0f + kBlank));
+			//天井に当たったことを記録する
+			info.ceiling = true;
+		}
+	}
+}
+
+void Player::Update() {
+
+	//衝突情報を初期化
+	CollisionMapInfo collisionMapInfo;
+	//移動量に速度の値をコピー
+	collisionMapInfo.move = velocity_;
+
+	collisionMapInfo.landing = false;
+	collisionMapInfo.hitWall = false;
+
+	//マップ衝突チェック
+	CheckMapCollision(collisionMapInfo);
+
+	//移動
+	worldTransform_.translation_ += collisionMapInfo.move;
+
+	//worldTransform_.translation_ += velocity_;
 
 	// 着地フラグ
 	bool landing = false;
@@ -138,7 +218,19 @@ void Player::Update()
 	WorldTransformUpdate(worldTransform_);
 }
 
+
 void Player::Draw()
 {
 	model_->Draw(worldTransform_, *camera_);
+}
+
+//角の座標計算
+Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
+	Vector3 offsetTable[kNumCorner] = {
+	    {+kWidth / 2.0f, -kHeight / 2.0f, 0},//kRightBottom
+        {-kWidth / 2.0f, -kHeight / 2.0f, 0},//kLeftBottom
+        {+kWidth / 2.0f, +kHeight / 2.0f, 0},//kRightTop
+        {-kWidth / 2.0f, +kHeight / 2.0f, 0} //kLeftTop
+    };
+	return center + offsetTable[static_cast<uint32_t>(corner)];
 }

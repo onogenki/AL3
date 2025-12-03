@@ -16,17 +16,21 @@ struct MapChipData {
 
 class MapChipField {
 
-	private:
-
-	//1ブロックのサイズ(ブロック用のモデルのサイズに合わせる)
-	static inline const float kBlockWidth = 1.0f;
-	static inline const float kBlockHeight = 1.0f;
-
-	//ブロックの個数
-	static inline const uint32_t kNumBlockVirtical = 20;
-	static inline const uint32_t kNumBlockHorizontal = 100;
-
 	public:
+
+	//指定座標がマップチップの何番目の位置か
+	struct IndexSet {
+		uint32_t xIndex;
+		uint32_t yIndex;
+	};
+
+	//範囲矩形
+	struct Rect {
+		float left;   // 左
+		float right;  // 右
+		float bottom; // 下
+		float top;    // 上
+	};
 
 	MapChipData mapChipData_;
 
@@ -38,14 +42,23 @@ class MapChipField {
 
 	Vector3 GetMapChipPositionByIndex(uint32_t xIndex, uint32_t yIndex);
 
-	uint32_t GetNumBlockVirtical() const 
-	{ 
-		return kNumBlockVirtical; 
-	}
+	uint32_t GetNumBlockVirtical() const { return kNumBlockVirtical; }
 
-	uint32_t GetNumBlockHorizontal()const
-	{
-		return kNumBlockHorizontal;
-	}
+	uint32_t GetNumBlockHorizontal() const { return kNumBlockHorizontal; }
+
+	IndexSet GetMapChipIndexSetByPosition(const Vector3& position);
+
+	//ブロックの範囲取得関数
+	Rect GetRectByIndex(uint32_t xIndex, uint32_t yIndex);
+
+	private:
+
+	//1ブロックのサイズ(ブロック用のモデルのサイズに合わせる)
+	static inline const float kBlockWidth = 1.0f;
+	static inline const float kBlockHeight = 1.0f;
+
+	//ブロックの個数
+	static inline const uint32_t kNumBlockVirtical = 20;
+	static inline const uint32_t kNumBlockHorizontal = 100;
 
 };

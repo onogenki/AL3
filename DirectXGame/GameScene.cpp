@@ -28,6 +28,8 @@ void GameScene::Initialize() {
 	// カメラの初期化
 	camera_.Initialize();
 
+	player_->SetMapChipField(mapChipField_);
+
 	// ブロック
 	//単純な立方体モデルを自動生成(用意されてて軽量で作れる)
 	//blockModel_ = Model::Create();
