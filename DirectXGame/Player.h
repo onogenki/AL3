@@ -60,6 +60,9 @@ public:
 	//設置状態の切り替え処理
 	void UpdateOnGround(const CollisionMapInfo& info);
 
+	// 壁に接触している場合の処理
+	void UpdateOnWall(const CollisionMapInfo& info);
+
 	//geeter
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
 	const Vector3& GetVelocity() const { return velocity_; }//速度
@@ -107,4 +110,11 @@ private:
 	static inline const float kGravityAcceleration = 0.98f / 60.0f;// 重力加速度(下方向)
 	static inline const float kLimitFallSpeed = 0.5f;              // 最大落下速度(下方向)
 	static inline const float kJumpAcceleration = 20.0f / 60.0f;   // ジャンプ初速(上方向)
+
+	//微小な数値
+	static inline const float kGroundSearchHeight = 0.06f;
+
+	//着地時の速度減衰率
+	static inline const float kAttenuationWall = 0.2f;
+
 };
