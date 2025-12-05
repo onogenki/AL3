@@ -40,8 +40,6 @@ public:
 
 	void Draw();
 
-	Vector3 CornerPosition(const Vector3& center, Corner corner);
-
 	// 外部からポイントをセットするためのsetter
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
 
@@ -55,6 +53,12 @@ public:
 	void CheckMapCollisionDown(CollisionMapInfo& info);
 	void CheckMapCollisionRight(CollisionMapInfo& info);
 	void CheckMapCollisionLeft(CollisionMapInfo& info);
+
+	//角っこ
+	Vector3 CornerPosition(const Vector3& center, Corner corner);
+
+	//設置状態の切り替え処理
+	void UpdateOnGround(const CollisionMapInfo& info);
 
 	//geeter
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
@@ -85,6 +89,8 @@ private:
 	static inline const float kAcceleration = 0.01f;
 	// 非入力時の摩擦係数
 	static inline const float kAttenuation = 0.13f;
+	// 着地時の速度減衰率
+	static inline const float kAttenuationLanding = 0.0f;
 	// 最高速度
 	static inline const float kLimitRunSpeed = 0.25f;
 	// 顔の向き

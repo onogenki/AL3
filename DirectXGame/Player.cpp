@@ -390,3 +390,40 @@ Vector3 Player::CornerPosition(const Vector3& center, Corner corner) {
     };
 	return center + offsetTable[static_cast<uint32_t>(corner)];
 }
+
+void Player::UpdateOnGround(const CollisionMapInfo& info) {
+
+	// 自キャラが接地状態か
+	if (onGround_) { // 接地状態の処理
+
+		// ジャンプ開始
+		if (velocity_.y > 0.0f) {
+			onGround_ = false;
+		} else { // 空中状態の処理
+
+			MapChipType mapChipType;
+			//真下の当たり判定を行う
+			bool hit = false;
+			//左下点の判定
+			kLeftBottom + Vector3(0, -, 0);
+			//右下点の判定
+			kRightBottom + Vector3(0, -, 0);
+			//落下開始
+			if (!hit)
+			{
+				//空中状態に切り替える
+				onGround_ = false;
+			}
+			 
+			// 着地フラグ
+			if (info.landing) {
+				// 着地状態に切り替える(落下を止める)
+				onGround_ = true;
+				// 着地時にx速度減衰
+				velocity_.x *= (1.0f - kAttenuationLanding);
+				// y速度をゼロに
+				velocity_.y = 0.0f;
+			}
+		}
+	}
+}
