@@ -101,17 +101,17 @@ void GameScene::GeneratedBlocks() {
 
 
 				//block.obj は中心が原点なので 0.5f ずらす
-				pos.x += 0.5f;
-				pos.y += 0.5f;
-
-				worldTransform->translation_ = pos;
-				worldTransformBlocks_[i][j] = worldTransform;
+				//pos.x += 0.5f;
+				//pos.y += 0.5f;
+				//
+				//worldTransform->translation_ = pos;
+				//worldTransformBlocks_[i][j] = worldTransform;
 				
 				
 				
 				//ずらしてないときの処理はこっち
-				//worldTransformBlocks_[i][j] = worldTransform;
-				//worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
+				worldTransformBlocks_[i][j] = worldTransform;
+				worldTransformBlocks_[i][j]->translation_ = mapChipField_->GetMapChipPositionByIndex(j, i);
 			}
 		}
 	}
