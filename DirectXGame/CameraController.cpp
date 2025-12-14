@@ -15,6 +15,7 @@ void CameraController::Update()
 	const WorldTransform& targetWorldTransform = target_->GetWorldTransform();
 
 	const Vector3& targetVelocity = target_->GetVelocity();
+
 	//追従対象とオフセットと " 追従対象の速度 " からカメラの " 目標座標 " を計算
 	destination_ = targetWorldTransform.translation_ + targetOffset_ + targetVelocity * kVelocityBias;
 
@@ -30,12 +31,14 @@ void CameraController::Update()
 	//移動範囲制限
 	camera_->translation_.x = std::max(camera_->translation_.x, movableArea_.left);
 	camera_->translation_.x = std::min(camera_->translation_.x, movableArea_.right);
-	camera_->translation_.y = std::min(camera_->translation_.y, movableArea_.bottom);
-	camera_->translation_.y = std::max(camera_->translation_.y, movableArea_.top);
+	camera_->translation_.y = std::max(camera_->translation_.y, movableArea_.bottom);
+	camera_->translation_.y = std::min(camera_->translation_.y, movableArea_.top);
 
 	//行列を更新する
 	camera_->UpdateMatrix();
-
+	ImGui::Text("CameraX: %.2f", camera_->translation_.x);
+	ImGui::Text("TargetX: %.2f", target_->GetWorldTransform().translation_.x);
+	ImGui::Text("Current MovableArea Left: %.2f", movableArea_.left);
 }
 
 void CameraController::Reset() 

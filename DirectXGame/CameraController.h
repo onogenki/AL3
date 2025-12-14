@@ -10,7 +10,7 @@ class CameraController {
 
 	public:
 
-		//矩形 これから使うときは { 左　右　下　上 } となる
+		//矩形 これから使うときは { 左(最小値)　右(最大値)　下　上 } となる
 		struct Rect
 		{
 		    float left = 0.0f;  //左
@@ -37,8 +37,9 @@ class CameraController {
 		// 追従対象とカメラの座標の差(オフセット)
 	    Vector3 targetOffset_ = {0, 0, -15.0f};
 
-		// カメラ移動範囲
-	    Rect movableArea_ = {0, 100, 0, 100};
+		// カメラ移動範囲(あくまで移動制限のため　
+		// 見える範囲の設定はGameScene.cppで)
+	    Rect movableArea_ = {10.5f, 100 - 12.0f, 6.0f, 6.0f};
 
 		//カメラの目標座標
 	    Vector3 destination_;
@@ -46,7 +47,7 @@ class CameraController {
 		//座標補間割合
 	    static inline const float kInterpolationRate = 0.1f;
 		//速度掛け算
-	    static inline const float kVelocityBias = 30.0f;
+	    static inline const float kVelocityBias = 15.0f;
 		//追従対象の各方向へのカメラ移動範囲
 	    static inline const Rect targetMargin = {-9.0f, 9.0f, -5.0f, 5.0f};
 };

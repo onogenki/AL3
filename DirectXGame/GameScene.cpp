@@ -51,8 +51,8 @@ void GameScene::Initialize() {
 	soundDataHandle_ = Audio::GetInstance()->LoadWave("mokugyo.wav");
 	// 音声1回だけ再生(SE)
 	// voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_);
-	// 音声ループ再生(BGM)
-	voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_, true);
+	// 音声ループ再生(BGM)再生止めるもの
+	//voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_, true);
 
 	// 軸方向の表示を有効化にする
 	AxisIndicator::GetInstance()->SetVisible(true);
@@ -70,8 +70,6 @@ void GameScene::Initialize() {
 	CController_->SetTarget(player_);//追尾対象セット
 	CController_->Reset();//リセット
 
-	CameraController::Rect cameraArea = {12.0f, 100 - 12.0f, 6.0f, 6.0f};
-	CController_->SetMovableArea(cameraArea);
 }
 
 
@@ -179,8 +177,10 @@ void GameScene::Update() {
 
 	// 音声再生
 	if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+		//音声再生
+		voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_, false);
 		// 音声停止
-		Audio::GetInstance()->StopWave(voiceHandle_);
+		//Audio::GetInstance()->StopWave(voiceHandle_);
 	}
 
 	debugCamera_->Update();
@@ -228,7 +228,7 @@ void GameScene::Draw() {
 
 	//横線
 	for (int row = 0; row <= numRows; ++row) {
-		float y = 0.0f + row * gridSize;
+		float y = 0.5f + row * gridSize;
 		drawer->DrawLine3d(
 			{0.0f, y, 0.0f},
 			{0.0f + numCols * gridSize, y, 0.0f},
@@ -239,7 +239,7 @@ void GameScene::Draw() {
 	//縦線
 	for (int col = 0; col <= numCols; ++col) 
 	{
-		float x = 0.0f + col * gridSize;
+		float x = 0.5f + col * gridSize;
 		drawer->DrawLine3d(
 			{x, 0.0f, 0.0f},
 			{x, 0.0f + numRows * gridSize, 0.0f},
