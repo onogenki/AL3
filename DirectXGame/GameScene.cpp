@@ -184,6 +184,13 @@ void GameScene::Update() {
 	}
 
 	debugCamera_->Update();
+
+
+	if (Input::GetInstance()->PushKey(DIK_1)) {
+		finished_ = true;
+	}
+
+
 }
 
 void GameScene::Draw() {

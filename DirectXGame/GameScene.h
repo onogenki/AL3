@@ -25,6 +25,9 @@ public:
 	// ブロック生成
 	void GeneratedBlocks();
 
+	//デスフラグのgetter
+	bool IsFinished() const { return finished_; }
+
 private:
 	// テクスチャハンドル(リソース読み込むために必要なもの)
 	uint32_t textureHandle_ = 0;
@@ -66,4 +69,6 @@ private:
 
 	//カメラ移動
 	CameraController* CController_ = nullptr;
+
+	bool finished_ = false;
 };
