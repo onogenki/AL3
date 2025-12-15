@@ -343,21 +343,6 @@ void GameScene::Draw() {
 		}
 	}
 
-	// 3Dモデル描画後処理
-	Model::PostDraw();
-
-
-
-
-	//スプライト描画処理前処理
-	Sprite::PreDraw(dxCommon->GetCommandList());
-
-	// ここにスプライトインスタンスの(2Dキャラ)描画処理を記述する
-	//sprite_->Draw();
-	
-	fade_->Draw();
-
-
 	// ラインを描画する
 
 	PrimitiveDrawer* drawer = PrimitiveDrawer::GetInstance();
@@ -381,6 +366,20 @@ void GameScene::Draw() {
 		float x = 0.5f + col * gridSize;
 		drawer->DrawLine3d({x, 0.0f, 0.0f}, {x, 0.0f + numRows * gridSize, 0.0f}, {0.6f, 0.6f, 0.6f, 1.0f});
 	}
+
+	// 3Dモデル描画後処理
+	Model::PostDraw();
+
+
+
+
+	//スプライト描画処理前処理
+	Sprite::PreDraw(dxCommon->GetCommandList());
+
+	// ここにスプライトインスタンスの(2Dキャラ)描画処理を記述する
+	//sprite_->Draw();
+	
+	fade_->Draw();
 
 
 	// スプライト描画後処理
