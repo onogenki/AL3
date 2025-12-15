@@ -7,7 +7,6 @@ using namespace KamataEngine;
 
 //Sceneはここに
 TitleScene* titleScene = nullptr;
-
 GameScene* gameScene = nullptr;
 
 
@@ -61,10 +60,8 @@ void ChangeScene()
 }
 
 //更新関数
-void UpdateScene()
-{
-	switch (scene)
-	{ 
+void UpdateScene() {
+	switch (scene) {
 	case Scene::kTitle:
 		titleScene->Update();
 		break;
@@ -72,9 +69,6 @@ void UpdateScene()
 		gameScene->Update();
 		break;
 	}
-
-
-
 }
 
 // 描画関数
@@ -108,8 +102,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	titleScene = new TitleScene();
 	titleScene->Initialize();
-	gameScene = new GameScene();
-	gameScene->Initialize();
 
 	// メインループ
 	while (true) {
@@ -139,11 +131,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		//軸表示の描画
 		AxisIndicator::GetInstance()->Draw();
 
+		// プリミティブ描画のリセット
+		PrimitiveDrawer::GetInstance()->Reset();
+
 		//imGui描画
 		imguiManager->Draw();
-
-		//軸表示の描画
-		AxisIndicator::GetInstance()->Draw();
 
 		// 描画終了
 		dxCommon->PostDraw();
@@ -152,8 +144,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// シーンの解放
 	delete titleScene;
 	delete gameScene;
-	// nullptrの代入
-	gameScene = nullptr;
 
 	// エンジンの終了処理
 	KamataEngine::Finalize();

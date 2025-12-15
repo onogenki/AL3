@@ -6,11 +6,23 @@
 #include"MapChipField.h"
 #include"Math.h"
 #include "CameraController.h"
+#include "Fade.h"
 using namespace KamataEngine;
 
 // ゲームシーン
 class GameScene {
 public:
+
+	//シーンのフェーズ
+	enum class Phase
+	{
+		kFadeIn, //フェードイン
+		kPlay,   //ゲームプレイ
+		kDeath,  //デス演出
+		kFadeOut,//フェードアウト
+	};
+
+
 	// 初期化
 	void Initialize();
 
@@ -24,6 +36,8 @@ public:
 
 	// ブロック生成
 	void GeneratedBlocks();
+
+	void ChangePhase();
 
 	//デスフラグのgetter
 	bool IsFinished() const { return finished_; }
@@ -66,6 +80,13 @@ private:
 
 	// ImGuiで値を入力する変数
 	float inputFloat3[3] = {0, 0, 0};
+
+
+	// 現在のフェーズ
+	Phase phase_ = Phase::kPlay;
+
+	// 暗転フェード
+	Fade* fade_ = nullptr;
 
 	//カメラ移動
 	CameraController* CController_ = nullptr;

@@ -70,6 +70,13 @@ void GameScene::Initialize() {
 	CController_->SetTarget(player_);//追尾対象セット
 	CController_->Reset();//リセット
 
+
+	// フェードを持ってくる
+	fade_ = new Fade();
+	fade_->Initialize();
+	// フェード時間はここで決める
+	fade_->Start(Fade::Status::FadeIn, 1.0f);
+
 }
 
 
@@ -94,7 +101,7 @@ void GameScene::GeneratedBlocks() {
 				worldTransform->Initialize();
 				
 				//マップチップの左下座標
-				Vector3 pos = mapChipField_->GetMapChipPositionByIndex(j, i);
+				//Vector3 pos = mapChipField_->GetMapChipPositionByIndex(j, i);
 
 
 
@@ -115,6 +122,40 @@ void GameScene::GeneratedBlocks() {
 	}
 }
 
+void GameScene::ChangePhase() 
+{ 
+	switch (phase_)
+	{ 
+	
+	
+	//フェードイン
+	case Phase::kFadeIn:
+		if (fade_->IsFinished())
+		{
+			phase_ = Phase::kPlay;
+		}
+		break;
+
+
+
+		case Phase::kPlay:
+		if (Input::GetInstance()->PushKey(DIK_1)) {
+			fade_->Start(Fade::Status::FadeOut, 2.0f);
+			phase_ = Phase::kDeath;
+		}
+		break;
+
+
+		case Phase::kDeath:
+		    fade_->Update();
+		    if (fade_->IsFinished()) {
+			    finished_ = true; //シーン終了
+		    }
+		    break;
+	}
+
+}
+
 
 
 void GameScene::Update() {
@@ -125,93 +166,172 @@ void GameScene::Update() {
 	// 移動した座標をスプライトに反映
 	// sprite_->SetPosition(position);
 
-	skydome_->Update();
-	player_->Update();
-	CController_->Update();
+	fade_->Update();
+	ChangePhase();
 
-#ifdef _DEBUG // デバックビルドのみ見れる
+	switch (phase_) {
 
-	// ImGuiのウィンドウ作成
-	ImGui::Begin("Debug1");
-	// デバックテキストの表示
-	ImGui::Text("Player");
-	// float3入力ボックス
-	ImGui::InputFloat3("InputFloat3", inputFloat3);
-	// float3スライダー
-	ImGui::SliderFloat3("SliderFloat3", inputFloat3, 0.0f, 1.0f);
-	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(15, 13);
-	ImGui::End();
-	// デモウィンドウの表示を有効化
-	ImGui::ShowDemoWindow();
 
-	if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-		isDebugCameraActive_ = !isDebugCameraActive_;
-	}
+
+
+
+		// フェードイン
+	case Phase::kFadeIn:
+		fade_->Update();
+		if (fade_->IsFinished()) {
+			fade_->Start(Fade::Status::FadeOut, 1.0f);
+			phase_ = Phase::kPlay;
+		}
+
+		skydome_->Update();
+		player_->Update();
+		CController_->Update();
+
+
+
+
+
+		// デバックカメラの更新
+		if (isDebugCameraActive_) {
+			debugCamera_->Update();
+			camera_.matView = debugCamera_->GetCamera().matView;
+			camera_.matProjection = debugCamera_->GetCamera().matProjection;
+			// ビュープロジェクション行列の転送
+			camera_.TransferMatrix();
+		} else {
+			camera_.UpdateMatrix();
+		}
+
+		// ブロックの更新
+		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+			for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
+				if (!worldTransformBlock)
+					continue;
+				// アフィン変換～DirectXに転送
+				WorldTransformUpdate(*worldTransformBlock);
+			}
+		}
+
+		break;
+
+
+
+
+
+
+	// プレイ
+	case Phase::kPlay:
+		skydome_->Update();
+		player_->Update();
+		CController_->Update();
+
+
+
+		#ifdef _DEBUG // デバックビルドのみ見れる
+
+		// ImGuiのウィンドウ作成
+		ImGui::Begin("Debug1");
+		// デバックテキストの表示
+		ImGui::Text("Player");
+		// float3入力ボックス
+		ImGui::InputFloat3("InputFloat3", inputFloat3);
+		// float3スライダー
+		ImGui::SliderFloat3("SliderFloat3", inputFloat3, 0.0f, 1.0f);
+		Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(15, 13);
+		ImGui::End();
+		// デモウィンドウの表示を有効化
+		ImGui::ShowDemoWindow();
+
+		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+			isDebugCameraActive_ = !isDebugCameraActive_;
+		}
 
 #endif // デバックビルドのみ見れる
 
-	// デバックカメラの更新
-	if (isDebugCameraActive_) {
-		debugCamera_->Update();
-		camera_.matView = debugCamera_->GetCamera().matView;
-		camera_.matProjection = debugCamera_->GetCamera().matProjection;
-		// ビュープロジェクション行列の転送
-		camera_.TransferMatrix();
-	} else {
-		camera_.UpdateMatrix();
-	}
 
-
-
-	// ブロックの更新
-	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
-		for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
-			if (!worldTransformBlock)
-				continue;
-			// アフィン変換～DirectXに転送
-			WorldTransformUpdate(*worldTransformBlock);
-
+		// デバックカメラの更新
+		if (isDebugCameraActive_) {
+			debugCamera_->Update();
+			camera_.matView = debugCamera_->GetCamera().matView;
+			camera_.matProjection = debugCamera_->GetCamera().matProjection;
+			// ビュープロジェクション行列の転送
+			camera_.TransferMatrix();
+		} else {
+			camera_.UpdateMatrix();
 		}
+
+		// ブロックの更新
+		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+			for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
+				if (!worldTransformBlock)
+					continue;
+				// アフィン変換～DirectXに転送
+				WorldTransformUpdate(*worldTransformBlock);
+			}
+		}
+
+		// 敵player当たり判定
+
+
+
+		// 音声再生
+		if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+			// 音声再生
+			voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_, false);
+			// 音声停止
+			// Audio::GetInstance()->StopWave(voiceHandle_);
+		}
+
+
+		break;
+
+
+
+
+
+
+	// 死んだとき
+	case Phase::kDeath:
+		skydome_->Update();
+
+		// ブロックの更新
+		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+			for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
+				if (!worldTransformBlock)
+					continue;
+				// アフィン変換～DirectXに転送
+				WorldTransformUpdate(*worldTransformBlock);
+			}
+		}
+
+		break;
+
+
+
+
+
+
+	// フェードアウト
+	case Phase::kFadeOut:
+		fade_->Update();
+		if (fade_->IsFinished()) {
+			finished_ = true;
+		}
+
+		skydome_->Update();
+
+		break;
 	}
-
-
-	// 音声再生
-	if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
-		//音声再生
-		voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_, false);
-		// 音声停止
-		//Audio::GetInstance()->StopWave(voiceHandle_);
-	}
-
-	debugCamera_->Update();
-
-
-	if (Input::GetInstance()->PushKey(DIK_1)) {
-		finished_ = true;
-	}
-
-
 }
 
 void GameScene::Draw() {
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
-
-	//スプライト描画処理前処理
-	Sprite::PreDraw(dxCommon->GetCommandList());
-
-	// ここにスプライトインスタンスの(2Dキャラ)描画処理を記述する
-	//sprite_->Draw();
-	
-	// スプライト描画後処理
-	Sprite::PostDraw();
-
 
 
 	// 3Dモデル描画前処理
 	Model::PreDraw(dxCommon->GetCommandList());
 
 	skydome_->Draw();
-	//model_->Draw(worldTransform_, camera_, textureHandle_);
 	player_->Draw();
 
 	// ブロックの描画
@@ -219,48 +339,52 @@ void GameScene::Draw() {
 		for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
 			if (!worldTransformBlock)
 				continue;
-				blockModel_->Draw(*worldTransformBlock, camera_);
+			blockModel_->Draw(*worldTransformBlock, camera_);
 		}
 	}
-
-	// ラインを描画する
-
-	PrimitiveDrawer* drawer = PrimitiveDrawer::GetInstance();
-
-	//1マスのサイズ(マップチップ1ブロック分)
-	float gridSize = 1.0f;
-
-	int numRows = mapChipField_->GetNumBlockVirtical();//縦方向
-	int numCols = mapChipField_->GetNumBlockHorizontal();//横方向
-
-	//横線
-	for (int row = 0; row <= numRows; ++row) {
-		float y = 0.5f + row * gridSize;
-		drawer->DrawLine3d(
-			{0.0f, y, 0.0f},
-			{0.0f + numCols * gridSize, y, 0.0f},
-			{0.6f, 0.6f, 0.6f, 1.0f}//グレー
-		);
-	}
-
-	//縦線
-	for (int col = 0; col <= numCols; ++col) 
-	{
-		float x = 0.5f + col * gridSize;
-		drawer->DrawLine3d(
-			{x, 0.0f, 0.0f},
-			{x, 0.0f + numRows * gridSize, 0.0f},
-			{0.6f, 0.6f, 0.6f, 1.0f}
-		);
-	}
-
-
-
 
 	// 3Dモデル描画後処理
 	Model::PostDraw();
 
 
+
+
+	//スプライト描画処理前処理
+	Sprite::PreDraw(dxCommon->GetCommandList());
+
+	// ここにスプライトインスタンスの(2Dキャラ)描画処理を記述する
+	//sprite_->Draw();
+	
+	fade_->Draw();
+
+
+	// ラインを描画する
+
+	PrimitiveDrawer* drawer = PrimitiveDrawer::GetInstance();
+
+	// 1マスのサイズ(マップチップ1ブロック分)
+	float gridSize = 1.0f;
+
+	int numRows = mapChipField_->GetNumBlockVirtical();   // 縦方向
+	int numCols = mapChipField_->GetNumBlockHorizontal(); // 横方向
+
+	// 横線
+	for (int row = 0; row <= numRows; ++row) {
+		float y = 0.5f + row * gridSize;
+		drawer->DrawLine3d(
+		    {0.0f, y, 0.0f}, {0.0f + numCols * gridSize, y, 0.0f}, {0.6f, 0.6f, 0.6f, 1.0f} // グレー
+		);
+	}
+
+	// 縦線
+	for (int col = 0; col <= numCols; ++col) {
+		float x = 0.5f + col * gridSize;
+		drawer->DrawLine3d({x, 0.0f, 0.0f}, {x, 0.0f + numRows * gridSize, 0.0f}, {0.6f, 0.6f, 0.6f, 1.0f});
+	}
+
+
+	// スプライト描画後処理
+	Sprite::PostDraw();
 
 }
 
