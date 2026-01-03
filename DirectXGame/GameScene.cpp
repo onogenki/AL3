@@ -22,12 +22,12 @@ void GameScene::Initialize() {
 	playerModel_ = Model::CreateFromOBJ("needle_Body");
 	Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(2, 18);
 	player_->Initialize(playerModel_, &camera_, playerPosition); // 初期化
+	player_->SetMapChipField(mapChipField_);
 	// ワールドトランスフォーマーの初期化
 	worldTransform_.Initialize();
 	// カメラの初期化
 	camera_.Initialize();
 
-	player_->SetMapChipField(mapChipField_);
 
 	// ブロック
 	// 単純な立方体モデルを自動生成(用意されてて軽量で作れる)
@@ -129,38 +129,6 @@ void GameScene::GeneratedBlocks() {
 	}
 }
 
-void GameScene::ChangePhase() {
-	switch (phase_) {
-
-	// フェードイン
-	case Phase::kFadeIn:
-		if (fade_->IsFinished()) {
-			phase_ = Phase::kPlay;
-		}
-		break;
-
-	case Phase::kPlay:
-		if (Input::GetInstance()->PushKey(DIK_1)) {
-			exitRequest_ = ExitRequest::Death;
-			phase_ = Phase::kDeath;
-		}
-		break;
-
-	case Phase::kDeath:
-		// デス演出
-
-		fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);
-		phase_ = Phase::kFadeOut;
-		break;
-	case Phase::kFadeOut:
-		// fade_->Update();
-		if (fade_->IsFinished()) {
-			finished_ = true;
-		}
-		break;
-	}
-}
-
 void GameScene::Update() {
 	// スプライトの今の座標を取得
 	// Vector2 position = sprite_->GetPosition();
@@ -169,19 +137,18 @@ void GameScene::Update() {
 	// 移動した座標をスプライトに反映
 	// sprite_->SetPosition(position);
 
-	fade_->Update();
-	ChangePhase();
 
 	switch (phase_) {
 
 		// フェードイン
 	case Phase::kFadeIn:
+		player_->UpdateTransformOnly();
+		skydome_->Update();
+
+		fade_->Update();
 		if (fade_->IsFinished()) {
 			phase_ = Phase::kPlay;
 		}
-
-		skydome_->Update();
-		player_->Update();
 		CController_->Update();
 
 		// デバックカメラの更新
@@ -209,6 +176,15 @@ void GameScene::Update() {
 
 	// プレイ
 	case Phase::kPlay:
+
+		//死亡デバック
+		if (Input::GetInstance()->TriggerKey(DIK_1)) {
+			exitRequest_ = ExitRequest::Death;
+			fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);
+			phase_ = Phase::kFadeOut;
+			break;
+		}
+
 		if (!isPause_) {
 			skydome_->Update();
 			player_->Update();
@@ -335,6 +311,7 @@ void GameScene::Update() {
 
 	// フェードアウト
 	case Phase::kFadeOut:
+		fade_->Update();
 		if (fade_->IsFinished()) {
 			finished_ = true;
 		}
@@ -344,91 +321,183 @@ void GameScene::Update() {
 void GameScene::Draw() {
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 
-	// 3Dモデル描画前処理
-	Model::PreDraw(dxCommon->GetCommandList());
+	switch (phase_) {
+		// フェードイン描画
+	case GameScene::Phase::kFadeIn:
 
-	skydome_->Draw();
-	player_->Draw();
+		// 3Dモデル描画前処理
+		Model::PreDraw(dxCommon->GetCommandList());
 
-	// ブロックの描画
-	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
-		for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
-			if (!worldTransformBlock)
-				continue;
-			blockModel_->Draw(*worldTransformBlock, camera_);
+		player_->Draw();
+		skydome_->Draw();
+
+		// ブロックの描画
+		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+			for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
+				if (!worldTransformBlock)
+					continue;
+				blockModel_->Draw(*worldTransformBlock, camera_);
+			}
 		}
-	}
+		// 3Dモデル描画後処理
+		Model::PostDraw();
 
-	// ラインを描画する
+		// スプライト描画処理前処理
+		Sprite::PreDraw(dxCommon->GetCommandList());
 
-	PrimitiveDrawer* drawer = PrimitiveDrawer::GetInstance();
+		fade_->Draw();
 
-	// 1マスのサイズ(マップチップ1ブロック分)
-	float gridSize = 1.0f;
+		Sprite::PostDraw();
 
-	int numRows = mapChipField_->GetNumBlockVirtical();   // 縦方向
-	int numCols = mapChipField_->GetNumBlockHorizontal(); // 横方向
+		break;
 
-	// 横線
-	for (int row = 0; row <= numRows; ++row) {
-		float y = 0.5f + row * gridSize;
-		drawer->DrawLine3d(
-		    {0.0f, y, 0.0f}, {0.0f + numCols * gridSize, y, 0.0f}, {0.6f, 0.6f, 0.6f, 1.0f} // グレー
-		);
-	}
+	// プレイ画面
+	case GameScene::Phase::kPlay:
 
-	// 縦線
-	for (int col = 0; col <= numCols; ++col) {
-		float x = 0.5f + col * gridSize;
-		drawer->DrawLine3d({x, 0.0f, 0.0f}, {x, 0.0f + numRows * gridSize, 0.0f}, {0.6f, 0.6f, 0.6f, 1.0f});
-	}
+		// 3Dモデル描画前処理
+		Model::PreDraw(dxCommon->GetCommandList());
 
-	// 3Dモデル描画後処理
-	Model::PostDraw();
+		skydome_->Draw();
+		player_->Draw();
 
-	// スプライト描画処理前処理
-	Sprite::PreDraw(dxCommon->GetCommandList());
-
-	// ここにスプライトインスタンスの(2Dキャラ)描画処理を記述する
-	// sprite_->Draw();
-
-	fade_->Draw();
-	// ポーズ画面
-	if (isPause_) {
-		if (currentPauseState_ == PauseState::Resume) {
-			SpritePauseFont_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
-			SpritePauseFont_->Draw();
-			SpritePauseResum_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
-			SpritePauseResum_->Draw();
-			SpritePauseRetry_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
-			SpritePauseRetry_->Draw();
-			SpritePauseTitle_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
-			SpritePauseTitle_->Draw();
-		} else if (currentPauseState_ == PauseState::Retry)
-		{
-			SpritePauseFont_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
-			SpritePauseFont_->Draw();
-			SpritePauseResum_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
-			SpritePauseResum_->Draw();
-			SpritePauseRetry_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
-			SpritePauseRetry_->Draw();
-			SpritePauseTitle_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
-			SpritePauseTitle_->Draw();
-		} else if (currentPauseState_ == PauseState::Title)
-		{
-			SpritePauseFont_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
-			SpritePauseFont_->Draw();
-			SpritePauseResum_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
-			SpritePauseResum_->Draw();
-			SpritePauseRetry_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
-			SpritePauseRetry_->Draw();
-			SpritePauseTitle_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
-			SpritePauseTitle_->Draw();
+		// ブロックの描画
+		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+			for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
+				if (!worldTransformBlock)
+					continue;
+				blockModel_->Draw(*worldTransformBlock, camera_);
+			}
 		}
-	}
 
-	// スプライト描画後処理
-	Sprite::PostDraw();
+		// ラインを描画する
+
+		drawer_ = PrimitiveDrawer::GetInstance();
+
+		// 1マスのサイズ(マップチップ1ブロック分)
+		gridSize_ = 1.0f;
+
+		numRows_ = mapChipField_->GetNumBlockVirtical();   // 縦方向
+		numCols_ = mapChipField_->GetNumBlockHorizontal(); // 横方向
+
+		// 横線
+		for (int row = 0; row <= numRows_; ++row) {
+			float y = 0.5f + row * gridSize_;
+			drawer_->DrawLine3d(
+			    {0.0f, y, 0.0f}, {0.0f + numCols_ * gridSize_, y, 0.0f}, {0.6f, 0.6f, 0.6f, 1.0f} // グレー
+			);
+		}
+
+		// 縦線
+		for (int col = 0; col <= numCols_; ++col) {
+			float x = 0.5f + col * gridSize_;
+			drawer_->DrawLine3d({x, 0.0f, 0.0f}, {x, 0.0f + numRows_ * gridSize_, 0.0f}, {0.6f, 0.6f, 0.6f, 1.0f});
+		}
+
+		// 3Dモデル描画後処理
+		Model::PostDraw();
+
+		// スプライト描画処理前処理
+		Sprite::PreDraw(dxCommon->GetCommandList());
+
+		// ここにスプライトインスタンスの(2Dキャラ)描画処理を記述する
+		// sprite_->Draw();
+
+		fade_->Draw();
+		// ポーズ画面
+		if (isPause_) {
+			if (currentPauseState_ == PauseState::Resume) {
+				SpritePauseFont_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+				SpritePauseFont_->Draw();
+				SpritePauseResum_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+				SpritePauseResum_->Draw();
+				SpritePauseRetry_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
+				SpritePauseRetry_->Draw();
+				SpritePauseTitle_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
+				SpritePauseTitle_->Draw();
+			} else if (currentPauseState_ == PauseState::Retry) {
+				SpritePauseFont_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+				SpritePauseFont_->Draw();
+				SpritePauseResum_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
+				SpritePauseResum_->Draw();
+				SpritePauseRetry_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+				SpritePauseRetry_->Draw();
+				SpritePauseTitle_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
+				SpritePauseTitle_->Draw();
+			} else if (currentPauseState_ == PauseState::Title) {
+				SpritePauseFont_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+				SpritePauseFont_->Draw();
+				SpritePauseResum_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
+				SpritePauseResum_->Draw();
+				SpritePauseRetry_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
+				SpritePauseRetry_->Draw();
+				SpritePauseTitle_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+				SpritePauseTitle_->Draw();
+			}
+		}
+
+		// スプライト描画後処理
+		Sprite::PostDraw();
+
+		break;
+
+	case GameScene::Phase::kDeath:
+
+		// 3Dモデル描画前処理
+		Model::PreDraw(dxCommon->GetCommandList());
+
+		skydome_->Draw();
+
+		// ブロックの描画
+		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+			for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
+				if (!worldTransformBlock)
+					continue;
+				blockModel_->Draw(*worldTransformBlock, camera_);
+			}
+		}
+
+		// 3Dモデル描画後処理
+		Model::PostDraw();
+
+		// スプライト描画処理前処理
+		Sprite::PreDraw(dxCommon->GetCommandList());
+
+		fade_->Draw();
+
+		Sprite::PostDraw();
+
+		break;
+
+		//フェードアウト
+	case GameScene::Phase::kFadeOut:
+
+		// 3Dモデル描画前処理
+		Model::PreDraw(dxCommon->GetCommandList());
+
+		skydome_->Draw();
+		//player_->Draw();
+
+		// ブロックの描画
+		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+			for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
+				if (!worldTransformBlock)
+					continue;
+				blockModel_->Draw(*worldTransformBlock, camera_);
+			}
+		}
+
+		// 3Dモデル描画後処理
+		Model::PostDraw();
+
+		// スプライト描画処理前処理
+		Sprite::PreDraw(dxCommon->GetCommandList());
+
+		fade_->Draw();
+
+		Sprite::PostDraw();
+
+		break;
+	}
 }
 
 // デストラクタ

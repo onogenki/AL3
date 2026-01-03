@@ -58,10 +58,9 @@ void ChangeScene() {
 				//死んだとき
 				case GameScene::ExitRequest::Death:
 				delete gameScene;
-				gameScene = nullptr;
-				titleScene = new TitleScene();
-				titleScene->Initialize();
-				scene = Scene::kTitle; //タイトルに戻る
+				gameScene = new GameScene();
+				gameScene->Initialize();
+				scene = Scene::kGame; //再スタート
 				break;
 			}
 		}

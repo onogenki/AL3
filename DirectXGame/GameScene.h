@@ -51,9 +51,6 @@ public:
 	// ブロック生成
 	void GeneratedBlocks();
 
-	//フェーズの切り替え関数
-	void ChangePhase();
-
 	// デスフラグのgetter
 	bool IsFinished() const { return finished_; }
 
@@ -78,6 +75,11 @@ private:
 	Model* blockModel_ = nullptr;
 	// std::Vectorで可変個配列 それを2個使うことで2次元配列に
 	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
+
+	float gridSize_;
+	int numRows_;
+	int numCols_;
+	PrimitiveDrawer* drawer_;
 
 	ExitRequest exitRequest_ = ExitRequest::None;
 

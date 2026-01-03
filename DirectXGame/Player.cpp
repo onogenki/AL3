@@ -442,3 +442,5 @@ void Player::UpdateOnWall(const CollisionMapInfo& info) {
 		velocity_.x *= (1.0f - kAttenuationWall);
 	}
 }
+
+void Player::UpdateTransformOnly() { WorldTransformUpdate(worldTransform_); }
