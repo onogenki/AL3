@@ -3,10 +3,21 @@
 
 void Fade::Initialize() {
 	// 暗転フェード
-	BlackTextureHandle_ = TextureManager::Load("white1x1.png");
-	BlackSprite_ = Sprite::Create(BlackTextureHandle_, {0.0f, 0.0f});
-	BlackSprite_->SetSize(Vector2(WinApp::kWindowWidth, WinApp::kWindowHeight));
-	BlackSprite_->SetColor(Vector4(0, 0, 0, 1));
+	TextureHandle_ = TextureManager::Load("white1x1.png");
+	Sprite_ = Sprite::Create(TextureHandle_, {0.0f, 0.0f});
+	Sprite_->SetSize(Vector2(WinApp::kWindowWidth, WinApp::kWindowHeight));
+	//Sprite_->SetColor(Vector4(0, 0, 0, 1));
+
+	//暗転時の色
+	switch (colorType_) {
+	case FadeType::Black:
+		fadeColor_ = {0, 0, 0, 1};
+		break;
+	case FadeType::White:
+		fadeColor_ = {1, 1, 1, 1};
+		break;
+	}
+	Sprite_->SetColor(fadeColor_);
 }
 
 void Fade::Update() {
@@ -22,28 +33,32 @@ void Fade::Update() {
 
 	// フェードイン
 	case Status::FadeIn:
-
 		// 1フレーム分の秒数をカウントアップ
 		counter_ += 1.0f / 60.0f;
 		if (counter_ >= duration_) {
 			counter_ = duration_;
 		}
 		// 0.0fから1.0fの間で、経過時間がフェード持続時間に近づくほどアルファ値を大きくする
-		BlackSprite_->SetColor(Vector4(0, 0, 0, std::clamp(1.0f - counter_ / duration_, 0.0f, 1.0f)));
+		alphaIn_ = std::clamp(1.0f - counter_ / duration_, 0.0f, 1.0f);
+		// 最後の値でフェードをするため
+		Sprite_->SetColor(Vector4(fadeColor_.x, fadeColor_.y, fadeColor_.z, alphaIn_));
 
 		break;
 
+
 	// フェードアウト
 	case Status::FadeOut:
-
 		// 1フレーム分の秒数をカウントアップ
 		counter_ += 1.0f / 60.0f;
 		// フェード持続時間に達したら打ち止め
 		if (counter_ >= duration_) {
 			counter_ = duration_;
 		}
+
 		// 0.0fから1.0fの間で、経過時間がフェード持続時間に近づくほどアルファ値を大きくする
-		BlackSprite_->SetColor(Vector4(0, 0, 0, std::clamp(counter_ / duration_, 0.0f, 1.0f)));
+		alphaOut_ = std::clamp(counter_ / duration_, 0.0f, 1.0f);
+
+		Sprite_->SetColor(Vector4(fadeColor_.x, fadeColor_.y, fadeColor_.z, alphaOut_));
 
 		break;
 	}
@@ -55,36 +70,34 @@ void Fade::Draw() {
 		return;
 	}
 
-	Sprite::PreDraw(DirectXCommon::GetInstance()->GetCommandList());
+	//ポーズ画面のときにこれ書くとエラーが出る
+	//Sprite::PreDraw(DirectXCommon::GetInstance()->GetCommandList());
+	//Sprite::PostDraw();
 
-	BlackSprite_->Draw();
 
-	Sprite::PostDraw();
+	Sprite_->Draw();
+
 }
 
 // フェード開始関数
-void Fade::Start(Status status, float duration) {
+void Fade::Start(Status status, float duration,FadeType type) {
 	status_ = status;
 	duration_ = duration; // 値はフェードするクラスで決める
 	counter_ = 0.0f;
+
+	switch (type) {
+	case FadeType::Black:
+		fadeColor_ = {0, 0, 0, 1};
+		break;
+	case FadeType::White:
+		fadeColor_ = {1, 1, 1, 1};
+		break;
+	}
+
 }
 // フェード終了関数
 void Fade::Stop() { status_ = Status::None; }
 
-bool Fade::IsFinished() const {
-	// フェード状態による分岐
-	switch (status_) {
-
-	// フェードイン
-	case Status::FadeIn:
-
-	// フェードアウト
-	case Status::FadeOut:
-		if (counter_ >= duration_) {
-			return true;
-		} else {
-			return false;
-		}
-	}
-	return true;
+bool Fade::IsFinished() const { 
+	return counter_ >= duration_; 
 }

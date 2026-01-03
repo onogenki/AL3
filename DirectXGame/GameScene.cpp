@@ -40,6 +40,20 @@ void GameScene::Initialize() {
 	// trueにすると反転描画になり、内側から見れる(天球用)
 	skyDomeModel_ = Model::CreateFromOBJ("skydome", true);
 	skydome_->Initialize(skyDomeModel_, &camera_);
+	
+	// ポーズ画面タイトル
+	PauseFont_ = TextureManager::Load("2DPause3D.png");
+	SpritePauseFont_ = Sprite::Create(PauseTitle_, {10.0f, 2.0f});
+
+	//ポーズ画面続ける
+	PauseResum_ = TextureManager::Load("2DResumPause3D.png");
+	SpritePauseResum_ = Sprite::Create(PauseResum_, {10.0f, 20.0f});
+	//ポーズ画面リトライ
+	PauseRetry_ = TextureManager::Load("2DRetryPause3D.png");
+	SpritePauseRetry_ = Sprite::Create(PauseRetry_, {10.0f, 35.0f});
+	// ポーズ画面タイトルに戻る
+	PauseTitle_ = TextureManager::Load("2DTitlePause3D.png");
+	SpritePauseTitle_ = Sprite::Create(PauseTitle_, {10.0f, 50.0f});
 
 	// ライン描画が参照するカメラを指定する(アドレス渡し)
 	PrimitiveDrawer::GetInstance()->SetCamera(&camera_);
@@ -69,11 +83,12 @@ void GameScene::Initialize() {
 	CController_->SetTarget(player_);      // 追尾対象セット
 	CController_->Reset();                 // リセット
 
+	phase_ = Phase::kFadeIn;
 	// フェードを持ってくる
 	fade_ = new Fade();
 	fade_->Initialize();
-	// フェード時間はここで決める
-	fade_->Start(Fade::Status::FadeIn, 1.0f);
+	// 開幕フェード時間はここで決める
+	fade_->Start(Fade::Status::FadeIn, 1.0f,Fade::FadeType::Black);
 }
 
 void GameScene::GeneratedBlocks() {
@@ -126,15 +141,21 @@ void GameScene::ChangePhase() {
 
 	case Phase::kPlay:
 		if (Input::GetInstance()->PushKey(DIK_1)) {
-			fade_->Start(Fade::Status::FadeOut, 2.0f);
+			exitRequest_ = ExitRequest::Death;
 			phase_ = Phase::kDeath;
 		}
 		break;
 
 	case Phase::kDeath:
-		fade_->Update();
+		// デス演出
+
+		fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);
+		phase_ = Phase::kFadeOut;
+		break;
+	case Phase::kFadeOut:
+		// fade_->Update();
 		if (fade_->IsFinished()) {
-			finished_ = true; // シーン終了
+			finished_ = true;
 		}
 		break;
 	}
@@ -155,9 +176,7 @@ void GameScene::Update() {
 
 		// フェードイン
 	case Phase::kFadeIn:
-		fade_->Update();
 		if (fade_->IsFinished()) {
-			fade_->Start(Fade::Status::FadeOut, 1.0f);
 			phase_ = Phase::kPlay;
 		}
 
@@ -190,67 +209,117 @@ void GameScene::Update() {
 
 	// プレイ
 	case Phase::kPlay:
-		skydome_->Update();
-		player_->Update();
-		CController_->Update();
+		if (!isPause_) {
+			skydome_->Update();
+			player_->Update();
+			CController_->Update();
 
 #ifdef _DEBUG // デバックビルドのみ見れる
 
-		// ImGuiのウィンドウ作成
-		ImGui::Begin("Debug1");
-		// デバックテキストの表示
-		ImGui::Text("Player");
-		// float3入力ボックス
-		ImGui::InputFloat3("InputFloat3", inputFloat3);
-		// float3スライダー
-		ImGui::SliderFloat3("SliderFloat3", inputFloat3, 0.0f, 1.0f);
-		Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(15, 13);
-		ImGui::End();
-		// デモウィンドウの表示を有効化
-		ImGui::ShowDemoWindow();
+			// ImGuiのウィンドウ作成
+			ImGui::Begin("Debug1");
+			// デバックテキストの表示
+			ImGui::Text("Player");
+			// float3入力ボックス
+			ImGui::InputFloat3("InputFloat3", inputFloat3);
+			// float3スライダー
+			ImGui::SliderFloat3("SliderFloat3", inputFloat3, 0.0f, 1.0f);
+			Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(15, 13);
+			ImGui::End();
+			// デモウィンドウの表示を有効化
+			ImGui::ShowDemoWindow();
 
-		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
-			isDebugCameraActive_ = !isDebugCameraActive_;
-		}
+			if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+				isDebugCameraActive_ = !isDebugCameraActive_;
+			}
 
 #endif // デバックビルドのみ見れる
 
-		// デバックカメラの更新
-		if (isDebugCameraActive_) {
-			debugCamera_->Update();
-			camera_.matView = debugCamera_->GetCamera().matView;
-			camera_.matProjection = debugCamera_->GetCamera().matProjection;
-			// ビュープロジェクション行列の転送
-			camera_.TransferMatrix();
-		} else {
-			camera_.UpdateMatrix();
-		}
-
-		// ブロックの更新
-		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
-			for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
-				if (!worldTransformBlock)
-					continue;
-				// アフィン変換～DirectXに転送
-				WorldTransformUpdate(*worldTransformBlock);
+			// デバックカメラの更新
+			if (isDebugCameraActive_) {
+				debugCamera_->Update();
+				camera_.matView = debugCamera_->GetCamera().matView;
+				camera_.matProjection = debugCamera_->GetCamera().matProjection;
+				// ビュープロジェクション行列の転送
+				camera_.TransferMatrix();
+			} else {
+				camera_.UpdateMatrix();
 			}
-		}
 
-		// 敵player当たり判定
+			// ブロックの更新
+			for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+				for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
+					if (!worldTransformBlock)
+						continue;
+					// アフィン変換～DirectXに転送
+					WorldTransformUpdate(*worldTransformBlock);
+				}
+			}
 
-		// 音声再生
-		if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+			// 敵player当たり判定
+
 			// 音声再生
-			voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_, false);
-			// 音声停止
-			// Audio::GetInstance()->StopWave(voiceHandle_);
+			if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+				// 音声再生
+				voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_, false);
+				// 音声停止
+				// Audio::GetInstance()->StopWave(voiceHandle_);
+			}
+
+			//ポーズ画面へ
+			if (Input::GetInstance()->PushKey(DIK_TAB))
+			{
+				isPause_ = true;
+			}
+
+		} else // ポーズ画面
+		{
+
+			// 再開画面
+			if (currentPauseState_ == PauseState::Resume) {
+				if (Input::GetInstance()->TriggerKey(DIK_UP)) {
+					currentPauseState_ = PauseState::Title;
+				} else if (Input::GetInstance()->TriggerKey(DIK_DOWN)) {
+					currentPauseState_ = PauseState::Retry;
+				}
+				if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+					isPause_ = false;
+				}
+
+				// リトライ画面
+			} else if (currentPauseState_ == PauseState::Retry) {
+				if (Input::GetInstance()->TriggerKey(DIK_UP)) {
+					currentPauseState_ = PauseState::Resume;
+				} else if (Input::GetInstance()->TriggerKey(DIK_DOWN)) {
+					currentPauseState_ = PauseState::Title;
+				}
+				if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+					exitRequest_ = ExitRequest::Retry;
+					fade_->Start(Fade::Status::FadeOut, 0.5f, Fade::FadeType::Black);
+					phase_ = Phase::kFadeOut;
+				}
+
+				//タイトルに戻る画面
+			} else if (currentPauseState_ == PauseState::Title) {
+				if (Input::GetInstance()->TriggerKey(DIK_UP)) {
+					currentPauseState_ = PauseState::Retry;
+				} else if (Input::GetInstance()->TriggerKey(DIK_DOWN)) {
+					currentPauseState_ = PauseState::Resume;
+				}
+				if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+					// タイトルに戻る
+					exitRequest_ = ExitRequest::Title;
+					fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);
+					phase_ = Phase::kFadeOut;
+				}
+			}
 		}
 
 		break;
 
 	// 死んだとき
 	case Phase::kDeath:
-		skydome_->Update();
+		//skydome_->Update();
 
 		// ブロックの更新
 		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
@@ -266,17 +335,12 @@ void GameScene::Update() {
 
 	// フェードアウト
 	case Phase::kFadeOut:
-		fade_->Update();
 		if (fade_->IsFinished()) {
 			finished_ = true;
 		}
-
-		skydome_->Update();
-
 		break;
 	}
 }
-
 void GameScene::Draw() {
 	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
 
@@ -329,6 +393,39 @@ void GameScene::Draw() {
 	// sprite_->Draw();
 
 	fade_->Draw();
+	// ポーズ画面
+	if (isPause_) {
+		if (currentPauseState_ == PauseState::Resume) {
+			SpritePauseFont_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+			SpritePauseFont_->Draw();
+			SpritePauseResum_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+			SpritePauseResum_->Draw();
+			SpritePauseRetry_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
+			SpritePauseRetry_->Draw();
+			SpritePauseTitle_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
+			SpritePauseTitle_->Draw();
+		} else if (currentPauseState_ == PauseState::Retry)
+		{
+			SpritePauseFont_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+			SpritePauseFont_->Draw();
+			SpritePauseResum_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
+			SpritePauseResum_->Draw();
+			SpritePauseRetry_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+			SpritePauseRetry_->Draw();
+			SpritePauseTitle_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
+			SpritePauseTitle_->Draw();
+		} else if (currentPauseState_ == PauseState::Title)
+		{
+			SpritePauseFont_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+			SpritePauseFont_->Draw();
+			SpritePauseResum_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
+			SpritePauseResum_->Draw();
+			SpritePauseRetry_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
+			SpritePauseRetry_->Draw();
+			SpritePauseTitle_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+			SpritePauseTitle_->Draw();
+		}
+	}
 
 	// スプライト描画後処理
 	Sprite::PostDraw();

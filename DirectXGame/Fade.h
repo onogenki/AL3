@@ -3,8 +3,15 @@
 
 using namespace KamataEngine;
 
+
 class Fade {
 public:
+
+enum class FadeType
+{
+	Black,
+	White,
+};
 	// フェードの更新
 	enum class Status {
 		None,    // フェードなし
@@ -19,7 +26,7 @@ public:
 	void Draw();
 
 	// フェード開始
-	void Start(Status status, float duration);
+	void Start(Status status, float duration, FadeType type);
 	// フェード終了
 	void Stop();
 
@@ -28,8 +35,8 @@ public:
 
 private:
 	// 暗転フェード
-	uint32_t BlackTextureHandle_ = 0;
-	Sprite* BlackSprite_ = nullptr;
+	uint32_t TextureHandle_ = 0;
+	Sprite* Sprite_ = nullptr;
 
 	// 現在のフェードの更新
 	Status status_ = Status::None;
@@ -38,4 +45,10 @@ private:
 	float duration_ = 0.0f;
 	// 経過時間カウンター
 	float counter_ = 0.0f;
+
+	FadeType colorType_;
+	Vector4 fadeColor_;
+
+	float alphaIn_ = 0.0f;
+	float alphaOut_ = 0.0f;
 };

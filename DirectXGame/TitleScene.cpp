@@ -14,17 +14,18 @@ void TitleScene::Initialize() {
 	// フェードを持ってくる
 	fade_ = new Fade();
 	fade_->Initialize();
-	// フェード時間はここで決める
-	fade_->Start(Fade::Status::FadeIn, 1.0f);
+	// 開幕時フェード時間はここで決める
+	fade_->Start(Fade::Status::FadeIn, 1.0f,Fade::FadeType::White);
 }
 
 void TitleScene::Update() {
+
+		fade_->Update();
 
 	switch (phase_) {
 
 		// フェードイン
 	case Phase::kFadeIn:
-		fade_->Update();
 
 		if (fade_->IsFinished()) {
 			phase_ = Phase::kMain;
@@ -35,14 +36,13 @@ void TitleScene::Update() {
 	case Phase::kMain:
 		// タイトルの終了条件
 		if (Input::GetInstance()->PushKey(DIK_SPACE)) {
-			fade_->Start(Fade::Status::FadeOut, 1.0f);
+			fade_->Start(Fade::Status::FadeOut, 1.0f,Fade::FadeType::Black);
 			phase_ = Phase::kFadeOut;
 		}
 		break;
 
 		// フェードアウト
 	case Phase::kFadeOut:
-		fade_->Update();
 		if (fade_->IsFinished()) {
 			finished_ = true;
 		}

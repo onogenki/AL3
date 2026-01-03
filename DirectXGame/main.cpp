@@ -30,7 +30,6 @@ void ChangeScene() {
 			scene = Scene::kGame;       // シーン変更
 			delete titleScene;          // 旧シーンの解放
 			titleScene = nullptr;
-
 			// 次のシーンの生成と初期化
 			gameScene = new GameScene;
 			gameScene->Initialize();
@@ -40,12 +39,31 @@ void ChangeScene() {
 		// ゲームシーン
 	case Scene::kGame:
 		if (gameScene->IsFinished()) { // 次のシーンへ進むとき
-			scene = Scene::kTitle;
-			delete gameScene;
-			gameScene = nullptr;
-
-			titleScene = new TitleScene;
-			titleScene->Initialize();
+			switch (gameScene->GetExitRequest()) {
+				//リトライするとき
+			case GameScene::ExitRequest::Retry:
+				delete gameScene;
+				gameScene = new GameScene();
+				gameScene->Initialize();
+				scene = Scene::kGame;//再スタート
+				break;
+				//タイトルに戻るとき
+			case GameScene::ExitRequest::Title:
+				delete gameScene;
+				gameScene = nullptr;
+				titleScene = new TitleScene();
+				titleScene->Initialize();
+				scene = Scene::kTitle;//タイトルに戻る
+				break;
+				//死んだとき
+				case GameScene::ExitRequest::Death:
+				delete gameScene;
+				gameScene = nullptr;
+				titleScene = new TitleScene();
+				titleScene->Initialize();
+				scene = Scene::kTitle; //タイトルに戻る
+				break;
+			}
 		}
 		break;
 	}
