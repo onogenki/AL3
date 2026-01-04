@@ -1,10 +1,12 @@
 #pragma once
 #include"KamataEngine.h"
+#include"Player.h"
 
 #include "math.h"
 
 using namespace KamataEngine;
 
+class GameScene;
 // ヘッダ側ではポインタを持つだけなので前方宣言のほうが依存関係薄くなる
 class MapChipField;
 
@@ -24,8 +26,14 @@ public:
 	
 	void Draw();
 
+
 	// 外部からポイントをセットするためのsetter
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
+
+	// ワールド座標を取得(当たり判定をとるため)
+	Vector3 GetWorldPosition() const;
+
+	AABB GetAABB();
 
 	// kFadeInでplayerを描画させるもの
 	void UpdateTransformOnly();

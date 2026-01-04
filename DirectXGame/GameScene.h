@@ -55,6 +55,9 @@ public:
 	// デスフラグのgetter
 	bool IsFinished() const { return finished_; }
 
+	//すべての当たり判定を行う
+	void CheckAllCollision();
+
 	//ポーズからのリトライとタイトルに戻る分岐Getter
 	ExitRequest GetExitRequest() const { return exitRequest_; }
 
@@ -81,10 +84,16 @@ private:
 	// std::Vectorで可変個配列 それを2個使うことで2次元配列に
 	std::vector<std::vector<WorldTransform*>> worldTransformBlocks_;
 
+	//デバック縦横線
 	float gridSize_;
 	int numRows_;
 	int numCols_;
 	PrimitiveDrawer* drawer_;
+
+	//当たり判定
+	float playerFootY;//playerの足
+	bool enemyHeadY;  //enemyの頭
+	bool isFalling;//落ちてるとき
 
 	ExitRequest exitRequest_ = ExitRequest::None;
 

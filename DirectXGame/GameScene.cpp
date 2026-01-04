@@ -145,6 +145,40 @@ void GameScene::GeneratedBlocks() {
 	}
 }
 
+void GameScene::CheckAllCollision() 
+{ 
+
+	 if (phase_ != Phase::kPlay) {
+		return;
+	}
+
+	AABB playerAABB = player_->GetAABB();
+
+	for (Enemy* enemy:enemies_) {
+		AABB enemyAABB = enemy->GetAABB();
+
+		//当たってるか
+		if (!IsCollision(playerAABB, enemyAABB)) {
+			continue;
+		}
+
+		//高さ判定
+		playerFootY = playerAABB.min.y;
+		enemyHeadY = enemyAABB.max.y;
+
+		//落下中か
+		isFalling = player_->GetVelocity().y < 0.0f;
+
+		if (isFalling && playerFootY > enemyHeadY - player_->GetkBlank()) {
+			player_->Bounce();//跳ねる
+		} else {
+			exitRequest_ = ExitRequest::Death;
+			fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);
+			phase_ = Phase::kFadeOut;
+		}
+	}
+}
+
 void GameScene::Update() {
 	// スプライトの今の座標を取得
 	// Vector2 position = sprite_->GetPosition();
@@ -162,6 +196,7 @@ void GameScene::Update() {
 		for (Enemy* enemy : enemies_) {
 			enemy->UpdateTransformOnly();
 		}
+
 		skydome_->Update();
 
 		fade_->Update();
@@ -190,7 +225,6 @@ void GameScene::Update() {
 				WorldTransformUpdate(*worldTransformBlock);
 			}
 		}
-
 		break;
 
 	// プレイ
@@ -270,7 +304,7 @@ void GameScene::Update() {
 			{
 				isPause_ = true;
 			}
-
+			CheckAllCollision(); // 全ての当たり判定を行う
 		} else // ポーズ画面
 		{
 

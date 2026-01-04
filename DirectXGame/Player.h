@@ -1,10 +1,14 @@
 #pragma once
 #include"KamataEngine.h"
+#include"Math.h"
 
 using namespace KamataEngine;
 
+class GameScene;
 //ヘッダ側ではポインタを持つだけなので前方宣言のほうが依存関係薄くなる
 class MapChipField;
+
+class Enemy;
 
 class Player {
 public:
@@ -43,6 +47,11 @@ public:
 	// 外部からポイントをセットするためのsetter
 	void SetMapChipField(MapChipField* mapChipField) { mapChipField_ = mapChipField; }
 
+	//ワールド座標を取得(当たり判定をとるため)
+	Vector3 GetWorldPosition() const;
+
+	AABB GetAABB();
+
 	// 移動入力
 	void InputMove();
 
@@ -67,6 +76,10 @@ public:
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
 	const Vector3& GetVelocity() const { return velocity_; }//速度
 
+	const float GetkBlank() const { return kBlank_; }
+
+	void Bounce();
+
 	//kFadeInでplayerを描画させるもの
 	void UpdateTransformOnly();
 
@@ -86,9 +99,9 @@ private:
 	Vector3 velocity_ = {};
 
 	//キャラクターの当たり判定サイズ
-	static inline const float kWidth = 0.8f;
-	static inline const float kHeight = 0.8f;
-	static inline const float kBlank = 0.04f;
+	static inline const float kWidth_ = 0.8f;
+	static inline const float kHeight_ = 0.8f;
+	static inline const float kBlank_ = 0.04f;
 
 
 	// フレームごとの加速度
@@ -119,5 +132,4 @@ private:
 
 	//着地時の速度減衰率
 	static inline const float kAttenuationWall = 0.2f;
-
 };
