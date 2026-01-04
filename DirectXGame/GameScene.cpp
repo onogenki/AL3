@@ -16,7 +16,10 @@ void GameScene::Initialize() {
 	GeneratedBlocks();
 
 	// 3Dモデルの生成
-	// player
+
+	///
+	/// player
+	///
 	player_ = new Player(); // 生成
 	// 3Dモデルファイルを読み込む(OBJとフォルダ名を一致させること)
 	playerModel_ = Model::CreateFromOBJ("needle_Body");
@@ -28,13 +31,21 @@ void GameScene::Initialize() {
 	// カメラの初期化
 	camera_.Initialize();
 
-	enemy_ = new Enemy();
-	enemyModel_ = Model::CreateFromOBJ("becher");
-	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(12, 18);
-	enemy_->Initialize(enemyModel_, &camera_, enemyPosition);
-	enemy_->SetMapChipField(mapChipField_);
+	///
+	///enemy
+	///
+	for (int32_t i = 0; i < 3; ++i) {
+		Enemy* newEnemy = new Enemy();
+		enemyModel_ = Model::CreateFromOBJ("becher");
+		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(12 + i * 10, 18);
+		newEnemy->Initialize(enemyModel_, &camera_, enemyPosition);
+		newEnemy->SetMapChipField(mapChipField_);
+		enemies_.push_back(newEnemy);
+	}
 
-	// ブロック
+	///
+	/// ブロック
+	/// 
 	// 単純な立方体モデルを自動生成(用意されてて軽量で作れる)
 	// blockModel_ = Model::Create();
 
@@ -148,7 +159,9 @@ void GameScene::Update() {
 		// フェードイン
 	case Phase::kFadeIn:
 		player_->UpdateTransformOnly();
-		enemy_->UpdateTransformOnly();
+		for (Enemy* enemy : enemies_) {
+			enemy->UpdateTransformOnly();
+		}
 		skydome_->Update();
 
 		fade_->Update();
@@ -194,7 +207,10 @@ void GameScene::Update() {
 		if (!isPause_) {
 			skydome_->Update();
 			player_->Update();
-			enemy_->Update();
+			for (Enemy* enemy : enemies_) 
+			{
+				enemy->Update();
+			}
 			CController_->Update();
 
 #ifdef _DEBUG // デバックビルドのみ見れる
@@ -336,7 +352,10 @@ void GameScene::Draw() {
 		Model::PreDraw(dxCommon->GetCommandList());
 
 		player_->Draw();
-		enemy_->Draw();
+		for (Enemy* enemy : enemies_) 
+		{
+			enemy->Draw();
+		}
 		skydome_->Draw();
 
 		// ブロックの描画
@@ -367,7 +386,10 @@ void GameScene::Draw() {
 
 		skydome_->Draw();
 		player_->Draw();
-		enemy_->Draw();
+		for (Enemy* enemy : enemies_) 
+		{
+			enemy->Draw();
+		}
 
 		// ブロックの描画
 		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
@@ -513,7 +535,10 @@ void GameScene::Draw() {
 GameScene::~GameScene() {
 	// delete sprite_;
 	delete player_;
-	delete enemy_;
+	for (Enemy* enemy : enemies_)
+	{
+		delete enemy;
+	}
 	delete debugCamera_;
 	delete blockModel_;
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {

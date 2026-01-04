@@ -72,8 +72,9 @@ private:
 	// カメラ
 	Camera camera_;
 
-	Enemy* enemy_ = nullptr;
+	//enemy
 	Model* enemyModel_ = nullptr;
+	std::list<Enemy*> enemies_;
 
 	// ブロック
 	Model* blockModel_ = nullptr;
