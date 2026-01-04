@@ -473,5 +473,5 @@ void Player::UpdateTransformOnly() { WorldTransformUpdate(worldTransform_); }
 
 void Player::Bounce() {
 	velocity_.y = 0.0f;
-	velocity_.y += 0.5f; // 踏んだ時のジャンプ力
+	velocity_.y += 0.3f; // 踏んだ時のジャンプ力
 }

@@ -7,6 +7,7 @@
 #include "Player.h"
 #include "Skydome.h"
 #include"Enemy.h"
+#include"DeathParticles.h"
 #include <vector>
 using namespace KamataEngine;
 
@@ -130,6 +131,9 @@ private:
 
 	// ImGuiで値を入力する変数
 	float inputFloat3[3] = {0, 0, 0};
+
+	DeathParticles* deathParticles_ = nullptr;
+	Model* deathParticlesModel_ = nullptr;
 
 	// 現在のフェーズ
 	Phase phase_ = Phase::kPlay;

@@ -31,16 +31,25 @@ void GameScene::Initialize() {
 	// カメラの初期化
 	camera_.Initialize();
 
+
+	//デスパーティクル
+	deathParticles_ = new DeathParticles;
+	deathParticlesModel_ = Model::CreateFromOBJ("deathParticle");
+	
 	///
 	///enemy
 	///
 	for (int32_t i = 0; i < 3; ++i) {
 		Enemy* newEnemy = new Enemy();
 		enemyModel_ = Model::CreateFromOBJ("becher");
-		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(12 + i * 10, 18);
+		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(12 + i * 2, 18);
 		newEnemy->Initialize(enemyModel_, &camera_, enemyPosition);
 		newEnemy->SetMapChipField(mapChipField_);
 		enemies_.push_back(newEnemy);
+
+		
+		// デスパーティクル
+		deathParticles_->Initialize(deathParticlesModel_, &camera_, enemyPosition);
 	}
 
 	///
@@ -104,7 +113,7 @@ void GameScene::Initialize() {
 	fade_ = new Fade();
 	fade_->Initialize();
 	// 開幕フェード時間はここで決める
-	fade_->Start(Fade::Status::FadeIn, 1.0f,Fade::FadeType::Black);
+	fade_->Start(Fade::Status::FadeIn, 0.7f,Fade::FadeType::Black);
 }
 
 void GameScene::GeneratedBlocks() {
@@ -171,9 +180,11 @@ void GameScene::CheckAllCollision()
 
 		if (isFalling && playerFootY > enemyHeadY - player_->GetkBlank()) {
 			player_->Bounce();//跳ねる
+			deathParticles_->Spawn(enemy->GetWorldPosition());
+			break;
 		} else {
 			exitRequest_ = ExitRequest::Death;
-			fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);
+			fade_->Start(Fade::Status::FadeOut, 0.5f, Fade::FadeType::White);
 			phase_ = Phase::kFadeOut;
 		}
 	}
@@ -245,6 +256,10 @@ void GameScene::Update() {
 			{
 				enemy->Update();
 			}
+			if (deathParticles_) {
+				deathParticles_->Update();
+			}
+
 			CController_->Update();
 
 #ifdef _DEBUG // デバックビルドのみ見れる
@@ -425,6 +440,11 @@ void GameScene::Draw() {
 			enemy->Draw();
 		}
 
+		// デスパーティクルあれば描画
+		if (deathParticles_) {
+			deathParticles_->Draw();
+		}
+
 		// ブロックの描画
 		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 			for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
@@ -583,6 +603,8 @@ GameScene::~GameScene() {
 	worldTransformBlocks_.clear();
 	delete skyDomeModel_;
 	delete mapChipField_;
+	delete deathParticles_;
+	delete deathParticlesModel_;
 	delete SpritePauseFont_;
 	delete SpritePauseResum_;
 	delete SpritePauseRetry_;
