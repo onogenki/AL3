@@ -15,7 +15,7 @@ void Enemy::Initialize(Model* enemyModel, Camera* camera, const Vector3& positio
 	worldTransform_.rotation_.y = std::numbers::pi_v<float> * 1.3f / 2.0f;
 
 	//速度を設定する
-	velocity_ = {-kWalkSpeed, 0, 0};
+	velocity_ = {-kWalkSpeed_, 0, 0};
 
 	camera_ = camera;
 
@@ -27,6 +27,9 @@ void Enemy::Update() {
 	worldTransform_.translation_ += velocity_;
 
 	walkTimer_ += 1.0f / 60.0f;
+
+	//回転アニメーション                   傾く範囲 * 傾き時間のモーション
+	worldTransform_.rotation_.x = kWalkMotionAngle_ * std::sin(std::numbers::pi_v<float> * 1.0f * walkTimer_ / kWalkMotionTime_/2.0f);
 
 	// ワールド行列更新
 	WorldTransformUpdate(worldTransform_);

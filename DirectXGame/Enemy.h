@@ -47,12 +47,24 @@ public:
 	    LRDirection lrDirection_ = LRDirection::kLeft;
 
 		//歩行の速さ
-	    static inline const float kWalkSpeed = 0.02f;
+	    static inline const float kWalkSpeed_ = 0.02f;
 
-		float walkTimer_ = 0.0f;
 
 		// 当たり判定サイズ
-	    static inline const float kWidth = 0.8f;
-	    static inline const float kHeight = 0.8f;
+	    static inline const float kWidth_ = 0.8f;
+	    static inline const float kHeight_ = 0.8f;
+
+		// アニメーションの周期となる時間
+	    static inline const float kWalkMotionAngle_ = 0.3f;//傾く範囲
+	    static inline const float kWalkMotionTime_ = 0.3f;//傾く時間
+
+		// 経過時間
+	    float walkTimer_ = 0.0f;
+
+		//やられモーション
+		static inline const float kDefeatedTime_ = 0.6f;
+	    static inline const float kDefeatedMotionAngleStart_ = 0.0f;
+	    static inline const float kDefeatedMotionAngleEnd_ = -60.0f;
+	    float counter_ = 0.0f; // カウンター
 
 };
