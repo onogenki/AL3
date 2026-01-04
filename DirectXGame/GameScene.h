@@ -6,6 +6,7 @@
 #include "Math.h"
 #include "Player.h"
 #include "Skydome.h"
+#include"Enemy.h"
 #include <vector>
 using namespace KamataEngine;
 
@@ -70,6 +71,9 @@ private:
 	WorldTransform worldTransform_;
 	// カメラ
 	Camera camera_;
+
+	Enemy* enemy_ = nullptr;
+	Model* enemyModel_ = nullptr;
 
 	// ブロック
 	Model* blockModel_ = nullptr;

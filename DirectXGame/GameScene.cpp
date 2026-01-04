@@ -28,6 +28,11 @@ void GameScene::Initialize() {
 	// カメラの初期化
 	camera_.Initialize();
 
+	enemy_ = new Enemy();
+	enemyModel_ = Model::CreateFromOBJ("becher");
+	Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(12, 18);
+	enemy_->Initialize(enemyModel_, &camera_, enemyPosition);
+	enemy_->SetMapChipField(mapChipField_);
 
 	// ブロック
 	// 単純な立方体モデルを自動生成(用意されてて軽量で作れる)
@@ -143,6 +148,7 @@ void GameScene::Update() {
 		// フェードイン
 	case Phase::kFadeIn:
 		player_->UpdateTransformOnly();
+		enemy_->UpdateTransformOnly();
 		skydome_->Update();
 
 		fade_->Update();
@@ -188,6 +194,7 @@ void GameScene::Update() {
 		if (!isPause_) {
 			skydome_->Update();
 			player_->Update();
+			enemy_->Update();
 			CController_->Update();
 
 #ifdef _DEBUG // デバックビルドのみ見れる
@@ -329,6 +336,7 @@ void GameScene::Draw() {
 		Model::PreDraw(dxCommon->GetCommandList());
 
 		player_->Draw();
+		enemy_->Draw();
 		skydome_->Draw();
 
 		// ブロックの描画
@@ -359,6 +367,7 @@ void GameScene::Draw() {
 
 		skydome_->Draw();
 		player_->Draw();
+		enemy_->Draw();
 
 		// ブロックの描画
 		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
@@ -504,6 +513,7 @@ void GameScene::Draw() {
 GameScene::~GameScene() {
 	// delete sprite_;
 	delete player_;
+	delete enemy_;
 	delete debugCamera_;
 	delete blockModel_;
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
@@ -514,4 +524,8 @@ GameScene::~GameScene() {
 	worldTransformBlocks_.clear();
 	delete skyDomeModel_;
 	delete mapChipField_;
+	delete SpritePauseFont_;
+	delete SpritePauseResum_;
+	delete SpritePauseRetry_;
+	delete SpritePauseTitle_;
 }
