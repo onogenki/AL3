@@ -132,7 +132,8 @@ private:
 	// ImGuiで値を入力する変数
 	float inputFloat3[3] = {0, 0, 0};
 
-	DeathParticles* deathParticles_ = nullptr;
+	//デスパーティクル
+	std::list<DeathParticles*> deathParticlesList_;
 	Model* deathParticlesModel_ = nullptr;
 
 	// 現在のフェーズ

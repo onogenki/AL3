@@ -1,5 +1,6 @@
 #pragma once
 #include"KamataEngine.h"
+#include "Player.h"
 #include"Player.h"
 
 #include "math.h"
@@ -35,6 +36,9 @@ public:
 
 	AABB GetAABB();
 
+	//無効フラグ
+	bool IsDead() const { return isDead_; }
+
 	// kFadeInでplayerを描画させるもの
 	void UpdateTransformOnly();
 
@@ -57,10 +61,12 @@ public:
 		//歩行の速さ
 	    static inline const float kWalkSpeed_ = 0.02f;
 
-
 		// 当たり判定サイズ
 	    static inline const float kWidth_ = 0.8f;
 	    static inline const float kHeight_ = 0.8f;
+
+		// デスフラグ
+	    bool isDead_ = false;
 
 		// アニメーションの周期となる時間
 	    static inline const float kWalkMotionAngle_ = 0.3f;//傾く範囲

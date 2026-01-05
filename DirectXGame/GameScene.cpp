@@ -31,11 +31,6 @@ void GameScene::Initialize() {
 	// カメラの初期化
 	camera_.Initialize();
 
-
-	//デスパーティクル
-	deathParticles_ = new DeathParticles;
-	deathParticlesModel_ = Model::CreateFromOBJ("deathParticle");
-	
 	///
 	///enemy
 	///
@@ -46,11 +41,12 @@ void GameScene::Initialize() {
 		newEnemy->Initialize(enemyModel_, &camera_, enemyPosition);
 		newEnemy->SetMapChipField(mapChipField_);
 		enemies_.push_back(newEnemy);
-
-		
-		// デスパーティクル
-		deathParticles_->Initialize(deathParticlesModel_, &camera_, enemyPosition);
 	}
+
+
+	// デスパーティクル
+	deathParticlesModel_ = Model::CreateFromOBJ("deathParticle");
+	
 
 	///
 	/// ブロック
@@ -178,11 +174,19 @@ void GameScene::CheckAllCollision()
 		//落下中か
 		isFalling = player_->GetVelocity().y < 0.0f;
 
+		//当たった時
 		if (isFalling && playerFootY > enemyHeadY - player_->GetkBlank()) {
 			player_->Bounce();//跳ねる
-			deathParticles_->Spawn(enemy->GetWorldPosition());
+			//enemy倒れる
+			DeathParticles* deathParticles = new DeathParticles();
+			deathParticles->Initialize(deathParticlesModel_, &camera_, enemy->GetWorldPosition());
+			deathParticles->Spawn(enemy->GetWorldPosition());
+
+			deathParticlesList_.push_back(deathParticles);
 			break;
-		} else {
+		} else {//player倒れる
+			DeathParticles* deathParticle = new DeathParticles();
+			deathParticle->Initialize(deathParticlesModel_, &camera_, player_->GetWorldPosition());
 			exitRequest_ = ExitRequest::Death;
 			fade_->Start(Fade::Status::FadeOut, 0.5f, Fade::FadeType::White);
 			phase_ = Phase::kFadeOut;
@@ -256,8 +260,8 @@ void GameScene::Update() {
 			{
 				enemy->Update();
 			}
-			if (deathParticles_) {
-				deathParticles_->Update();
+			for (DeathParticles* deathParticles : deathParticlesList_) {
+				deathParticles->Update();
 			}
 
 			CController_->Update();
@@ -441,10 +445,9 @@ void GameScene::Draw() {
 		}
 
 		// デスパーティクルあれば描画
-		if (deathParticles_) {
-			deathParticles_->Draw();
+		for (DeathParticles* deathParticles : deathParticlesList_) {
+			deathParticles->Draw();
 		}
-
 		// ブロックの描画
 		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 			for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
@@ -593,6 +596,14 @@ GameScene::~GameScene() {
 	{
 		delete enemy;
 	}
+	//条件に合う要素だけ消す
+	deathParticlesList_.remove_if([](DeathParticles* deathParticles) {
+		if (deathParticles->IsFinished()) {
+			delete deathParticles;
+			return true;//リストから消す(デスパーティクルの時間まで)
+		}
+		return false;
+	});
 	delete debugCamera_;
 	delete blockModel_;
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
@@ -603,7 +614,6 @@ GameScene::~GameScene() {
 	worldTransformBlocks_.clear();
 	delete skyDomeModel_;
 	delete mapChipField_;
-	delete deathParticles_;
 	delete deathParticlesModel_;
 	delete SpritePauseFont_;
 	delete SpritePauseResum_;

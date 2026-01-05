@@ -75,8 +75,8 @@ public:
 	//geeter
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
 	const Vector3& GetVelocity() const { return velocity_; }//速度
-
-	const float GetkBlank() const { return kBlank_; }
+	const float GetkBlank() const { return kBlank_; }//敵とplayerの当たるまでの空白
+	bool IsDead() const { return isDead_; }//デスフラグ
 
 	void Bounce();
 
@@ -88,8 +88,6 @@ private:
 
 	//マップチップフィールドによるフィールド
 	MapChipField* mapChipField_ = nullptr;
-
-
 
 	//モデル
 	Model* model_ = nullptr;
@@ -103,6 +101,8 @@ private:
 	static inline const float kHeight_ = 0.8f;
 	static inline const float kBlank_ = 0.04f;
 
+	//デスフラグ
+	bool isDead_ = false;
 
 	// フレームごとの加速度
 	static inline const float kAcceleration = 0.01f;
