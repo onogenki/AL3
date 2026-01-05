@@ -61,20 +61,28 @@ void GameScene::Initialize() {
 	// trueにすると反転描画になり、内側から見れる(天球用)
 	skyDomeModel_ = Model::CreateFromOBJ("skydome", true);
 	skydome_->Initialize(skyDomeModel_, &camera_);
+
+	// TABキーでポーズ
+	TABFont_ = TextureManager::Load("2DTABPause3D.png");
+	SpriteTABFont_ = Sprite::Create(TABFont_, {900.0f, -150.0f});
 	
 	// ポーズ画面タイトル
 	PauseFont_ = TextureManager::Load("2DPause3D.png");
-	SpritePauseFont_ = Sprite::Create(PauseTitle_, {10.0f, 2.0f});
+	SpritePauseFont_ = Sprite::Create(PauseFont_, {450.0f, -100.0f});
 
 	//ポーズ画面続ける
 	PauseResum_ = TextureManager::Load("2DResumPause3D.png");
-	SpritePauseResum_ = Sprite::Create(PauseResum_, {10.0f, 20.0f});
+	SpritePauseResum_ = Sprite::Create(PauseResum_, {450.0f, 50.0f});
 	//ポーズ画面リトライ
 	PauseRetry_ = TextureManager::Load("2DRetryPause3D.png");
-	SpritePauseRetry_ = Sprite::Create(PauseRetry_, {10.0f, 35.0f});
+	SpritePauseRetry_ = Sprite::Create(PauseRetry_, {450.0f, 150.0f});
 	// ポーズ画面タイトルに戻る
 	PauseTitle_ = TextureManager::Load("2DTitlePause3D.png");
-	SpritePauseTitle_ = Sprite::Create(PauseTitle_, {10.0f, 50.0f});
+	SpritePauseTitle_ = Sprite::Create(PauseTitle_, {450.0f, 280.0f});
+
+	// ポーズ画面タイトルに戻る
+	PauseEnter_ = TextureManager::Load("2DPauseEnter3D.png");
+	SpritePauseEnter_ = Sprite::Create(PauseEnter_, {950.0f, 250.0f});
 
 	// ライン描画が参照するカメラを指定する(アドレス渡し)
 	PrimitiveDrawer::GetInstance()->SetCamera(&camera_);
@@ -357,7 +365,7 @@ void GameScene::Update() {
 			}
 
 			//ポーズ画面へ
-			if (Input::GetInstance()->PushKey(DIK_TAB))
+			if (Input::GetInstance()->TriggerKey(DIK_TAB))
 			{
 				isPause_ = true;
 			}
@@ -372,7 +380,8 @@ void GameScene::Update() {
 				} else if (Input::GetInstance()->TriggerKey(DIK_DOWN)) {
 					currentPauseState_ = PauseState::Retry;
 				}
-				if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+				if (Input::GetInstance()->TriggerKey(DIK_RETURN)|| 
+					Input::GetInstance()->TriggerKey(DIK_TAB)) {
 					isPause_ = false;
 				}
 
@@ -388,7 +397,10 @@ void GameScene::Update() {
 					fade_->Start(Fade::Status::FadeOut, 0.5f, Fade::FadeType::Black);
 					phase_ = Phase::kFadeOut;
 				}
-
+				if (Input::GetInstance()->TriggerKey(DIK_TAB)) {
+					isPause_ = false;
+					currentPauseState_ = PauseState::Resume;
+				}
 				//タイトルに戻る画面
 			} else if (currentPauseState_ == PauseState::Title) {
 				if (Input::GetInstance()->TriggerKey(DIK_UP)) {
@@ -401,6 +413,10 @@ void GameScene::Update() {
 					exitRequest_ = ExitRequest::Title;
 					fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);
 					phase_ = Phase::kFadeOut;
+				}
+				if (Input::GetInstance()->TriggerKey(DIK_TAB)) {
+					isPause_ = false;
+					currentPauseState_ = PauseState::Resume;
 				}
 			}
 		}
@@ -549,6 +565,10 @@ void GameScene::Draw() {
 		// sprite_->Draw();
 
 		fade_->Draw();
+
+		//TABキーでポーズ
+		SpriteTABFont_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+		SpriteTABFont_->Draw();
 		// ポーズ画面
 		if (isPause_) {
 			if (currentPauseState_ == PauseState::Resume) {
@@ -560,6 +580,8 @@ void GameScene::Draw() {
 				SpritePauseRetry_->Draw();
 				SpritePauseTitle_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
 				SpritePauseTitle_->Draw();
+				SpritePauseEnter_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+				SpritePauseEnter_->Draw();
 			} else if (currentPauseState_ == PauseState::Retry) {
 				SpritePauseFont_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
 				SpritePauseFont_->Draw();
@@ -569,6 +591,8 @@ void GameScene::Draw() {
 				SpritePauseRetry_->Draw();
 				SpritePauseTitle_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
 				SpritePauseTitle_->Draw();
+				SpritePauseEnter_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+				SpritePauseEnter_->Draw();
 			} else if (currentPauseState_ == PauseState::Title) {
 				SpritePauseFont_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
 				SpritePauseFont_->Draw();
@@ -578,6 +602,8 @@ void GameScene::Draw() {
 				SpritePauseRetry_->Draw();
 				SpritePauseTitle_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
 				SpritePauseTitle_->Draw();
+				SpritePauseEnter_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+				SpritePauseEnter_->Draw();
 			}
 		}
 
@@ -682,8 +708,10 @@ GameScene::~GameScene() {
 	delete skyDomeModel_;
 	delete mapChipField_;
 	delete deathParticlesModel_;
+	delete SpriteTABFont_;
 	delete SpritePauseFont_;
 	delete SpritePauseResum_;
 	delete SpritePauseRetry_;
 	delete SpritePauseTitle_;
+	delete SpritePauseEnter_;
 }

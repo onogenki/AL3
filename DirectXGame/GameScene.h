@@ -102,6 +102,10 @@ private:
 	Skydome* skydome_ = nullptr;
 	Model* skyDomeModel_ = nullptr;
 
+	//TABキーでポーズ
+	uint32_t TABFont_ = 0;
+	Sprite* SpriteTABFont_ = nullptr;
+
 	// ポーズ画面
 	uint32_t PauseFont_ = 0;
 	Sprite* SpritePauseFont_ = nullptr;
@@ -116,6 +120,9 @@ private:
 	uint32_t PauseRetry_ = 0;
 	Sprite* SpritePauseRetry_ = nullptr;
 
+	//ポーズ選択
+	uint32_t PauseEnter_ = 0;
+	Sprite* SpritePauseEnter_ = nullptr;
 	// マップチップフィールド
 	MapChipField* mapChipField_;
 
