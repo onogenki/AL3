@@ -1,4 +1,7 @@
 #include "Enemy.h"
+#include"Math.h"
+#include "Player.h"
+#include "GameScene.h"
 
 #include <cassert>
 #include <numbers>
@@ -48,21 +51,77 @@ AABB Enemy::GetAABB() {
 
 void Enemy::Update() {
 
-	// 移動
-	worldTransform_.translation_ += velocity_;
+	// 変更リクエストがあったら
+	if (behaviorRequest_ != Behavior::kUnknown) {
+		// 振る舞いを変更する
+		behavior_ = behaviorRequest_;
 
-	walkTimer_ += 1.0f / 60.0f;
+		// 各振る舞いごとの初期化を実行
+		switch (behavior_) {
+		case Behavior::kDefeated:
+		default:
+			counter_ = 0;
+			break;
+		}
+		// 変更リクエストをリセット
+		behaviorRequest_ = Behavior::kUnknown;
+	}
 
-	//回転アニメーション                   傾く範囲 * 傾き時間のモーション
-	worldTransform_.rotation_.x = kWalkMotionAngle_ * std::sin(std::numbers::pi_v<float> * 1.0f * walkTimer_ / kWalkMotionTime_/2.0f);
+	switch (behavior_) {
 
-	// ワールド行列更新
-	WorldTransformUpdate(worldTransform_);
+	//歩行
+	case Behavior::kWalk:
+
+		// 移動
+		worldTransform_.translation_ += velocity_;
+
+		walkTimer_ += 1.0f / 60.0f;
+
+		// 回転アニメーション                   傾く範囲 * 傾き時間のモーション
+		worldTransform_.rotation_.x = kWalkMotionAngle_ * std::sin(std::numbers::pi_v<float> * 1.0f * walkTimer_ / kWalkMotionTime_ / 2.0f);
+
+		// ワールド行列更新
+		WorldTransformUpdate(worldTransform_);
+		break;
+
+	//やられ
+	case Behavior::kDefeated:
+		// 0215　アニメーションのタイマーを加算
+		counter_ += 1.0f / 60.0f;
+		// y,x軸回りの回転角をイージングで変化
+		worldTransform_.rotation_.y += 0.3f;
+		worldTransform_.rotation_.x = EaseOut(ToRadians(kDefeatedMotionAngleStart_), ToRadians(kDefeatedMotionAngleEnd_), counter_ / kDefeatedTime_);
+		// ワールドトランスフォームの行列更新
+		WorldTransformUpdate(worldTransform_);
+		// アニメーションのタイマーが一定時間に達したらデスフラグ
+		if (counter_ >= kDefeatedTime_) {
+			isDead_ = true;
+		}
+		break;
+
+
+	}
 }
 
 void Enemy::Draw() 
 {
 	model_->Draw(worldTransform_, *camera_); 
+}
+
+void Enemy::OnCollision(const Player* player) {
+
+	(void)player;
+
+	//敵がやられてるなら何もしない
+	if (behavior_ == Behavior::kDefeated) {
+		return;
+	}
+
+	//やられに変更
+	behaviorRequest_ = Behavior::kDefeated;
+
+	//衝突を無効化
+	isCollisionDisabled_ = true;
 }
 
 void Enemy::UpdateTransformOnly() { WorldTransformUpdate(worldTransform_); }

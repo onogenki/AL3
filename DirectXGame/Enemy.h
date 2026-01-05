@@ -1,7 +1,6 @@
 #pragma once
 #include"KamataEngine.h"
 #include "Player.h"
-#include"Player.h"
 
 #include "math.h"
 
@@ -11,6 +10,8 @@ class GameScene;
 // ヘッダ側ではポインタを持つだけなので前方宣言のほうが依存関係薄くなる
 class MapChipField;
 
+class Player;
+
 class Enemy {
 
 public:
@@ -19,6 +20,13 @@ public:
 	enum class LRDirection {
 		kRight,
 		kLeft,
+	};
+
+	//振る舞い
+	enum Behavior { 
+		kUnknown = -1,//無効な状態
+		kWalk,        //歩行状態
+		kDefeated,    //やられ
 	};
 
 	void Initialize(Model* enemyModel, Camera* camera, const Vector3& position);
@@ -36,8 +44,14 @@ public:
 
 	AABB GetAABB();
 
+	//衝突判定
+	void OnCollision(const Player* player); 
+
 	//無効フラグ
 	bool IsDead() const { return isDead_; }
+
+	bool IsCollisionDisabled() const { return isCollisionDisabled_; }
+
 
 	// kFadeInでplayerを描画させるもの
 	void UpdateTransformOnly();
@@ -75,10 +89,14 @@ public:
 		// 経過時間
 	    float walkTimer_ = 0.0f;
 
+		Behavior behavior_ = Behavior::kWalk;
+	    Behavior behaviorRequest_ = Behavior::kUnknown;
+
 		//やられモーション
 		static inline const float kDefeatedTime_ = 0.6f;
 	    static inline const float kDefeatedMotionAngleStart_ = 0.0f;
 	    static inline const float kDefeatedMotionAngleEnd_ = -60.0f;
 	    float counter_ = 0.0f; // カウンター
 
+		bool isCollisionDisabled_ = false;
 };

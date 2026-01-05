@@ -36,9 +36,6 @@ void CameraController::Update()
 
 	//行列を更新する
 	camera_->UpdateMatrix();
-	ImGui::Text("CameraX: %.2f", camera_->translation_.x);
-	ImGui::Text("TargetX: %.2f", target_->GetWorldTransform().translation_.x);
-	ImGui::Text("Current MovableArea Left: %.2f", movableArea_.left);
 }
 
 void CameraController::Reset() 

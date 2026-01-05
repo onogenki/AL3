@@ -133,7 +133,8 @@ private:
 	float inputFloat3[3] = {0, 0, 0};
 
 	//デスパーティクル
-	std::list<DeathParticles*> deathParticlesList_;
+	DeathParticles* deathParticle_ = nullptr;//player
+	std::list<DeathParticles*> deathParticlesList_;//複数の敵
 	Model* deathParticlesModel_ = nullptr;
 
 	// 現在のフェーズ

@@ -475,3 +475,14 @@ void Player::Bounce() {
 	velocity_.y = 0.0f;
 	velocity_.y += 0.3f; // 踏んだ時のジャンプ力
 }
+
+void Player::OnCollision(const Enemy* enemy) {
+
+	(void)enemy;
+
+	//書き換え
+	isDead_ = true;
+
+	// 衝突無効化
+	isCollisionDisabled_ = true; 
+}

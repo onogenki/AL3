@@ -2,7 +2,7 @@
 
 void DeathParticles::Initialize(Model* deathParticlesModel, Camera* camera, const Vector3& position) {
 	
-	assert(deathParticlesModel);
+	//assert(deathParticlesModel);
 
 	model_ = deathParticlesModel;
 	// ワールド変換の初期化

@@ -80,6 +80,10 @@ public:
 
 	void Bounce();
 
+	void OnCollision(const Enemy* enemy);
+
+	bool IsCollisionDisabled() const { return isCollisionDisabled_; }
+
 	//kFadeInでplayerを描画させるもの
 	void UpdateTransformOnly();
 
@@ -132,4 +136,8 @@ private:
 
 	//着地時の速度減衰率
 	static inline const float kAttenuationWall = 0.2f;
+
+	// 衝突無効化
+	bool isCollisionDisabled_ = false; 
+
 };
