@@ -21,7 +21,7 @@ public:
 	~TitleScene();
 
 	// デスフラグのgetter
-	bool IsFinished() const { return finished_; }
+	bool IsFinished() const { return isFinished_; }
 
 private:
 	// テクスチャハンドル(リソース読み込むために必要なもの)
@@ -43,5 +43,5 @@ private:
 	uint32_t voiceHandle_ = 0;
 
 	// 終了フラグ
-	bool finished_ = false;
+	bool isFinished_ = false;
 };

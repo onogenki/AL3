@@ -1,4 +1,5 @@
 #include "GameScene.h"
+#include"StageScene.h"
 #include "TitleScene.h"
 #include <KamataEngine.h>
 #include <Windows.h>
@@ -7,6 +8,7 @@ using namespace KamataEngine;
 
 // Sceneはここに
 TitleScene* titleScene = nullptr;
+StageScene* stageScene = nullptr;
 GameScene* gameScene = nullptr;
 
 // シーン
@@ -14,6 +16,7 @@ enum class Scene {
 	kUnKnown = 0,
 
 	kTitle,
+	kStageSelect,
 	kGame,
 };
 
@@ -27,11 +30,23 @@ void ChangeScene() {
 		// タイトル
 	case Scene::kTitle:
 		if (titleScene->IsFinished()) { // 次のシーンへ進むとき
-			scene = Scene::kGame;       // シーン変更
+			scene = Scene::kStageSelect;// シーン変更
 			delete titleScene;          // 旧シーンの解放
 			titleScene = nullptr;
 			// 次のシーンの生成と初期化
-			gameScene = new GameScene;
+			stageScene = new StageScene();
+			stageScene->Initialize();
+		}
+		break;
+
+		//ステージシーン
+	case Scene::kStageSelect:
+		if (stageScene->IsFinished()) {  // 次のシーンへ進むとき
+			scene = Scene::kGame; // シーン変更
+			delete stageScene;           // 旧シーンの解放
+			stageScene = nullptr;
+			// 次のシーンの生成と初期化
+			gameScene = new GameScene();
 			gameScene->Initialize();
 		}
 		break;
@@ -58,9 +73,10 @@ void ChangeScene() {
 				//死んだとき
 				case GameScene::ExitRequest::Death:
 				delete gameScene;
-				gameScene = new GameScene();
-				gameScene->Initialize();
-				scene = Scene::kGame; //再スタート
+				gameScene = nullptr;
+				stageScene = new StageScene();
+				stageScene->Initialize();
+				scene = Scene::kStageSelect; //再スタート
 				break;
 			}
 		}
@@ -74,8 +90,11 @@ void UpdateScene() {
 	case Scene::kTitle:
 		titleScene->Update();
 		break;
+	case Scene::kStageSelect:
+		stageScene->Update();
+		break;
 	case Scene::kGame:
-		gameScene->Update();
+			gameScene->Update();
 		break;
 	}
 }
@@ -86,8 +105,11 @@ void DrawScene() {
 	case Scene::kTitle:
 		titleScene->Draw();
 		break;
+	case Scene::kStageSelect:
+		stageScene->Draw();
+		break;
 	case Scene::kGame:
-		gameScene->Draw();
+			gameScene->Draw();
 		break;
 	}
 }
@@ -151,6 +173,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	// シーンの解放
 	delete titleScene;
+	delete stageScene;
 	delete gameScene;
 
 	// エンジンの終了処理

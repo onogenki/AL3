@@ -1,0 +1,93 @@
+#include "StageScene.h"
+#include "Math.h"
+#include <numbers>
+
+void StageScene::Initialize()
+{
+	phase_ = Phase::kFadeIn;
+	isFinished_ = false;
+	//ステージセレクト1
+	stage1Model_ = Model::CreateFromOBJ("stageSelect1");
+	worldTransformStage1_.Initialize();
+	worldTransformStage1_.scale_ = {10.0f,10.0f,10.0f};
+
+	//player
+	playerModel_ = Model::CreateFromOBJ("needle_Body");
+	worldTransformPlayer_.Initialize();
+	worldTransformPlayer_.translation_.x = -50.0f;
+	worldTransformPlayer_.translation_.z = 35.0f;
+	worldTransformPlayer_.scale_ = {10.0f,10.0f,10.0f};
+	worldTransformPlayer_.rotation_.y = 0.75f * std::numbers::pi_v<float>;
+
+	//spaceフォント
+	textureHandleSpace_ = TextureManager::Load("space.png");
+	spriteSpace_ = Sprite::Create(textureHandleSpace_, {300.0f, 350.0f});
+
+	camera_.Initialize();
+
+	//フェードを持ってくる
+	fade_ = new Fade();
+	fade_->Initialize();
+	// 開幕時フェード時間はここで決める
+	fade_->Start(Fade::Status::FadeIn, 1.0f, Fade::FadeType::Black);
+}
+
+void StageScene::Update()
+{
+
+	fade_->Update();
+	switch (phase_)
+	{//フェードイン 
+	case Phase::kFadeIn:
+
+		if (fade_->IsFinished()) {
+			phase_ = Phase::kMain;
+		}
+		break;
+
+		// メイン
+	case Phase::kMain:
+		// タイトルの終了条件
+		if (Input::GetInstance()->PushKey(DIK_SPACE)) {
+			fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::Black);
+			phase_ = Phase::kFadeOut;
+		}
+		break;
+
+		// フェードアウト
+	case Phase::kFadeOut:
+		if (fade_->IsFinished()) {
+			isFinished_ = true;
+		}
+		break;
+	}
+
+
+	camera_.TransferMatrix();
+	// アフィン変換～DirectXに転送（座標）
+	WorldTransformUpdate(worldTransformStage1_);
+	WorldTransformUpdate(worldTransformPlayer_);
+}
+
+void StageScene::Draw()
+{ 
+	DirectXCommon* dxCommon = DirectXCommon::GetInstance();
+
+	// 3Dモデル描画前処理
+	Model::PreDraw(dxCommon->GetCommandList());
+	stage1Model_->Draw(worldTransformStage1_, camera_);
+	playerModel_->Draw(worldTransformPlayer_, camera_);
+
+	// 3Dモデル描画後処理
+	Model::PostDraw();
+
+	Sprite::PreDraw(DirectXCommon::GetInstance()->GetCommandList());
+	fade_->Draw();
+	spriteSpace_->Draw();
+	Sprite::PostDraw();
+}
+
+StageScene::~StageScene() { 
+	delete playerModel_;
+	delete stage1Model_;
+	delete fade_; }

@@ -696,6 +696,7 @@ GameScene::~GameScene() {
 	for (DeathParticles* deathParticles : deathParticlesList_) {
 		delete deathParticles;
 	}
+	deathParticlesList_.clear();
 	delete deathParticle_;//player
 	delete debugCamera_;
 	delete blockModel_;

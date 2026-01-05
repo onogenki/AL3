@@ -44,7 +44,7 @@ void TitleScene::Update() {
 		// フェードアウト
 	case Phase::kFadeOut:
 		if (fade_->IsFinished()) {
-			finished_ = true;
+			isFinished_ = true;
 		}
 		break;
 	}
