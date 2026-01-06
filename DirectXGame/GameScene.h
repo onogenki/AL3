@@ -137,6 +137,10 @@ private:
 	uint32_t textureHandleSpace_ = 0;
 	Sprite* spriteSpace_ = nullptr;
 
+	// ポーズ選択
+	uint32_t textureHandleClear_ = 0;
+	Sprite* spriteClear_ = nullptr;
+
 	// マップチップフィールド
 	MapChipField* mapChipField_;
 

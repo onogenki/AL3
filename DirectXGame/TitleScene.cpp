@@ -3,6 +3,9 @@
 #include "Math.h"
 
 void TitleScene::Initialize() {
+
+	// カメラ初期化
+	camera_.Initialize();
 	// スプライト画像読み込み
 	textureHandleTitle_ = TextureManager::Load("2DTitle3D.png");
 	textureHandleSpace_ = TextureManager::Load("space.png");
@@ -11,6 +14,11 @@ void TitleScene::Initialize() {
 	spriteTitle_ = Sprite::Create(textureHandleTitle_, {100.0f, 50.0f});
 	spriteSpace_ = Sprite::Create(textureHandleSpace_, {100.0f, 350.0f});
 
+	// 天球
+	skydome_ = new Skydome();
+	// trueにすると反転描画になり、内側から見れる(天球用)
+	skyDomeModel_ = Model::CreateFromOBJ("sky_under", true);
+	skydome_->Initialize(skyDomeModel_, &camera_);
 	// フェードを持ってくる
 	fade_ = new Fade();
 	fade_->Initialize();
@@ -26,7 +34,6 @@ void TitleScene::Update() {
 
 		// フェードイン
 	case Phase::kFadeIn:
-
 		if (fade_->IsFinished()) {
 			phase_ = Phase::kMain;
 		}
@@ -60,6 +67,8 @@ void TitleScene::Draw() {
 	// 描画処理前処理
 	Model::PreDraw(commandList);
 
+	skydome_->Draw();
+
 	// 描画処理後処理
 	Model::PostDraw();
 
@@ -78,4 +87,7 @@ void TitleScene::Draw() {
 	Sprite::PostDraw();
 }
 
-TitleScene::~TitleScene() { delete fade_; }
+TitleScene::~TitleScene() { 
+	delete fade_;
+	delete skyDomeModel_;
+}

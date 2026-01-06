@@ -4,6 +4,7 @@
 
 void StageScene::Initialize()
 {
+
 	//ステージセレクト1
 	stage1Model_ = Model::CreateFromOBJ("stageSelect1");
 	worldTransformStage1_.Initialize();
@@ -28,6 +29,11 @@ void StageScene::Initialize()
 	fade_->Initialize();
 	// 開幕時フェード時間はここで決める
 	fade_->Start(Fade::Status::FadeIn, 1.0f, Fade::FadeType::Black);
+	// 天球
+	skydome_ = new Skydome();
+	// trueにすると反転描画になり、内側から見れる(天球用)
+	skyDomeModel_ = Model::CreateFromOBJ("sky_under", true);
+	skydome_->Initialize(skyDomeModel_, &camera_);
 	
 	//リセット
 	phase_ = Phase::kFadeIn;
@@ -41,7 +47,6 @@ void StageScene::Update()
 	switch (phase_)
 	{//フェードイン 
 	case Phase::kFadeIn:
-
 		if (fade_->IsFinished()) {
 			phase_ = Phase::kMain;
 		}
@@ -77,6 +82,7 @@ void StageScene::Draw()
 
 	// 3Dモデル描画前処理
 	Model::PreDraw(dxCommon->GetCommandList());
+	skydome_->Draw();
 	stage1Model_->Draw(worldTransformStage1_, camera_);
 	playerModel_->Draw(worldTransformPlayer_, camera_);
 
@@ -89,7 +95,9 @@ void StageScene::Draw()
 	Sprite::PostDraw();
 }
 
-StageScene::~StageScene() { 
+StageScene::~StageScene() {
 	delete playerModel_;
 	delete stage1Model_;
-	delete fade_; }
+	delete fade_;
+	delete skyDomeModel_;
+}

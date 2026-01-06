@@ -73,7 +73,7 @@ void GameScene::Initialize() {
 	// 天球
 	skydome_ = new Skydome();
 	// trueにすると反転描画になり、内側から見れる(天球用)
-	skyDomeModel_ = Model::CreateFromOBJ("skydome", true);
+	skyDomeModel_ = Model::CreateFromOBJ("sky_under", true);
 	skydome_->Initialize(skyDomeModel_, &camera_);
 
 	// TABキーでポーズ
@@ -101,6 +101,9 @@ void GameScene::Initialize() {
 	// spaceフォント
 	textureHandleSpace_ = TextureManager::Load("space.png");
 	spriteSpace_ = Sprite::Create(textureHandleSpace_, {300.0f, 100.0f});
+	// spaceフォント
+	textureHandleClear_ = TextureManager::Load("Game Clear.png");
+	spriteClear_ = Sprite::Create(textureHandleClear_, {300.0f, 0.0f});
 
 	// ライン描画が参照するカメラを指定する(アドレス渡し)
 	PrimitiveDrawer::GetInstance()->SetCamera(&camera_);
@@ -516,11 +519,11 @@ void GameScene::Draw() {
 		// 3Dモデル描画前処理
 		Model::PreDraw(dxCommon->GetCommandList());
 
+		skydome_->Draw();
 		player_->Draw();
 		for (Enemy* enemy : enemies_) {
 			enemy->Draw();
 		}
-		skydome_->Draw();
 
 		// ブロックの描画
 		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
@@ -734,7 +737,8 @@ void GameScene::Draw() {
 		//spaceキー
 		spriteSpace_->SetColor({0.0f, 0.0f, 0.0f, 0.9f});
 		spriteSpace_->Draw();
-
+		spriteClear_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+		spriteClear_->Draw();
 		Sprite::PostDraw();
 
 		break;

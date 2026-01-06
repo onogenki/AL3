@@ -1,6 +1,7 @@
 #pragma once
 #include "Fade.h"
 #include "KamataEngine.h"
+#include "Skydome.h"
 
 using namespace KamataEngine;
 
@@ -31,6 +32,11 @@ private:
 	Sprite* spriteTitle_ = nullptr;
 	Sprite* spriteSpace_ = nullptr;
 
+	// 天球
+	Skydome* skydome_ = nullptr;
+	Model* skyDomeModel_ = nullptr;
+	// カメラ
+	Camera camera_;
 	// 暗転フェード
 	Fade* fade_ = nullptr;
 

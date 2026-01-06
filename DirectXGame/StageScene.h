@@ -2,6 +2,7 @@
 #include "Fade.h"
 #include "KamataEngine.h"
 #include "Player.h"
+#include "Skydome.h"
 
 using namespace KamataEngine;
 
@@ -49,4 +50,7 @@ public:
 	    // スプライト(2D表示物)
 	    Sprite* spriteSpace_ = nullptr;
 
+		// 天球
+	    Skydome* skydome_ = nullptr;
+	    Model* skyDomeModel_ = nullptr;
 };
