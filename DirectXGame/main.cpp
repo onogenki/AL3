@@ -55,28 +55,36 @@ void ChangeScene() {
 	case Scene::kGame:
 		if (gameScene->IsFinished()) { // 次のシーンへ進むとき
 			switch (gameScene->GetExitRequest()) {
-				//リトライするとき
+				// リトライするとき
 			case GameScene::ExitRequest::Retry:
 				delete gameScene;
 				gameScene = new GameScene();
 				gameScene->Initialize();
-				scene = Scene::kGame;//再スタート
+				scene = Scene::kGame; // 再スタート
 				break;
-				//タイトルに戻るとき
+				// タイトルに戻るとき
 			case GameScene::ExitRequest::Title:
 				delete gameScene;
 				gameScene = nullptr;
 				titleScene = new TitleScene();
 				titleScene->Initialize();
-				scene = Scene::kTitle;//タイトルに戻る
+				scene = Scene::kTitle; // タイトルに戻る
 				break;
-				//死んだとき
-				case GameScene::ExitRequest::Death:
+			// 死んだとき
+			case GameScene::ExitRequest::Death:
 				delete gameScene;
 				gameScene = nullptr;
 				stageScene = new StageScene();
 				stageScene->Initialize();
-				scene = Scene::kStageSelect; //再スタート
+				scene = Scene::kStageSelect; // ステージセレクトへ
+				break;
+			// クリアしたら
+			case GameScene::ExitRequest::Clear:
+				delete gameScene;
+				gameScene = nullptr;
+				stageScene = new StageScene();
+				stageScene->Initialize();
+				scene = Scene::kStageSelect; // ステージセレクトへ
 				break;
 			}
 		}

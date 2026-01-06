@@ -43,6 +43,19 @@ void GameScene::Initialize() {
 		enemies_.push_back(newEnemy);
 	}
 
+	///
+	///ゴールドア
+	///
+	goal_ = new Goal();
+	BlackGoalModel_ = Model::CreateFromOBJ("BlackGoal");//黒いドア
+	LeftOpenGoalModel_ = Model::CreateFromOBJ("LeftGoal");//左のドア
+	RightOpenGoalModel_ = Model::CreateFromOBJ("RightGoal");//右のドア
+
+	Vector3 GoalPosition = mapChipField_->GetMapChipPositionByIndex(35, 18);
+	goal_->Initialize(BlackGoalModel_, LeftOpenGoalModel_, RightOpenGoalModel_, &camera_, GoalPosition);
+	goal_->SetMapChipField(mapChipField_);
+
+
 
 	// デスパーティクル
 	deathParticlesModel_ = Model::CreateFromOBJ("deathParticle");
@@ -83,6 +96,10 @@ void GameScene::Initialize() {
 	// ポーズ画面タイトルに戻る
 	PauseEnter_ = TextureManager::Load("2DPauseEnter3D.png");
 	SpritePauseEnter_ = Sprite::Create(PauseEnter_, {950.0f, 250.0f});
+
+	// spaceフォント
+	textureHandleSpace_ = TextureManager::Load("space.png");
+	spriteSpace_ = Sprite::Create(textureHandleSpace_, {300.0f, 100.0f});
 
 	// ライン描画が参照するカメラを指定する(アドレス渡し)
 	PrimitiveDrawer::GetInstance()->SetCamera(&camera_);
@@ -158,36 +175,38 @@ void GameScene::GeneratedBlocks() {
 	}
 }
 
-void GameScene::CheckAllCollision() 
-{ 
+//当たり判定(クリア、死ぬ判定)
+void GameScene::CheckAllCollision() {
 
-	 if (phase_ != Phase::kPlay) {
+	if (phase_ != Phase::kPlay) {
 		return;
 	}
 
 	AABB playerAABB = player_->GetAABB();
 
-	for (Enemy* enemy:enemies_) {
+	for (Enemy* enemy : enemies_) {
 		AABB enemyAABB = enemy->GetAABB();
 		// コリジョン無効の敵はスキップ
 		if (enemy->IsCollisionDisabled())
-			continue; 
-		//当たってるか
+			continue;
+		// 当たってるか
 		if (!IsCollision(playerAABB, enemyAABB)) {
 			continue;
 		}
 
-		//高さ判定
+		// 高さ判定
 		playerFootY = playerAABB.min.y;
 		enemyHeadY = enemyAABB.max.y;
 
-		//落下中か
+		// 落下中か
 		isFalling = player_->GetVelocity().y < 0.0f;
 
-		//当たった時
+		///
+		/// player,enemyの当たった時
+		///
 		if (isFalling && playerFootY > enemyHeadY - player_->GetkBlank()) {
-			player_->Bounce(); // 跳ねる
-			enemy->OnCollision(player_);//敵が倒れる
+			player_->Bounce();           // 跳ねる
+			enemy->OnCollision(player_); // 敵が倒れる
 
 			DeathParticles* deathParticles = new DeathParticles();
 			deathParticles->Initialize(deathParticlesModel_, &camera_, enemy->GetWorldPosition());
@@ -199,7 +218,7 @@ void GameScene::CheckAllCollision()
 		} else { // player倒れる
 			{
 				if (!player_->IsDead()) {
-						player_->OnCollision(enemy); // playerが倒れる
+					player_->OnCollision(enemy); // playerが倒れる
 					if (!deathParticle_) {
 						deathParticle_ = new DeathParticles;
 						const Vector3& deathParticlesPosition = player_->GetWorldPosition();
@@ -213,6 +232,17 @@ void GameScene::CheckAllCollision()
 				}
 			}
 		}
+	}
+	///
+	/// ゴール当たり判定
+	///
+	AABB goalAABB = goal_->GetAABB();
+	IsGoalSpace_ = IsCollision(playerAABB, goalAABB);
+	if (IsCollision(playerAABB, goalAABB)) {
+		goal_->OnCollision(player_);
+	}
+	if (goal_->IsOpen()) {
+		phase_ = Phase::kClear; // ドアが開いたらクリアシーンに
 	}
 }
 
@@ -292,7 +322,7 @@ void GameScene::Update() {
 			for (DeathParticles* deathParticles : deathParticlesList_) {
 				deathParticles->Update();
 			}
-
+			goal_->Update();
 			CController_->Update();
 
 #ifdef _DEBUG // デバックビルドのみ見れる
@@ -310,7 +340,7 @@ void GameScene::Update() {
 			// デモウィンドウの表示を有効化
 			ImGui::ShowDemoWindow();
 
-			if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+			if (Input::GetInstance()->TriggerKey(DIK_P)) {
 				isDebugCameraActive_ = !isDebugCameraActive_;
 			}
 
@@ -427,7 +457,7 @@ void GameScene::Update() {
 	case Phase::kDeath:
 		//skydome_->Update();
 
-		//enemy
+		//playerのデスパーティクルが終わるまで
 		if (deathParticle_ && deathParticle_->IsFinished()) {
 			phase_ = Phase::kFadeOut;
 		}
@@ -435,12 +465,7 @@ void GameScene::Update() {
 		if (deathParticle_) {
 			deathParticle_->Update();
 		}
-		for (Enemy* enemy : enemies_) {
-			enemy->Update();
-		}
-		for (DeathParticles* deathParticles : deathParticlesList_) {
-			deathParticles->Update();
-		}
+		
 		// ブロックの更新
 		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 			for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
@@ -449,6 +474,20 @@ void GameScene::Update() {
 				// アフィン変換～DirectXに転送
 				WorldTransformUpdate(*worldTransformBlock);
 			}
+		}
+
+		break;
+
+		//クリア
+	case Phase::kClear:
+		
+		//player_->Update();
+		goal_->Update();
+
+		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+			exitRequest_ = ExitRequest::Clear;
+			fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);
+			phase_ = Phase::kFadeOut;
 		}
 
 		break;
@@ -511,6 +550,7 @@ void GameScene::Draw() {
 		{
 			enemy->Draw();
 		}
+		goal_->Draw();
 
 		// enemyデスパーティクルあれば描画
 		for (DeathParticles* deathParticles : deathParticlesList_) {
@@ -606,7 +646,11 @@ void GameScene::Draw() {
 				SpritePauseEnter_->Draw();
 			}
 		}
-
+		//ドアの前だとドア開けるspace描画
+		if (!isPause_&&IsGoalSpace_ && goal_->GetState() == Goal::State::kCanOpen) {
+			spriteSpace_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+			spriteSpace_->Draw();
+		}
 		// スプライト描画後処理
 		Sprite::PostDraw();
 
@@ -647,6 +691,44 @@ void GameScene::Draw() {
 		Sprite::PreDraw(dxCommon->GetCommandList());
 
 		fade_->Draw();
+
+		Sprite::PostDraw();
+
+		break;
+
+		//クリア
+	case GameScene::Phase::kClear:
+
+		// 3Dモデル描画前処理
+		Model::PreDraw(dxCommon->GetCommandList());
+
+		skydome_->Draw();
+		player_->Draw();
+		for (Enemy* enemy : enemies_) {
+			enemy->Draw();
+		}
+		goal_->Draw();
+
+		// ブロックの描画
+		for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+			for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
+				if (!worldTransformBlock)
+					continue;
+				blockModel_->Draw(*worldTransformBlock, camera_);
+			}
+		}
+
+		// 3Dモデル描画後処理
+		Model::PostDraw();
+
+		// スプライト描画処理前処理
+		Sprite::PreDraw(dxCommon->GetCommandList());
+
+		fade_->Draw();
+		
+		//spaceキー
+		spriteSpace_->SetColor({0.0f, 0.0f, 0.0f, 0.9f});
+		spriteSpace_->Draw();
 
 		Sprite::PostDraw();
 
@@ -700,6 +782,10 @@ GameScene::~GameScene() {
 	delete deathParticle_;//player
 	delete debugCamera_;
 	delete blockModel_;
+	delete goal_;
+	delete BlackGoalModel_;
+	delete LeftOpenGoalModel_;
+	delete RightOpenGoalModel_;
 	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
 		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
 			delete worldTransformBlock;
@@ -715,4 +801,5 @@ GameScene::~GameScene() {
 	delete SpritePauseRetry_;
 	delete SpritePauseTitle_;
 	delete SpritePauseEnter_;
+	delete spriteSpace_;
 }

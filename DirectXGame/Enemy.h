@@ -1,7 +1,6 @@
 #pragma once
 #include"KamataEngine.h"
 #include "Player.h"
-
 #include "math.h"
 
 using namespace KamataEngine;

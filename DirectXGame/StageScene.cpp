@@ -4,8 +4,6 @@
 
 void StageScene::Initialize()
 {
-	phase_ = Phase::kFadeIn;
-	isFinished_ = false;
 	//ステージセレクト1
 	stage1Model_ = Model::CreateFromOBJ("stageSelect1");
 	worldTransformStage1_.Initialize();
@@ -30,6 +28,10 @@ void StageScene::Initialize()
 	fade_->Initialize();
 	// 開幕時フェード時間はここで決める
 	fade_->Start(Fade::Status::FadeIn, 1.0f, Fade::FadeType::Black);
+	
+	//リセット
+	phase_ = Phase::kFadeIn;
+	isFinished_ = false;
 }
 
 void StageScene::Update()

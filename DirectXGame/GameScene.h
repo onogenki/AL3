@@ -8,6 +8,7 @@
 #include "Skydome.h"
 #include"Enemy.h"
 #include"DeathParticles.h"
+#include"Goal.h"
 #include <vector>
 using namespace KamataEngine;
 
@@ -19,6 +20,7 @@ public:
 		kFadeIn,  // フェードイン
 		kPlay,    // ゲームプレイ
 		kDeath,   // デス演出
+		kClear,   //クリア演出
 		kFadeOut, // フェードアウト
 	};
 
@@ -37,6 +39,7 @@ public:
 		Retry,//リトライしたら
 		Title,//タイトルに戻る押したら
 		Death,//死んだら
+		Clear,//クリアしたら
 	};
 
 	// 初期化
@@ -79,6 +82,12 @@ private:
 	//enemy
 	Model* enemyModel_ = nullptr;
 	std::list<Enemy*> enemies_;
+
+	//ドア
+	Goal* goal_ = nullptr;
+	Model* BlackGoalModel_ = nullptr; 
+	Model* LeftOpenGoalModel_ = nullptr; 
+	Model* RightOpenGoalModel_ = nullptr;
 
 	// ブロック
 	Model* blockModel_ = nullptr;
@@ -123,6 +132,11 @@ private:
 	//ポーズ選択
 	uint32_t PauseEnter_ = 0;
 	Sprite* SpritePauseEnter_ = nullptr;
+
+	//spaceキー
+	uint32_t textureHandleSpace_ = 0;
+	Sprite* spriteSpace_ = nullptr;
+
 	// マップチップフィールド
 	MapChipField* mapChipField_;
 
@@ -163,4 +177,7 @@ private:
 	CameraController* CController_ = nullptr;
 
 	bool finished_ = false;
+
+	bool IsGoalSpace_;
+
 };

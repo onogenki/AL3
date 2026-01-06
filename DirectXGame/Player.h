@@ -4,14 +4,19 @@
 
 using namespace KamataEngine;
 
-class GameScene;
 //ヘッダ側ではポインタを持つだけなので前方宣言のほうが依存関係薄くなる
+class GameScene;
 class MapChipField;
-
 class Enemy;
+class Goal;
 
 class Player {
 public:
+
+	enum Behavior {
+		kWalk,         // 歩行状態
+		kClear,         // クリア
+	};
 
 	// 左右
 	enum class LRDirection {
