@@ -68,6 +68,9 @@ public:
 	void CheckMapCollisionRight(CollisionMapInfo& info);
 	void CheckMapCollisionLeft(CollisionMapInfo& info);
 
+	//クリアモーション
+	void UpdateClearMove();
+
 	//角っこ
 	Vector3 CornerPosition(const Vector3& center, Corner corner);
 
@@ -81,13 +84,21 @@ public:
 	const WorldTransform& GetWorldTransform() const { return worldTransform_; }
 	const Vector3& GetVelocity() const { return velocity_; }//速度
 	const float GetkBlank() const { return kBlank_; }//敵とplayerの当たるまでの空白
-	bool IsDead() const { return isDead_; }//デスフラグ
+	Behavior GetBehavior() const { return behavior_; } // 状態取得
+
+	// クリア後フラグ
+	bool IsClearMotionFinished() const { return isClearMotionFinished_; } 
+	// デスフラグ
+	bool IsDead() const { return isDead_; }
 
 	void Bounce();
 
 	void OnCollision(const Enemy* enemy);
 
 	bool IsCollisionDisabled() const { return isCollisionDisabled_; }
+
+	// seeter 状態変更
+	void SetBehavior(Behavior behavior) { behavior_ = behavior; }
 
 	//kFadeInでplayerを描画させるもの
 	void UpdateTransformOnly();
@@ -141,6 +152,14 @@ private:
 
 	//着地時の速度減衰率
 	static inline const float kAttenuationWall = 0.2f;
+
+	//クリアモーション
+	Behavior behavior_ = Behavior::kWalk;
+	static inline const float kClearTime_ = 0.6f;
+	static inline const float kClearMotionAngleStart_ = 0.0f;
+	static inline const float kClearMotionAngleEnd_ = -60.0f;
+	float counter_ = 0.0f; // カウンター
+	bool isClearMotionFinished_ = false;//クリアモーション止める
 
 	// 衝突無効化
 	bool isCollisionDisabled_ = false; 

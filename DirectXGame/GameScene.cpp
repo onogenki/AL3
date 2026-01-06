@@ -51,6 +51,7 @@ void GameScene::Initialize() {
 	LeftOpenGoalModel_ = Model::CreateFromOBJ("LeftGoal");//左のドア
 	RightOpenGoalModel_ = Model::CreateFromOBJ("RightGoal");//右のドア
 
+	IsGoalSpace_ = false;
 	Vector3 GoalPosition = mapChipField_->GetMapChipPositionByIndex(35, 18);
 	goal_->Initialize(BlackGoalModel_, LeftOpenGoalModel_, RightOpenGoalModel_, &camera_, GoalPosition);
 	goal_->SetMapChipField(mapChipField_);
@@ -236,10 +237,14 @@ void GameScene::CheckAllCollision() {
 	///
 	/// ゴール当たり判定
 	///
+	IsGoalSpace_ = false;
 	AABB goalAABB = goal_->GetAABB();
 	IsGoalSpace_ = IsCollision(playerAABB, goalAABB);
 	if (IsCollision(playerAABB, goalAABB)) {
 		goal_->OnCollision(player_);
+	}//クリアモーション
+	if (goal_->IsOpening()) {
+		player_->SetBehavior(Player::Behavior::kClear);
 	}
 	if (goal_->IsOpen()) {
 		phase_ = Phase::kClear; // ドアが開いたらクリアシーンに
@@ -481,10 +486,10 @@ void GameScene::Update() {
 		//クリア
 	case Phase::kClear:
 		
-		//player_->Update();
+		player_->Update();
 		goal_->Update();
 
-		if (Input::GetInstance()->TriggerKey(DIK_SPACE)) {
+		if (Input::GetInstance()->TriggerKey(DIK_SPACE) && player_->IsClearMotionFinished()) {
 			exitRequest_ = ExitRequest::Clear;
 			fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);
 			phase_ = Phase::kFadeOut;

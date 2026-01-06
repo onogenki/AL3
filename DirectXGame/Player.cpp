@@ -344,9 +344,44 @@ void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 	}
 }
 
+//クリアモーション
+void Player::UpdateClearMove() {
+	//終わったら何もしない
+	if (isClearMotionFinished_) {
+		return;
+	}
+
+
+	// 入力は無視
+	velocity_ = {};
+
+	counter_ += 1.0f / 60.0f;
+	worldTransform_.rotation_.y += 0.3f;
+	worldTransform_.rotation_.x = EaseOut(ToRadians(kClearMotionAngleStart_), ToRadians(kClearMotionAngleEnd_), counter_ / kClearTime_);
+	//歩かせる
+	worldTransform_.translation_.x -= 0.05f;
+	worldTransform_.translation_.z -= 0.05f;
+
+	WorldTransformUpdate(worldTransform_);
+	// アニメーションのタイマーが一定時間に達したら止める
+	if (counter_ >= kClearTime_) {
+		isClearMotionFinished_ = true;
+	}
+}
+
+
 void Player::Update() {
 
+	switch (behavior_)
+	{ case Behavior::kWalk:
 	InputMove();
+		break;
+
+		case Behavior::kClear:
+		UpdateClearMove(); 
+			break;
+	}
+
 
 	//衝突情報を初期化
 	CollisionMapInfo collisionMapInfo;

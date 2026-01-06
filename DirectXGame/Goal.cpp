@@ -27,6 +27,9 @@ void Goal::Initialize(Model* goalBModel, Model* goalLOModel, Model* goalROModel,
 	worldTransformLO_.translation_ = worldTransformB_.translation_;
 	worldTransformRO_.translation_ = worldTransformB_.translation_;
 	camera_ = camera;
+	WorldTransformUpdate(worldTransformB_);
+	WorldTransformUpdate(worldTransformLO_);
+	WorldTransformUpdate(worldTransformRO_);
 }
 
 Vector3 Goal::GetWorldPosition() const {
