@@ -106,6 +106,8 @@
     <None Include="Resources\shaders\Terrain.hlsli">
       <Filter>シェーダー ファイル</Filter>
     </None>
+    <None Include="..\..\..\..\Downloads\exclusion.dic" />
+    <None Include=".editorconfig" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GameScene.h">

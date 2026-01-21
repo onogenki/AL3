@@ -123,8 +123,8 @@ private:
 	uint32_t PauseTitle_ = 0;
 	Sprite* SpritePauseTitle_ = nullptr;
 	//ポーズ画面リザルトへ
-	uint32_t PauseResum_ = 0;
-	Sprite* SpritePauseResum_ = nullptr;
+	uint32_t PauseResume_ = 0;
+	Sprite* SpritePauseResume_ = nullptr;
 	//ポーズ画面リトライへ
 	uint32_t PauseRetry_ = 0;
 	Sprite* SpritePauseRetry_ = nullptr;

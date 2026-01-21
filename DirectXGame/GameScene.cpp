@@ -85,8 +85,8 @@ void GameScene::Initialize() {
 	SpritePauseFont_ = Sprite::Create(PauseFont_, {450.0f, -100.0f});
 
 	//ポーズ画面続ける
-	PauseResum_ = TextureManager::Load("2DResumPause3D.png");
-	SpritePauseResum_ = Sprite::Create(PauseResum_, {450.0f, 50.0f});
+	PauseResume_ = TextureManager::Load("2DResumPause3D.png");
+	SpritePauseResume_ = Sprite::Create(PauseResume_, {450.0f, 50.0f});
 	//ポーズ画面リトライ
 	PauseRetry_ = TextureManager::Load("2DRetryPause3D.png");
 	SpritePauseRetry_ = Sprite::Create(PauseRetry_, {450.0f, 150.0f});
@@ -622,8 +622,8 @@ void GameScene::Draw() {
 			if (currentPauseState_ == PauseState::Resume) {
 				SpritePauseFont_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
 				SpritePauseFont_->Draw();
-				SpritePauseResum_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
-				SpritePauseResum_->Draw();
+				SpritePauseResume_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+				SpritePauseResume_->Draw();
 				SpritePauseRetry_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
 				SpritePauseRetry_->Draw();
 				SpritePauseTitle_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
@@ -633,8 +633,8 @@ void GameScene::Draw() {
 			} else if (currentPauseState_ == PauseState::Retry) {
 				SpritePauseFont_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
 				SpritePauseFont_->Draw();
-				SpritePauseResum_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
-				SpritePauseResum_->Draw();
+				SpritePauseResume_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
+				SpritePauseResume_->Draw();
 				SpritePauseRetry_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
 				SpritePauseRetry_->Draw();
 				SpritePauseTitle_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
@@ -644,8 +644,8 @@ void GameScene::Draw() {
 			} else if (currentPauseState_ == PauseState::Title) {
 				SpritePauseFont_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
 				SpritePauseFont_->Draw();
-				SpritePauseResum_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
-				SpritePauseResum_->Draw();
+				SpritePauseResume_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
+				SpritePauseResume_->Draw();
 				SpritePauseRetry_->SetColor({0.0f, 0.0f, 0.0f, 0.4f});
 				SpritePauseRetry_->Draw();
 				SpritePauseTitle_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
@@ -795,18 +795,18 @@ GameScene::~GameScene() {
 	delete BlackGoalModel_;
 	delete LeftOpenGoalModel_;
 	delete RightOpenGoalModel_;
-	for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
-		for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
-			delete worldTransformBlock;
-		}
-	}
+	//for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+	//	for (WorldTransform* worldTransformBlock : worldTransformBlockLine) {
+	//		delete worldTransformBlock;
+	//	}
+	//}
 	worldTransformBlocks_.clear();
 	delete skyDomeModel_;
 	delete mapChipField_;
 	delete deathParticlesModel_;
 	delete SpriteTABFont_;
 	delete SpritePauseFont_;
-	delete SpritePauseResum_;
+	delete SpritePauseResume_;
 	delete SpritePauseRetry_;
 	delete SpritePauseTitle_;
 	delete SpritePauseEnter_;
