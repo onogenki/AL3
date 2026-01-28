@@ -109,7 +109,7 @@ public:
 
 
 		//歩行の速さ
-	    static inline const float kWalkSpeed_ = 0.009f;
+	    static inline const float kWalkSpeed_ = 0.02f;
 
 		// 当たり判定サイズ
 	    static inline const float kWidth_ = 0.8f;
@@ -130,12 +130,12 @@ public:
 	    // 旋回タイマー
 	    float turnTimer_ = 0.0f;
 	    // 旋回時間 <秒>
-	    static inline const float kTimeTurn = 0.3f;
+	    static inline const float kTimeTurn = 0.45f;
 	    // 着地フラグ
 	    bool onGround_ = true;
 
-		static inline const float kGravityAcceleration = 0.98f / 60.0f; // 重力加速度(下方向)
-	    static inline const float kLimitFallSpeed = 0.5f;               // 最大落下速度(下方向)
+		static inline const float kGravityAcceleration = 0.98f / 40.0f; // 重力加速度(下方向)
+	    static inline const float kLimitFallSpeed = 4.8f;               // 最大落下速度(下方向)
 
 		// 微小な数値
 	    static inline const float kGroundSearchHeight = 0.06f;
