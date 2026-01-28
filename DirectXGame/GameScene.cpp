@@ -413,24 +413,30 @@ void GameScene::Update() {
 
 			// 再開画面
 			if (currentPauseState_ == PauseState::Resume) {
-				if (Input::GetInstance()->TriggerKey(DIK_UP)) {
+				if (Input::GetInstance()->TriggerKey(DIK_UP) ||
+					Input::GetInstance()->TriggerKey(DIK_W)) {
 					currentPauseState_ = PauseState::Title;
-				} else if (Input::GetInstance()->TriggerKey(DIK_DOWN)) {
+				} else if (Input::GetInstance()->TriggerKey(DIK_DOWN)|| 
+					Input::GetInstance()->TriggerKey(DIK_S)) {
 					currentPauseState_ = PauseState::Retry;
 				}
 				if (Input::GetInstance()->TriggerKey(DIK_RETURN)|| 
-					Input::GetInstance()->TriggerKey(DIK_TAB)) {
+					Input::GetInstance()->TriggerKey(DIK_TAB)||
+				Input::GetInstance()->TriggerKey(DIK_SPACE)){
 					isPause_ = false;
 				}
 
 				// リトライ画面
 			} else if (currentPauseState_ == PauseState::Retry) {
-				if (Input::GetInstance()->TriggerKey(DIK_UP)) {
+				if (Input::GetInstance()->TriggerKey(DIK_UP) || 
+					Input::GetInstance()->TriggerKey(DIK_W)) {
 					currentPauseState_ = PauseState::Resume;
-				} else if (Input::GetInstance()->TriggerKey(DIK_DOWN)) {
+				} else if (Input::GetInstance()->TriggerKey(DIK_DOWN)|| 
+					Input::GetInstance()->TriggerKey(DIK_S)) {
 					currentPauseState_ = PauseState::Title;
 				}
-				if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+				if (Input::GetInstance()->TriggerKey(DIK_RETURN)|| 
+					Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 					exitRequest_ = ExitRequest::Retry;
 					fade_->Start(Fade::Status::FadeOut, 0.5f, Fade::FadeType::Black);
 					phase_ = Phase::kFadeOut;
@@ -441,12 +447,15 @@ void GameScene::Update() {
 				}
 				//タイトルに戻る画面
 			} else if (currentPauseState_ == PauseState::Title) {
-				if (Input::GetInstance()->TriggerKey(DIK_UP)) {
+				if (Input::GetInstance()->TriggerKey(DIK_UP) || 
+					Input::GetInstance()->TriggerKey(DIK_W)) {
 					currentPauseState_ = PauseState::Retry;
-				} else if (Input::GetInstance()->TriggerKey(DIK_DOWN)) {
+				} else if (Input::GetInstance()->TriggerKey(DIK_DOWN) ||
+					Input::GetInstance()->TriggerKey(DIK_S)) {
 					currentPauseState_ = PauseState::Resume;
 				}
-				if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+				if (Input::GetInstance()->TriggerKey(DIK_RETURN)||
+					Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 					// タイトルに戻る
 					exitRequest_ = ExitRequest::Title;
 					fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);

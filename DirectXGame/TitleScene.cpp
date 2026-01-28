@@ -7,12 +7,12 @@ void TitleScene::Initialize() {
 	// カメラ初期化
 	camera_.Initialize();
 	// スプライト画像読み込み
-	textureHandleTitle_ = TextureManager::Load("2DTitle3D.png");
+	textureHandleTitle_ = TextureManager::Load("TitleMgrb.png");
 	textureHandleSpace_ = TextureManager::Load("space.png");
 
 	// スプライト利用
-	spriteTitle_ = Sprite::Create(textureHandleTitle_, {100.0f, 50.0f});
-	spriteSpace_ = Sprite::Create(textureHandleSpace_, {100.0f, 350.0f});
+	spriteTitle_ = Sprite::Create(textureHandleTitle_, {450.0f, 50.0f});
+	spriteSpace_ = Sprite::Create(textureHandleSpace_, {350.0f, 350.0f});
 
 	// 天球
 	skydome_ = new Skydome();
