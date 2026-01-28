@@ -243,7 +243,7 @@ void Player::CheckMapCollisionDown(CollisionMapInfo& info) {
 // 右方向判定
 void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
 
-	// 上昇ありか
+	// 左移動か
 	if (info.move.x <= 0) {
 		return;
 	}
@@ -295,7 +295,7 @@ void Player::CheckMapCollisionRight(CollisionMapInfo& info) {
 // 左方向判定
 void Player::CheckMapCollisionLeft(CollisionMapInfo& info) {
 
-	// 上昇ありか
+	// 右移動か
 	if (info.move.x >= 0) {
 		return;
 	}
@@ -372,14 +372,14 @@ void Player::UpdateClearMove() {
 
 void Player::Update() {
 
-	switch (behavior_)
-	{ case Behavior::kWalk:
-	InputMove();
+	switch (behavior_) {
+	case Behavior::kWalk:
+		InputMove();
 		break;
 
-		case Behavior::kClear:
-		UpdateClearMove(); 
-			break;
+	case Behavior::kClear:
+		UpdateClearMove();
+		break;
 	}
 
 
@@ -411,7 +411,7 @@ void Player::Update() {
 	if (turnTimer_ > 0.0f) {
 		// 旋回タイマーを1/60秒だけカウントダウンする
 		turnTimer_ = std::max(turnTimer_ - (1.0f / 60.0f), 0.0f);
-		// 左右の自キャラ角度テーブル
+		// 左右の自キャラ角度テーブル                                  右向き                                左向き
 		float destinationRotationYTable[] = {std::numbers::pi_v<float> / 1.5f, std::numbers::pi_v<float> * 3.0f / 2.32f};
 		// 状態に応じた目標角度を取得する
 		float destinationRotationY = destinationRotationYTable[static_cast<uint32_t>(lrDirection_)];

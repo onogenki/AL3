@@ -13,16 +13,18 @@ class Goal;
 class Player {
 public:
 
-	enum Behavior {
-		kWalk,         // 歩行状態
-		kClear,         // クリア
-	};
-
 	// 左右
 	enum class LRDirection {
 		kRight,
 		kLeft,
 	};
+
+	//アクション
+	enum Behavior {
+		kWalk,         // 歩行状態
+		kClear,         // クリア
+	};
+
 
 	//マップとの当たり判定の情報
 	struct CollisionMapInfo {
@@ -125,7 +127,7 @@ private:
 	bool isDead_ = false;
 
 	// フレームごとの加速度
-	static inline const float kAcceleration = 0.01f;
+	static inline const float kAcceleration = 0.009f;
 	// 非入力時の摩擦係数
 	static inline const float kAttenuation = 0.13f;
 	// 着地時の速度減衰率

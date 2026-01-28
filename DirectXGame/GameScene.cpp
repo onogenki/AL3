@@ -37,7 +37,7 @@ void GameScene::Initialize() {
 	for (int32_t i = 0; i < 3; ++i) {
 		Enemy* newEnemy = new Enemy();
 		enemyModel_ = Model::CreateFromOBJ("becher");
-		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(12 + i * 2, 18);
+		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(3 + i * 2, 14);
 		newEnemy->Initialize(enemyModel_, &camera_, enemyPosition);
 		newEnemy->SetMapChipField(mapChipField_);
 		enemies_.push_back(newEnemy);
@@ -57,7 +57,7 @@ void GameScene::Initialize() {
 	goal_->SetMapChipField(mapChipField_);
 
 
-
+	 
 	// デスパーティクル
 	deathParticlesModel_ = Model::CreateFromOBJ("deathParticle");
 	
@@ -68,7 +68,7 @@ void GameScene::Initialize() {
 	// 単純な立方体モデルを自動生成(用意されてて軽量で作れる)
 	// blockModel_ = Model::Create();
 
-	blockModel_ = Model::CreateFromOBJ("block");
+	blockModel_ = Model::CreateFromOBJ("blockMgrb");
 
 	// 天球
 	skydome_ = new Skydome();
