@@ -134,7 +134,7 @@ public:
 	    // 着地フラグ
 	    bool onGround_ = true;
 
-		static inline const float kGravityAcceleration = 0.98f / 40.0f; // 重力加速度(下方向)
+		static inline const float kGravityAcceleration = 0.98f / 20.0f; // 重力加速度(下方向)
 	    static inline const float kLimitFallSpeed = 4.8f;               // 最大落下速度(下方向)
 
 		// 微小な数値
