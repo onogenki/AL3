@@ -127,7 +127,7 @@ private:
 	bool isDead_ = false;
 
 	// フレームごとの加速度
-	static inline const float kAcceleration = 0.01f;
+	static inline const float kAcceleration = 0.006f;
 	// 非入力時の摩擦係数
 	static inline const float kAttenuation = 0.13f;
 	// 着地時の速度減衰率

@@ -37,7 +37,7 @@ void GameScene::Initialize() {
 	for (int32_t i = 0; i < 3; ++i) {
 		Enemy* newEnemy = new Enemy();
 		enemyModel_ = Model::CreateFromOBJ("becher");
-		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(3 + i * 2, 14);
+		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(30 + i * 10, 15);
 		newEnemy->Initialize(enemyModel_, &camera_, enemyPosition);
 		newEnemy->SetMapChipField(mapChipField_);
 		enemies_.push_back(newEnemy);
@@ -52,7 +52,7 @@ void GameScene::Initialize() {
 	RightOpenGoalModel_ = Model::CreateFromOBJ("RightGoal");//右のドア
 
 	IsGoalSpace_ = false;
-	Vector3 GoalPosition = mapChipField_->GetMapChipPositionByIndex(35, 18);
+	Vector3 GoalPosition = mapChipField_->GetMapChipPositionByIndex(96, 12);
 	goal_->Initialize(BlackGoalModel_, LeftOpenGoalModel_, RightOpenGoalModel_, &camera_, GoalPosition);
 	goal_->SetMapChipField(mapChipField_);
 
@@ -186,7 +186,12 @@ void GameScene::CheckAllCollision() {
 		return;
 	}
 
+
 	AABB playerAABB = player_->GetAABB();
+
+	// 高さ判定
+	playerFootY = playerAABB.min.y;
+	isFalling = player_->GetVelocity().y < 0.0f;
 
 	for (Enemy* enemy : enemies_) {
 		AABB enemyAABB = enemy->GetAABB();
@@ -199,11 +204,7 @@ void GameScene::CheckAllCollision() {
 		}
 
 		// 高さ判定
-		playerFootY = playerAABB.min.y;
 		enemyHeadY = enemyAABB.max.y;
-
-		// 落下中か
-		isFalling = player_->GetVelocity().y < 0.0f;
 
 		///
 		/// player,enemyの当たった時
@@ -235,6 +236,24 @@ void GameScene::CheckAllCollision() {
 					phase_ = Phase::kDeath;
 				}
 			}
+		}
+	}
+	///
+	///落下死
+	/// 
+	if (isFalling && playerFootY <= 0.0f) {
+		if (!player_->IsDead()) {
+			player_->OnCollision(nullptr); // 衝突相手がいないのでnullptr等を渡す設計の場合
+			if (!deathParticle_) {
+				deathParticle_ = new DeathParticles;
+				const Vector3& deathParticlesPosition = player_->GetWorldPosition();
+				deathParticle_->Initialize(deathParticlesModel_, &camera_, deathParticlesPosition);
+				deathParticle_->Spawn(deathParticlesPosition);
+			}
+
+			exitRequest_ = ExitRequest::Death;
+			fade_->Start(Fade::Status::FadeOut, 0.5f, Fade::FadeType::White);
+			phase_ = Phase::kDeath;
 		}
 	}
 	///
@@ -337,13 +356,30 @@ void GameScene::Update() {
 
 			// ImGuiのウィンドウ作成
 			ImGui::Begin("Debug1");
-			// デバックテキストの表示
+			// playerデバックテキストの表示
 			ImGui::Text("Player");
-			// float3入力ボックス
-			ImGui::InputFloat3("InputFloat3", inputFloat3);
-			// float3スライダー
-			ImGui::SliderFloat3("SliderFloat3", inputFloat3, 0.0f, 1.0f);
-			Vector3 playerPosition = mapChipField_->GetMapChipPositionByIndex(15, 13);
+			
+			//座標
+			ImGui::Text("Player World Position");
+			Vector3 worldPos = player_->GetWorldPosition();
+			ImGui::Text("X: %.2f", worldPos.x);
+			ImGui::Text("Y: %.2f", worldPos.y);
+			ImGui::Text("Z: %.2f", worldPos.z);
+
+			ImGui::Separator();//区切り線
+			//マップチップ番号
+			ImGui::Text("Map Chip Index");
+			// デバッグのライン描画で使っていたのと同じサイズ(1.0f)を使います
+			float gridSize = 1.0f;
+
+			// 「座標 ÷ 1マスのサイズ」を整数(int)にすれば、何マス目かが分かります
+			int indexX = (int)(worldPos.x / gridSize);
+			int indexY = (int)(worldPos.y / gridSize);
+
+			ImGui::Text("Index X: %d", indexX);
+			ImGui::Text("Index Y: %d", indexY);
+
+
 			ImGui::End();
 			// デモウィンドウの表示を有効化
 			ImGui::ShowDemoWindow();
