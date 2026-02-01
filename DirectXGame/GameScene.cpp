@@ -56,12 +56,12 @@ void GameScene::Initialize() {
 		// 座標計算
 		Vector3 enemyPosition;
 		// 2体
-		if (i < 2) {
-			enemyPosition = mapChipField_->GetMapChipPositionByIndex(85 + i * 2, 1);
-		} else if (i > 2 && i < 5) { // 1体
-			enemyPosition = mapChipField_->GetMapChipPositionByIndex(87 + i * 2, 4);
+		if (i < 1) {
+			enemyPosition = mapChipField_->GetMapChipPositionByIndex(83 + i , 1);
+		} else if (i > 1 && i < 5) { // 1体
+			enemyPosition = mapChipField_->GetMapChipPositionByIndex(84 + i * 3, 4);
 		} else { // 1体
-			enemyPosition = mapChipField_->GetMapChipPositionByIndex(90 + i, 6);
+			enemyPosition = mapChipField_->GetMapChipPositionByIndex(92 + i + 2, 6);
 		}
 		// 初期化と登録
 		newEnemy->Initialize(enemyModel_, &camera_, enemyPosition);
@@ -133,7 +133,7 @@ void GameScene::Initialize() {
 	// spaceフォント
 	textureHandleSpace_ = TextureManager::Load("space.png");
 	spriteSpace_ = Sprite::Create(textureHandleSpace_, {300.0f, 100.0f});
-	// spaceフォント
+	// clearフォント
 	textureHandleClear_ = TextureManager::Load("Game Clear.png");
 	spriteClear_ = Sprite::Create(textureHandleClear_, {300.0f, 0.0f});
 
@@ -313,9 +313,7 @@ void GameScene::CheckAllCollision() {
 	if (goal_->IsOpening()) {
 		player_->SetBehavior(Player::Behavior::kClear);
 		for (Enemy* enemy : enemies_) {
-			// デスパーティクルを出して消すなど、倒した時と同じ処理を呼んでもいいですし、
-			// 単にリストから削除するフラグを立ててもいいです。
-			enemy->OnCollision(player_); // 強制的に倒したことにする例
+			enemy->OnCollision(player_); // 強制的に倒したことにする
 		}
 	}
 	if (goal_->IsOpen()) {
@@ -390,115 +388,118 @@ void GameScene::Update() {
 	case Phase::kPlay:
 
 		if (!isPause_) {
-			skydome_->Update();
-			player_->Update();
-			for (Enemy* enemy : enemies_) 
-			{
-				enemy->Update();
+
+			// ハイスピードモードオン
+			if (Input::GetInstance()->TriggerKey(DIK_P)) {
+				isHighSpeed_ = !isHighSpeed_;
 			}
-			for (DeathParticles* deathParticles : deathParticlesList_) {
-				deathParticles->Update();
-			}
-			goal_->Update();
-			CController_->Update();
+			//ハイスピードなら2回ループする
+			updateSteps = isHighSpeed_ ? 3 : 1;
+
+			for (int i = 0; i < updateSteps; ++i) {
+
+				skydome_->Update();
+				player_->Update();
+				for (Enemy* enemy : enemies_) {
+					enemy->Update();
+				}
+				for (DeathParticles* deathParticles : deathParticlesList_) {
+					deathParticles->Update();
+				}
+				goal_->Update();
+				CController_->Update();
 
 #ifdef _DEBUG // デバックビルドのみ見れる
 
-			// ImGuiのウィンドウ作成
-			ImGui::Begin("Debug1");
-			// playerデバックテキストの表示
-			ImGui::Text("Player");
-			
-			//座標
-			ImGui::Text("Player World Position");
-			Vector3 worldPos = player_->GetWorldPosition();
-			ImGui::Text("X: %.2f", worldPos.x);
-			ImGui::Text("Y: %.2f", worldPos.y);
-			ImGui::Text("Z: %.2f", worldPos.z);
+				// ImGuiのウィンドウ作成
+				ImGui::Begin("Debug1");
+				// playerデバックテキストの表示
+				ImGui::Text("Player");
 
-			ImGui::Separator();//区切り線
-			//マップチップ番号
-			ImGui::Text("Map Chip Index");
-			// デバッグのライン描画で使っていたのと同じサイズ(1.0f)を使います
-			float gridSize = 1.0f;
+				// 座標
+				ImGui::Text("Player World Position");
+				Vector3 worldPos = player_->GetWorldPosition();
+				ImGui::Text("X: %.2f", worldPos.x);
+				ImGui::Text("Y: %.2f", worldPos.y);
+				ImGui::Text("Z: %.2f", worldPos.z);
 
-			// 「座標 ÷ 1マスのサイズ」を整数(int)にすれば、何マス目かが分かります
-			int indexX = (int)(worldPos.x / gridSize);
-			int indexY = (int)(worldPos.y / gridSize);
+				ImGui::Separator(); // 区切り線
+				// マップチップ番号
+				ImGui::Text("Map Chip Index");
+				// デバッグのライン描画で使っていたのと同じサイズ(1.0f)
+				float gridSize = 1.0f;
 
-			ImGui::Text("Index X: %d", indexX);
-			ImGui::Text("Index Y: %d", indexY);
+				// 「座標 ÷ 1マスのサイズ」を整数にすれば、何マス目かが分かる
+				int indexX = (int)(worldPos.x / gridSize);
+				int indexY = (int)(worldPos.y / gridSize);
 
+				ImGui::Text("Index X: %d", indexX);
+				ImGui::Text("Index Y: %d", indexY);
 
-			ImGui::End();
-			// デモウィンドウの表示を有効化
-			ImGui::ShowDemoWindow();
+				ImGui::End();
+				// デモウィンドウの表示を有効化
+				ImGui::ShowDemoWindow();
 
-			if (Input::GetInstance()->TriggerKey(DIK_2)) {
-				isDebugCameraActive_ = !isDebugCameraActive_;
-			}
-
-			// 死亡デバック
-			if (Input::GetInstance()->PushKey(DIK_1)) {
-				if (!player_->IsDead()) {
-					player_->OnCollision(nullptr); // playerが倒れる
-					if (!deathParticle_) {
-						deathParticle_ = new DeathParticles;
-						const Vector3& deathParticlesPosition = player_->GetWorldPosition();
-						deathParticle_->Initialize(deathParticlesModel_, &camera_, deathParticlesPosition);
-						deathParticle_->Spawn(deathParticlesPosition);
-					}
+				if (Input::GetInstance()->TriggerKey(DIK_2)) {
+					isDebugCameraActive_ = !isDebugCameraActive_;
 				}
-				exitRequest_ = ExitRequest::Death;
-				fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);
-				phase_ = Phase::kDeath;
-				break;
-			}
+
+				// 死亡デバック
+				if (Input::GetInstance()->PushKey(DIK_1)) {
+					if (!player_->IsDead()) {
+						player_->OnCollision(nullptr); // playerが倒れる
+						if (!deathParticle_) {
+							deathParticle_ = new DeathParticles;
+							const Vector3& deathParticlesPosition = player_->GetWorldPosition();
+							deathParticle_->Initialize(deathParticlesModel_, &camera_, deathParticlesPosition);
+							deathParticle_->Spawn(deathParticlesPosition);
+						}
+					}
+					exitRequest_ = ExitRequest::Death;
+					fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);
+					phase_ = Phase::kDeath;
+					break;
+				}
 
 #endif // デバックビルドのみ見れる
 
-			// デバックカメラの更新
-			if (isDebugCameraActive_) {
-				debugCamera_->Update();
-				camera_.matView = debugCamera_->GetCamera().matView;
-				camera_.matProjection = debugCamera_->GetCamera().matProjection;
-				// ビュープロジェクション行列の転送
-				camera_.TransferMatrix();
-			} else {
-				camera_.UpdateMatrix();
-			}
-
-			// ブロックの更新
-			for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
-				for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
-					if (!worldTransformBlock)
-						continue;
-					// アフィン変換～DirectXに転送
-					WorldTransformUpdate(*worldTransformBlock);
+				// デバックカメラの更新
+				if (isDebugCameraActive_) {
+					debugCamera_->Update();
+					camera_.matView = debugCamera_->GetCamera().matView;
+					camera_.matProjection = debugCamera_->GetCamera().matProjection;
+					// ビュープロジェクション行列の転送
+					camera_.TransferMatrix();
+				} else {
+					camera_.UpdateMatrix();
 				}
-			}
 
-			// 敵player当たり判定
+				// ブロックの更新
+				for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+					for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
+						if (!worldTransformBlock)
+							continue;
+						// アフィン変換～DirectXに転送
+						WorldTransformUpdate(*worldTransformBlock);
+					}
+				}
 
-			// 音声再生
-			if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+				// 敵player当たり判定
+
 				// 音声再生
-				voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_, false);
-				// 音声停止
-				// Audio::GetInstance()->StopWave(voiceHandle_);
-			}
+				if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
+					// 音声再生
+					voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_, false);
+					// 音声停止
+					// Audio::GetInstance()->StopWave(voiceHandle_);
+				}
 
-			//ポーズ画面へ
-			if (Input::GetInstance()->TriggerKey(DIK_TAB))
-			{
-				isPause_ = true;
+				// ポーズ画面へ
+				if (Input::GetInstance()->TriggerKey(DIK_TAB)) {
+					isPause_ = true;
+				}
+				CheckAllCollision(); // 全ての当たり判定を行う
 			}
-			CheckAllCollision(); // 全ての当たり判定を行う
-
-			if (Input::GetInstance()->TriggerKey(DIK_P)) {
-				isHighSpeed_ = true;
-			}
-
 		} else // ポーズ画面
 		{
 

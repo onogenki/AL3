@@ -169,9 +169,9 @@ private:
 	//ポーズかどうか
 	bool isPause_ = false;
 
-	// ハイスピードかどうか
+	// ハイスピードかどうか(1フレームに動かす回数を増やす)
 	bool isHighSpeed_ = false;
-
+	int updateSteps;
 	//ポーズ画面か
 	PauseState currentPauseState_ = PauseState::Resume;
 
