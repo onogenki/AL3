@@ -89,6 +89,7 @@ public:
 
 	bool IsCollisionDisabled() const { return isCollisionDisabled_; }
 
+	const Vector3& GetVelocity() const { return velocity_; } // 速度
 
 	// kFadeInでplayerを描画させるもの
 	void UpdateTransformOnly();

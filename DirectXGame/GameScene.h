@@ -102,8 +102,9 @@ private:
 
 	//当たり判定
 	float playerFootY;//playerの足
-	bool enemyHeadY;  //enemyの頭
+	float enemyHeadY;  //enemyの頭
 	bool isFalling;//落ちてるとき
+	float fallVelocity;//落下速度
 
 	ExitRequest exitRequest_ = ExitRequest::None;
 
@@ -167,6 +168,9 @@ private:
 
 	//ポーズかどうか
 	bool isPause_ = false;
+
+	// ハイスピードかどうか
+	bool isHighSpeed_ = false;
 
 	//ポーズ画面か
 	PauseState currentPauseState_ = PauseState::Resume;

@@ -35,9 +35,35 @@ void GameScene::Initialize() {
 	///enemy
 	///
 	for (int32_t i = 0; i < 3; ++i) {
-		Enemy* newEnemy = new Enemy();
 		enemyModel_ = Model::CreateFromOBJ("becher");
-		Vector3 enemyPosition = mapChipField_->GetMapChipPositionByIndex(30 + i * 10, 15);
+
+		Enemy* newEnemy = new Enemy();
+		Vector3 enemyPosition;
+
+		// 2体
+		if (i < 2) {
+			enemyPosition = mapChipField_->GetMapChipPositionByIndex(30 + i * 10, 15);
+		} else { // 1体
+			enemyPosition = mapChipField_->GetMapChipPositionByIndex(70, 18);
+		}
+		newEnemy->Initialize(enemyModel_, &camera_, enemyPosition);
+		newEnemy->SetMapChipField(mapChipField_);
+		enemies_.push_back(newEnemy);
+	}
+
+	for (int32_t i = 0; i < 6; ++i) {
+		Enemy* newEnemy = new Enemy();
+		// 座標計算
+		Vector3 enemyPosition;
+		// 2体
+		if (i < 2) {
+			enemyPosition = mapChipField_->GetMapChipPositionByIndex(85 + i * 2, 1);
+		} else if (i > 2 && i < 5) { // 1体
+			enemyPosition = mapChipField_->GetMapChipPositionByIndex(87 + i * 2, 4);
+		} else { // 1体
+			enemyPosition = mapChipField_->GetMapChipPositionByIndex(90 + i, 6);
+		}
+		// 初期化と登録
 		newEnemy->Initialize(enemyModel_, &camera_, enemyPosition);
 		newEnemy->SetMapChipField(mapChipField_);
 		enemies_.push_back(newEnemy);
@@ -70,12 +96,18 @@ void GameScene::Initialize() {
 
 	blockModel_ = Model::CreateFromOBJ("blockMgrb");
 
-	// 天球
+	///
+	/// 天球
+	///
 	skydome_ = new Skydome();
 	// trueにすると反転描画になり、内側から見れる(天球用)
 	skyDomeModel_ = Model::CreateFromOBJ("sky_under", true);
 	skydome_->Initialize(skyDomeModel_, &camera_);
 
+	///
+	///2Dモデル
+	/// 
+	
 	// TABキーでポーズ
 	TABFont_ = TextureManager::Load("2DTABPause3D.png");
 	SpriteTABFont_ = Sprite::Create(TABFont_, {900.0f, -150.0f});
@@ -110,7 +142,9 @@ void GameScene::Initialize() {
 	// デバックカメラの生成
 	debugCamera_ = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight);
 
-	// サウンドデータの読み込み
+	///
+	/// サウンドデータの読み込み
+	/// 
 	soundDataHandle_ = Audio::GetInstance()->LoadWave("mokugyo.wav");
 	// 音声1回だけ再生(SE)
 	// voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_);
@@ -178,12 +212,11 @@ void GameScene::GeneratedBlocks() {
 		}
 	}
 }
-
 //当たり判定(クリア、死ぬ判定)
 void GameScene::CheckAllCollision() {
 
 	if (phase_ != Phase::kPlay) {
-		return;
+		return;//プレイ以外だと当たり判定が起きない
 	}
 
 
@@ -195,6 +228,16 @@ void GameScene::CheckAllCollision() {
 
 	for (Enemy* enemy : enemies_) {
 		AABB enemyAABB = enemy->GetAABB();
+		// 高さ判定
+		enemyHeadY = enemyAABB.max.y;
+
+		// 敵の落下死
+		if (enemyHeadY <= -1.0f) {
+			if (!enemy->IsDead()) {
+				enemy->OnCollision(nullptr); // 衝突相手がいないのでnullptr等を渡す設計の場合
+			}
+			continue;//playerと当たってなければスキップ
+		}
 		// コリジョン無効の敵はスキップ
 		if (enemy->IsCollisionDisabled())
 			continue;
@@ -202,15 +245,17 @@ void GameScene::CheckAllCollision() {
 		if (!IsCollision(playerAABB, enemyAABB)) {
 			continue;
 		}
-
-		// 高さ判定
-		enemyHeadY = enemyAABB.max.y;
-
+		//落下速度を引いて判定エリアを下方向に広げる
+		//判定ミスで倒せずplayerが死ぬのことがあるので多少めり込んでも倒せるようにする
+		fallVelocity = std::abs(player_->GetVelocity().y);
 		///
 		/// player,enemyの当たった時
 		///
-		if (isFalling && playerFootY > enemyHeadY - player_->GetkBlank()) {
+
+
+		if (isFalling && playerFootY > enemyHeadY - player_->GetkBlank()-fallVelocity) {
 			player_->Bounce();           // 跳ねる
+			isFalling = false;
 			enemy->OnCollision(player_); // 敵が倒れる
 
 			DeathParticles* deathParticles = new DeathParticles();
@@ -241,7 +286,7 @@ void GameScene::CheckAllCollision() {
 	///
 	///落下死
 	/// 
-	if (isFalling && playerFootY <= 0.0f) {
+	if (isFalling && playerFootY <= -2.5f) {
 		if (!player_->IsDead()) {
 			player_->OnCollision(nullptr); // 衝突相手がいないのでnullptr等を渡す設計の場合
 			if (!deathParticle_) {
@@ -250,7 +295,7 @@ void GameScene::CheckAllCollision() {
 				deathParticle_->Initialize(deathParticlesModel_, &camera_, deathParticlesPosition);
 				deathParticle_->Spawn(deathParticlesPosition);
 			}
-
+	
 			exitRequest_ = ExitRequest::Death;
 			fade_->Start(Fade::Status::FadeOut, 0.5f, Fade::FadeType::White);
 			phase_ = Phase::kDeath;
@@ -267,6 +312,11 @@ void GameScene::CheckAllCollision() {
 	}//クリアモーション
 	if (goal_->IsOpening()) {
 		player_->SetBehavior(Player::Behavior::kClear);
+		for (Enemy* enemy : enemies_) {
+			// デスパーティクルを出して消すなど、倒した時と同じ処理を呼んでもいいですし、
+			// 単にリストから削除するフラグを立ててもいいです。
+			enemy->OnCollision(player_); // 強制的に倒したことにする例
+		}
 	}
 	if (goal_->IsOpen()) {
 		phase_ = Phase::kClear; // ドアが開いたらクリアシーンに
@@ -384,7 +434,7 @@ void GameScene::Update() {
 			// デモウィンドウの表示を有効化
 			ImGui::ShowDemoWindow();
 
-			if (Input::GetInstance()->TriggerKey(DIK_P)) {
+			if (Input::GetInstance()->TriggerKey(DIK_2)) {
 				isDebugCameraActive_ = !isDebugCameraActive_;
 			}
 
@@ -444,6 +494,11 @@ void GameScene::Update() {
 				isPause_ = true;
 			}
 			CheckAllCollision(); // 全ての当たり判定を行う
+
+			if (Input::GetInstance()->TriggerKey(DIK_P)) {
+				isHighSpeed_ = true;
+			}
+
 		} else // ポーズ画面
 		{
 
@@ -535,6 +590,9 @@ void GameScene::Update() {
 	case Phase::kClear:
 		
 		player_->Update();
+		for (Enemy* enemy : enemies_) {
+			enemy->Update();
+		}
 		goal_->Update();
 
 		if (Input::GetInstance()->TriggerKey(DIK_SPACE) && player_->IsClearMotionFinished()) {

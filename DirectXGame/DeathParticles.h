@@ -19,6 +19,8 @@ public:
 	//終了判定関数
 	bool IsFinished() { return isFinished_; }
 
+	const Vector3& GetVelocity() const { return velocity_; } // 速度
+
 	//使い回し関数
 	void Spawn(const Vector3& position);
 	private:
