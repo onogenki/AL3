@@ -157,7 +157,7 @@ void GameScene::Initialize() {
 	spriteSpeed_ = Sprite::Create(textureHandleSpeed_, {600.0f, 600.0f});
 
 	// おまけフォント
-	textureHandleOmake_ = TextureManager::Load("omake2.png");
+	textureHandleOmake_ = TextureManager::Load("omake.png");
 	spriteOmake_ = Sprite::Create(textureHandleOmake_, {300.0f, 350.0f});
 
 	// ライン描画が参照するカメラを指定する(アドレス渡し)
