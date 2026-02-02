@@ -38,6 +38,10 @@ void StageScene::Initialize()
 	//リセット
 	phase_ = Phase::kFadeIn;
 	isFinished_ = false;
+
+	//selectBGM
+	selectBGM_ = Audio::GetInstance()->LoadWave("stageSelect.mp3");
+	isSelectBGMPlaying_ = false;
 }
 
 void StageScene::Update()
@@ -49,6 +53,10 @@ void StageScene::Update()
 	case Phase::kFadeIn:
 		if (fade_->IsFinished()) {
 			phase_ = Phase::kMain;
+		}
+		if (!isSelectBGMPlaying_) {
+			selectHandle_ = Audio::GetInstance()->PlayWave(selectBGM_, true);
+			isSelectBGMPlaying_ = true;
 		}
 		break;
 
@@ -66,6 +74,8 @@ void StageScene::Update()
 		if (fade_->IsFinished()) {
 			isFinished_ = true;
 		}
+		Audio::GetInstance()->StopWave(selectHandle_);
+		isSelectBGMPlaying_ = false;
 		break;
 	}
 

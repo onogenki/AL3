@@ -76,6 +76,16 @@ private:
 	Model* playerModel_ = nullptr;
 	// ワールドトランスフォーム
 	WorldTransform worldTransform_;
+
+	// 倒せるチュートリアル
+	Model* AttackText_ = nullptr;
+	WorldTransform worldTransformAttackText_;
+
+	// ハイスピードチュートリアル
+	Model* SpeedText_ = nullptr;
+	WorldTransform worldTransformSpeedText_;
+
+
 	// カメラ
 	Camera camera_;
 
@@ -138,9 +148,17 @@ private:
 	uint32_t textureHandleSpace_ = 0;
 	Sprite* spriteSpace_ = nullptr;
 
-	// ポーズ選択
+	// クリア
 	uint32_t textureHandleClear_ = 0;
 	Sprite* spriteClear_ = nullptr;
+
+	// スピード矢印->>
+	uint32_t textureHandleSpeed_ = 0;
+	Sprite* spriteSpeed_ = nullptr;
+
+	// おまけ
+	uint32_t textureHandleOmake_ = 0;
+	Sprite* spriteOmake_ = nullptr;
 
 	// マップチップフィールド
 	MapChipField* mapChipField_;
@@ -151,9 +169,15 @@ private:
 	DebugCamera* debugCamera_ = nullptr;
 
 	// サウンドデータハンドル(音データそのもの)
-	uint32_t soundDataHandle_ = 0;
+	uint32_t playBGM_ = 0;
+	uint32_t pauseBGM_ = 0;
 	// 音声再生ハンドル(実際に再生している音)
-	uint32_t voiceHandle_ = 0;
+	uint32_t playHandle_ = 0;
+	uint32_t pauseHandle_ = 0;
+
+	//再生フラグ
+	bool isPlayBGMPlaying_ = false;
+	bool isPauseBGMPlaying_ = false;
 
 	// ImGuiで値を入力する変数
 	float inputFloat3[3] = {0, 0, 0};

@@ -44,9 +44,10 @@ private:
 	Phase phase_ = Phase::kFadeIn;
 
 	// サウンドデータハンドル(音データそのもの)
-	uint32_t soundDataHandle_ = 0;
+	uint32_t titleBGM_ = 0;
+	bool isTitleBGMPlaying_ = false;
 	// 音声再生ハンドル(実際に再生している音)
-	uint32_t voiceHandle_ = 0;
+	uint32_t titleHandle_ = 0;
 
 	// 終了フラグ
 	bool isFinished_ = false;

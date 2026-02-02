@@ -15,7 +15,8 @@ void GameScene::Initialize() {
 	mapChipField_->LoadMapChipCsv("Resources/blocks.csv");
 	GeneratedBlocks();
 
-	// 3Dモデルの生成
+	///
+	/// 3Dモデルの生成
 
 	///
 	/// player
@@ -104,9 +105,22 @@ void GameScene::Initialize() {
 	skyDomeModel_ = Model::CreateFromOBJ("sky_under", true);
 	skydome_->Initialize(skyDomeModel_, &camera_);
 
+	// アタックチュートリアル
+	AttackText_ = Model::CreateFromOBJ("AttackTu", true);
+	worldTransformAttackText_.Initialize();
+	worldTransformAttackText_.translation_ = {39.0f, 7.0f, 0.0f};
+
+	// スピードチュートリアル
+	SpeedText_ = Model::CreateFromOBJ("SpeedTu", true);
+	worldTransformSpeedText_.Initialize();
+	worldTransformSpeedText_.translation_ = {87.0f, 6.0f, 0.0f};
+
+	///3Dモデルここまで
+	///
+
 	///
 	///2Dモデル
-	/// 
+	 
 	
 	// TABキーでポーズ
 	TABFont_ = TextureManager::Load("2DTABPause3D.png");
@@ -133,19 +147,35 @@ void GameScene::Initialize() {
 	// spaceフォント
 	textureHandleSpace_ = TextureManager::Load("space.png");
 	spriteSpace_ = Sprite::Create(textureHandleSpace_, {300.0f, 100.0f});
+
 	// clearフォント
 	textureHandleClear_ = TextureManager::Load("Game Clear.png");
 	spriteClear_ = Sprite::Create(textureHandleClear_, {300.0f, 0.0f});
+
+	// スピード矢印->>
+	textureHandleSpeed_ = TextureManager::Load("speed.png");
+	spriteSpeed_ = Sprite::Create(textureHandleSpeed_, {600.0f, 600.0f});
+
+	// おまけフォント
+	textureHandleOmake_ = TextureManager::Load("omake.png");
+	spriteOmake_ = Sprite::Create(textureHandleOmake_, {300.0f, 350.0f});
 
 	// ライン描画が参照するカメラを指定する(アドレス渡し)
 	PrimitiveDrawer::GetInstance()->SetCamera(&camera_);
 	// デバックカメラの生成
 	debugCamera_ = new DebugCamera(WinApp::kWindowWidth, WinApp::kWindowHeight);
 
+	///2Dモデルここまで
+	///
+	
 	///
 	/// サウンドデータの読み込み
 	/// 
-	soundDataHandle_ = Audio::GetInstance()->LoadWave("mokugyo.wav");
+	playBGM_ = Audio::GetInstance()->LoadWave("game.mp3");
+	pauseBGM_ = Audio::GetInstance()->LoadWave("pause.mp3");
+
+	isPlayBGMPlaying_ = false;
+	isPauseBGMPlaying_ = false;
 	// 音声1回だけ再生(SE)
 	// voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_);
 	// 音声ループ再生(BGM)再生止めるもの
@@ -382,6 +412,22 @@ void GameScene::Update() {
 				WorldTransformUpdate(*worldTransformBlock);
 			}
 		}
+
+		// 攻撃チュートリアルモデル更新
+		WorldTransformUpdate(worldTransformAttackText_);
+		// ハイスピードチュートリアルモデル更新
+		WorldTransformUpdate(worldTransformSpeedText_);
+
+		// 音声再生
+		if (!isPlayBGMPlaying_) {
+			// 音声再生
+			playHandle_ = Audio::GetInstance()->PlayWave(playBGM_, true);
+			pauseHandle_ = Audio::GetInstance()->PlayWave(pauseBGM_, true); // 裏で流しておく
+			Audio::GetInstance()->SetVolume(playHandle_, 1.0f);
+			Audio::GetInstance()->SetVolume(pauseHandle_, 0.0f); // 音量を0に
+		}
+		isPlayBGMPlaying_ = true; // 一応
+
 		break;
 
 	// プレイ
@@ -393,7 +439,18 @@ void GameScene::Update() {
 			if (Input::GetInstance()->TriggerKey(DIK_P)) {
 				isHighSpeed_ = !isHighSpeed_;
 			}
-			//ハイスピードなら2回ループする
+
+			if (isHighSpeed_) {
+				//あくまでplayWaveではないので、音量だけ変えてbgmを変えてるように仕上げてる
+				Audio::GetInstance()->SetVolume(playHandle_, 0.0f);
+				Audio::GetInstance()->SetVolume(pauseHandle_, 1.0f);
+			} else {
+				
+				Audio::GetInstance()->SetVolume(playHandle_, 1.0f);
+				Audio::GetInstance()->SetVolume(pauseHandle_, 0.0f);
+			}
+
+			// ハイスピードなら2回ループする(早くなる)
 			updateSteps = isHighSpeed_ ? 3 : 1;
 
 			for (int i = 0; i < updateSteps; ++i) {
@@ -408,98 +465,96 @@ void GameScene::Update() {
 				}
 				goal_->Update();
 				CController_->Update();
+				CheckAllCollision(); // 全ての当たり判定を行う
+			}
 
 #ifdef _DEBUG // デバックビルドのみ見れる
 
-				// ImGuiのウィンドウ作成
-				ImGui::Begin("Debug1");
-				// playerデバックテキストの表示
-				ImGui::Text("Player");
+			// ImGuiのウィンドウ作成
+			ImGui::Begin("Debug1");
+			// playerデバックテキストの表示
+			ImGui::Text("Player");
 
-				// 座標
-				ImGui::Text("Player World Position");
-				Vector3 worldPos = player_->GetWorldPosition();
-				ImGui::Text("X: %.2f", worldPos.x);
-				ImGui::Text("Y: %.2f", worldPos.y);
-				ImGui::Text("Z: %.2f", worldPos.z);
+			// 座標
+			ImGui::Text("Player World Position");
+			Vector3 worldPos = player_->GetWorldPosition();
+			ImGui::Text("X: %.2f", worldPos.x);
+			ImGui::Text("Y: %.2f", worldPos.y);
+			ImGui::Text("Z: %.2f", worldPos.z);
 
-				ImGui::Separator(); // 区切り線
-				// マップチップ番号
-				ImGui::Text("Map Chip Index");
-				// デバッグのライン描画で使っていたのと同じサイズ(1.0f)
-				float gridSize = 1.0f;
+			ImGui::Separator(); // 区切り線
+			// マップチップ番号
+			ImGui::Text("Map Chip Index");
+			// デバッグのライン描画で使っていたのと同じサイズ(1.0f)
+			float gridSize = 1.0f;
 
-				// 「座標 ÷ 1マスのサイズ」を整数にすれば、何マス目かが分かる
-				int indexX = (int)(worldPos.x / gridSize);
-				int indexY = (int)(worldPos.y / gridSize);
+			// 「座標 ÷ 1マスのサイズ」を整数にすれば、何マス目かが分かる
+			int indexX = (int)(worldPos.x / gridSize);
+			int indexY = (int)(worldPos.y / gridSize);
 
-				ImGui::Text("Index X: %d", indexX);
-				ImGui::Text("Index Y: %d", indexY);
+			ImGui::Text("Index X: %d", indexX);
+			ImGui::Text("Index Y: %d", indexY);
+		
+			ImGui::End();
+			// デモウィンドウの表示を有効化
+			ImGui::ShowDemoWindow();
 
-				ImGui::End();
-				// デモウィンドウの表示を有効化
-				ImGui::ShowDemoWindow();
+			if (Input::GetInstance()->TriggerKey(DIK_2)) {
+				isDebugCameraActive_ = !isDebugCameraActive_;
+			}
 
-				if (Input::GetInstance()->TriggerKey(DIK_2)) {
-					isDebugCameraActive_ = !isDebugCameraActive_;
-				}
-
-				// 死亡デバック
-				if (Input::GetInstance()->PushKey(DIK_1)) {
-					if (!player_->IsDead()) {
-						player_->OnCollision(nullptr); // playerが倒れる
-						if (!deathParticle_) {
-							deathParticle_ = new DeathParticles;
-							const Vector3& deathParticlesPosition = player_->GetWorldPosition();
-							deathParticle_->Initialize(deathParticlesModel_, &camera_, deathParticlesPosition);
-							deathParticle_->Spawn(deathParticlesPosition);
-						}
+			// 死亡デバック
+			if (Input::GetInstance()->PushKey(DIK_1)) {
+				if (!player_->IsDead()) {
+					player_->OnCollision(nullptr); // playerが倒れる
+					if (!deathParticle_) {
+						deathParticle_ = new DeathParticles;
+						const Vector3& deathParticlesPosition = player_->GetWorldPosition();
+						deathParticle_->Initialize(deathParticlesModel_, &camera_, deathParticlesPosition);
+						deathParticle_->Spawn(deathParticlesPosition);
 					}
-					exitRequest_ = ExitRequest::Death;
-					fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);
-					phase_ = Phase::kDeath;
-					break;
 				}
+				exitRequest_ = ExitRequest::Death;
+				fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);
+				phase_ = Phase::kDeath;
+				break;
+			}
 
 #endif // デバックビルドのみ見れる
-
-				// デバックカメラの更新
-				if (isDebugCameraActive_) {
-					debugCamera_->Update();
-					camera_.matView = debugCamera_->GetCamera().matView;
-					camera_.matProjection = debugCamera_->GetCamera().matProjection;
-					// ビュープロジェクション行列の転送
-					camera_.TransferMatrix();
-				} else {
-					camera_.UpdateMatrix();
-				}
-
-				// ブロックの更新
-				for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
-					for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
-						if (!worldTransformBlock)
-							continue;
-						// アフィン変換～DirectXに転送
-						WorldTransformUpdate(*worldTransformBlock);
-					}
-				}
-
-				// 敵player当たり判定
-
-				// 音声再生
-				if (Input::GetInstance()->TriggerKey(DIK_RETURN)) {
-					// 音声再生
-					voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_, false);
-					// 音声停止
-					// Audio::GetInstance()->StopWave(voiceHandle_);
-				}
-
-				// ポーズ画面へ
-				if (Input::GetInstance()->TriggerKey(DIK_TAB)) {
-					isPause_ = true;
-				}
-				CheckAllCollision(); // 全ての当たり判定を行う
+       // デバックカメラの更新
+			if (isDebugCameraActive_) {
+				debugCamera_->Update();
+				camera_.matView = debugCamera_->GetCamera().matView;
+				camera_.matProjection = debugCamera_->GetCamera().matProjection;
+				// ビュープロジェクション行列の転送
+				camera_.TransferMatrix();
+			} else {
+				camera_.UpdateMatrix();
 			}
+
+			// ブロックの更新
+			for (std::vector<WorldTransform*>& worldTransformBlockLine : worldTransformBlocks_) {
+				for (WorldTransform*& worldTransformBlock : worldTransformBlockLine) {
+					if (!worldTransformBlock)
+						continue;
+					// アフィン変換～DirectXに転送
+					WorldTransformUpdate(*worldTransformBlock);
+				}
+			}
+
+			//攻撃チュートリアルモデル更新
+			WorldTransformUpdate(worldTransformAttackText_);
+			// ハイスピードチュートリアルモデル更新
+			WorldTransformUpdate(worldTransformSpeedText_);
+
+			// ポーズ画面へ
+			if (Input::GetInstance()->TriggerKey(DIK_TAB)) {
+				isPause_ = true;
+				// 止めずにbgmを切り替える
+				Audio::GetInstance()->SetVolume(playHandle_, 0.0f);  // 流さない
+				Audio::GetInstance()->SetVolume(pauseHandle_, 1.0f); // 流す
+			}
+
 		} else // ポーズ画面
 		{
 
@@ -516,6 +571,9 @@ void GameScene::Update() {
 					Input::GetInstance()->TriggerKey(DIK_TAB)||
 				Input::GetInstance()->TriggerKey(DIK_SPACE)){
 					isPause_ = false;
+					// 音声再開
+					Audio::GetInstance()->SetVolume(playHandle_, 1.0f);  // プレイ曲をオン
+					Audio::GetInstance()->SetVolume(pauseHandle_, 0.0f); // ポーズ曲をミュート
 				}
 
 				// リトライ画面
@@ -532,10 +590,18 @@ void GameScene::Update() {
 					exitRequest_ = ExitRequest::Retry;
 					fade_->Start(Fade::Status::FadeOut, 0.5f, Fade::FadeType::Black);
 					phase_ = Phase::kFadeOut;
+					// 音声停止
+					Audio::GetInstance()->StopWave(playHandle_);
+					Audio::GetInstance()->StopWave(pauseHandle_);
+					isPlayBGMPlaying_ = false;
+					break; // 音声再生の処理を通さない
 				}
 				if (Input::GetInstance()->TriggerKey(DIK_TAB)) {
 					isPause_ = false;
 					currentPauseState_ = PauseState::Resume;
+					// 音声再開
+					Audio::GetInstance()->SetVolume(playHandle_, 1.0f);  // プレイ曲をオン
+					Audio::GetInstance()->SetVolume(pauseHandle_, 0.0f); // ポーズ曲をミュート
 				}
 				//タイトルに戻る画面
 			} else if (currentPauseState_ == PauseState::Title) {
@@ -552,10 +618,18 @@ void GameScene::Update() {
 					exitRequest_ = ExitRequest::Title;
 					fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);
 					phase_ = Phase::kFadeOut;
+					// 音声停止
+					Audio::GetInstance()->StopWave(playHandle_);
+					Audio::GetInstance()->StopWave(pauseHandle_);
+					isPlayBGMPlaying_ = false;
+					break; // 音声再生の処理を通さない
 				}
 				if (Input::GetInstance()->TriggerKey(DIK_TAB)) {
 					isPause_ = false;
 					currentPauseState_ = PauseState::Resume;
+					// 音声再開
+					Audio::GetInstance()->SetVolume(playHandle_, 1.0f);  // プレイ曲をオン
+					Audio::GetInstance()->SetVolume(pauseHandle_, 0.0f); // ポーズ曲をミュート
 				}
 			}
 		}
@@ -565,6 +639,9 @@ void GameScene::Update() {
 	// 死んだとき
 	case Phase::kDeath:
 		//skydome_->Update();
+		//  止めずにbgmを切り替える
+		Audio::GetInstance()->SetVolume(playHandle_, 0.0f);  // 流さない
+		Audio::GetInstance()->SetVolume(pauseHandle_, 1.0f); // 流す
 
 		//playerのデスパーティクルが終わるまで
 		if (deathParticle_ && deathParticle_->IsFinished()) {
@@ -584,12 +661,13 @@ void GameScene::Update() {
 				WorldTransformUpdate(*worldTransformBlock);
 			}
 		}
-
 		break;
 
 		//クリア
 	case Phase::kClear:
-		
+		// 止めずにbgmを切り替える
+		Audio::GetInstance()->SetVolume(playHandle_, 0.0f);  // 流さない
+		Audio::GetInstance()->SetVolume(pauseHandle_, 1.0f); // 流す
 		player_->Update();
 		for (Enemy* enemy : enemies_) {
 			enemy->Update();
@@ -600,6 +678,7 @@ void GameScene::Update() {
 			exitRequest_ = ExitRequest::Clear;
 			fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);
 			phase_ = Phase::kFadeOut;
+
 		}
 
 		break;
@@ -610,6 +689,9 @@ void GameScene::Update() {
 		if (fade_->IsFinished()) {
 			finished_ = true;
 		}
+		Audio::GetInstance()->StopWave(playHandle_);
+		Audio::GetInstance()->StopWave(pauseHandle_);
+		isPlayBGMPlaying_ = false;
 		break;
 	}
 }
@@ -663,6 +745,13 @@ void GameScene::Draw() {
 			enemy->Draw();
 		}
 		goal_->Draw();
+
+		// アタックチュートリアル
+		AttackText_->SetAlpha(1.0f);
+		AttackText_->Draw(worldTransformAttackText_, camera_);
+		// ハイスピードチュートリアル
+		SpeedText_->SetAlpha(1.0f);
+		SpeedText_->Draw(worldTransformSpeedText_, camera_);
 
 		// enemyデスパーティクルあれば描画
 		for (DeathParticles* deathParticles : deathParticlesList_) {
@@ -721,6 +810,7 @@ void GameScene::Draw() {
 		//TABキーでポーズ
 		SpriteTABFont_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
 		SpriteTABFont_->Draw();
+
 		// ポーズ画面
 		if (isPause_) {
 			if (currentPauseState_ == PauseState::Resume) {
@@ -763,6 +853,13 @@ void GameScene::Draw() {
 			spriteSpace_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
 			spriteSpace_->Draw();
 		}
+
+		if (isHighSpeed_)
+		{
+			spriteSpeed_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+			spriteSpeed_->Draw();
+		}
+
 		// スプライト描画後処理
 		Sprite::PostDraw();
 
@@ -843,6 +940,8 @@ void GameScene::Draw() {
 		spriteSpace_->Draw();
 		spriteClear_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
 		spriteClear_->Draw();
+		spriteOmake_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+		spriteOmake_->Draw();
 		Sprite::PostDraw();
 
 		break;
@@ -915,4 +1014,6 @@ GameScene::~GameScene() {
 	delete SpritePauseTitle_;
 	delete SpritePauseEnter_;
 	delete spriteSpace_;
+	delete AttackText_;
+	delete SpeedText_;
 }

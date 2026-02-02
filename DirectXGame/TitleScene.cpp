@@ -24,6 +24,10 @@ void TitleScene::Initialize() {
 	fade_->Initialize();
 	// 開幕時フェード時間はここで決める
 	fade_->Start(Fade::Status::FadeIn, 1.0f,Fade::FadeType::White);
+
+	//titleBGM
+	titleBGM_ = Audio::GetInstance()->LoadWave("title.mp3");
+	isTitleBGMPlaying_ = false;
 }
 
 void TitleScene::Update() {
@@ -36,6 +40,10 @@ void TitleScene::Update() {
 	case Phase::kFadeIn:
 		if (fade_->IsFinished()) {
 			phase_ = Phase::kMain;
+		}
+		if (!isTitleBGMPlaying_) {
+			titleHandle_ = Audio::GetInstance()->PlayWave(titleBGM_, true);
+			isTitleBGMPlaying_ = true;
 		}
 		break;
 
@@ -53,6 +61,8 @@ void TitleScene::Update() {
 		if (fade_->IsFinished()) {
 			isFinished_ = true;
 		}
+		Audio::GetInstance()->StopWave(titleHandle_);
+		isTitleBGMPlaying_ = false;
 		break;
 	}
 }

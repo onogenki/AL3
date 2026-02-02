@@ -53,4 +53,10 @@ public:
 		// 天球
 	    Skydome* skydome_ = nullptr;
 	    Model* skyDomeModel_ = nullptr;
+
+		//// サウンドデータハンドル(音データそのもの)
+	    uint32_t selectBGM_ = 0;
+	    bool isSelectBGMPlaying_ = false;
+	    // 音声再生ハンドル(実際に再生している音)
+		uint32_t selectHandle_ = 0;
 };
