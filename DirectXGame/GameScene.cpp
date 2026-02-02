@@ -108,7 +108,7 @@ void GameScene::Initialize() {
 	// アタックチュートリアル
 	AttackText_ = Model::CreateFromOBJ("AttackTu", true);
 	worldTransformAttackText_.Initialize();
-	worldTransformAttackText_.translation_ = {39.0f, 7.0f, 0.0f};
+	worldTransformAttackText_.translation_ = {39.0f, 4.0f, 0.0f};
 
 	// スピードチュートリアル
 	SpeedText_ = Model::CreateFromOBJ("SpeedTu", true);
