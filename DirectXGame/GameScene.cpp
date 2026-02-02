@@ -113,7 +113,7 @@ void GameScene::Initialize() {
 	// スピードチュートリアル
 	SpeedText_ = Model::CreateFromOBJ("SpeedTu", true);
 	worldTransformSpeedText_.Initialize();
-	worldTransformSpeedText_.translation_ = {87.0f, 6.0f, 0.0f};
+	worldTransformSpeedText_.translation_ = {87.0f, 6.0f, 1.0f};
 
 	///3Dモデルここまで
 	///
@@ -146,18 +146,18 @@ void GameScene::Initialize() {
 
 	// spaceフォント
 	textureHandleSpace_ = TextureManager::Load("space.png");
-	spriteSpace_ = Sprite::Create(textureHandleSpace_, {300.0f, 100.0f});
+	spriteSpace_ = Sprite::Create(textureHandleSpace_, {300.0f, 0.0f});
 
 	// clearフォント
 	textureHandleClear_ = TextureManager::Load("Game Clear.png");
-	spriteClear_ = Sprite::Create(textureHandleClear_, {300.0f, 0.0f});
+	spriteClear_ = Sprite::Create(textureHandleClear_, {300.0f, -100.0f});
 
 	// スピード矢印->>
 	textureHandleSpeed_ = TextureManager::Load("speed.png");
 	spriteSpeed_ = Sprite::Create(textureHandleSpeed_, {600.0f, 600.0f});
 
 	// おまけフォント
-	textureHandleOmake_ = TextureManager::Load("omake.png");
+	textureHandleOmake_ = TextureManager::Load("omake2.png");
 	spriteOmake_ = Sprite::Create(textureHandleOmake_, {300.0f, 350.0f});
 
 	// ライン描画が参照するカメラを指定する(アドレス渡し)
