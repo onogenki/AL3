@@ -117,7 +117,7 @@ void DrawScene() {
 		stageScene->Draw();
 		break;
 	case Scene::kGame:
-			gameScene->Draw();
+		gameScene->Draw();
 		break;
 	}
 }
