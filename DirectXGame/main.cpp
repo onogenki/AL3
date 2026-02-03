@@ -41,13 +41,25 @@ void ChangeScene() {
 
 		//ステージシーン
 	case Scene::kStageSelect:
-		if (stageScene->IsFinished()) {  // 次のシーンへ進むとき
-			scene = Scene::kGame; // シーン変更
-			delete stageScene;           // 旧シーンの解放
-			stageScene = nullptr;
-			// 次のシーンの生成と初期化
-			gameScene = new GameScene();
-			gameScene->Initialize();
+		if (stageScene->IsFinished()) { // 次のシーンへ進むとき
+			switch (stageScene->GetExitRequest()) {
+			case StageScene::ExitRequest::Play:
+				delete stageScene; // 旧シーンの解放
+				// 次のシーンの生成と初期化
+				gameScene = new GameScene();
+				stageScene = nullptr;
+				gameScene->Initialize();
+				scene = Scene::kGame; // ゲームへ
+				break;
+			case StageScene::ExitRequest::Title:
+				delete stageScene; // 旧シーンの解放
+				// 次のシーンの生成と初期化
+				titleScene = new TitleScene();
+				stageScene = nullptr;
+				titleScene->Initialize();
+				scene = Scene::kTitle; // タイトルへ
+				break;
+			}
 		}
 		break;
 

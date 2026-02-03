@@ -116,6 +116,7 @@ private:
 	bool isFalling;//落ちてるとき
 	float fallVelocity;//落下速度
 
+	//分岐
 	ExitRequest exitRequest_ = ExitRequest::None;
 
 	// 天球
@@ -152,7 +153,11 @@ private:
 	uint32_t textureHandleClear_ = 0;
 	Sprite* spriteClear_ = nullptr;
 
-	// スピード矢印->>
+	// ミス
+	uint32_t textureHandleMiss_ = 0;
+	Sprite* spriteMiss_ = nullptr;
+
+	// スピード矢印 ->>
 	uint32_t textureHandleSpeed_ = 0;
 	Sprite* spriteSpeed_ = nullptr;
 

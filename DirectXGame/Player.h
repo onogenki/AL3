@@ -105,6 +105,7 @@ public:
 	//kFadeInでplayerを描画させるもの
 	void UpdateTransformOnly();
 
+
 private:
 	WorldTransform worldTransform_;
 

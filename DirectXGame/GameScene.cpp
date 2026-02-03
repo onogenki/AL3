@@ -152,6 +152,10 @@ void GameScene::Initialize() {
 	textureHandleClear_ = TextureManager::Load("Game Clear.png");
 	spriteClear_ = Sprite::Create(textureHandleClear_, {300.0f, -100.0f});
 
+	// missフォント
+	textureHandleMiss_ = TextureManager::Load("Miss.png");
+	spriteMiss_ = Sprite::Create(textureHandleMiss_, {450.0f, 50.0f});
+	
 	// スピード矢印->>
 	textureHandleSpeed_ = TextureManager::Load("speed.png");
 	spriteSpeed_ = Sprite::Create(textureHandleSpeed_, {600.0f, 600.0f});
@@ -896,8 +900,10 @@ void GameScene::Draw() {
 		// 3Dモデル描画後処理
 		Model::PostDraw();
 
-		// スプライト描画処理前処理
+		// スプライト描画処理
 		Sprite::PreDraw(dxCommon->GetCommandList());
+		spriteMiss_->SetColor({0.0f, 0.0f, 0.0f, 1.0f});
+		spriteMiss_->Draw();
 
 		fade_->Draw();
 

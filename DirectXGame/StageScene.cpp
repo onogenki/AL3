@@ -21,6 +21,9 @@ void StageScene::Initialize()
 	//spaceフォント
 	textureHandleSpace_ = TextureManager::Load("space.png");
 	spriteSpace_ = Sprite::Create(textureHandleSpace_, {300.0f, 350.0f});
+    // backSpaceフォント
+	textureHandleBackSpace_ = TextureManager::Load("backSpace.png");
+	spriteBackSpace_ = Sprite::Create(textureHandleBackSpace_, {880.0f, -120.0f});
 
 	camera_.Initialize();
 
@@ -66,6 +69,13 @@ void StageScene::Update()
 		if (Input::GetInstance()->PushKey(DIK_SPACE)) {
 			fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::Black);
 			phase_ = Phase::kFadeOut;
+			exitRequest_ = ExitRequest::Play;
+		}
+		// タイトルの終了条件
+		if (Input::GetInstance()->PushKey(DIK_BACKSPACE)) {
+			fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);
+			phase_ = Phase::kFadeOut;
+			exitRequest_ = ExitRequest::Title;
 		}
 		break;
 
@@ -84,6 +94,7 @@ void StageScene::Update()
 	// アフィン変換～DirectXに転送（座標）
 	WorldTransformUpdate(worldTransformStage1_);
 	WorldTransformUpdate(worldTransformPlayer_);
+
 }
 
 void StageScene::Draw()
@@ -100,8 +111,9 @@ void StageScene::Draw()
 	Model::PostDraw();
 
 	Sprite::PreDraw(DirectXCommon::GetInstance()->GetCommandList());
-	fade_->Draw();
 	spriteSpace_->Draw();
+	spriteBackSpace_->Draw();
+	fade_->Draw();
 	Sprite::PostDraw();
 }
 
