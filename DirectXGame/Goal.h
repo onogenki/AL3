@@ -44,6 +44,8 @@ public:
 
 	//getter
 	State GetState() const { return state_; }
+	//音のハンドルをセットする関数
+	void SetSeHandle(uint32_t handle) { seClearHandle_ = handle; }
 
 	private:
 	WorldTransform worldTransformB_; //黒いドア
@@ -67,4 +69,7 @@ public:
 	//最初閉まってる状態
 	State state_ = State::kClosed;
 	float openTimer_ = 0.0f;
+
+	//クリアse
+	uint32_t seClearHandle_ = 0;
 };

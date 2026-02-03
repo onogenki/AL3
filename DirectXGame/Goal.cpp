@@ -19,6 +19,7 @@ void Goal::Initialize(Model* goalBModel, Model* goalLOModel, Model* goalROModel,
 
 	worldTransformB_.translation_ = position;
 
+	
 
 	//リセット
 	state_ = State::kClosed;
@@ -99,5 +100,6 @@ void Goal::OnCollision(const Player* player) {
 	if (state_ == State::kCanOpen && Input::GetInstance()->TriggerKey(DIK_SPACE)) {
 		state_ = State::kOpening;
 		openTimer_ = 0.0f;
+		Audio::GetInstance()->PlayWave(seClearHandle_);
 	}
 }

@@ -28,6 +28,10 @@ void TitleScene::Initialize() {
 	//titleBGM
 	titleBGM_ = Audio::GetInstance()->LoadWave("title.mp3");
 	isTitleBGMPlaying_ = false;
+
+	// ミス(タイトルへ)
+	seMissHandle_ = Audio::GetInstance()->LoadWave("missSE.mp3");
+	Audio::GetInstance()->SetVolume(seMissHandle_, 0.5f);
 }
 
 void TitleScene::Update() {
@@ -51,6 +55,7 @@ void TitleScene::Update() {
 	case Phase::kMain:
 		// タイトルの終了条件
 		if (Input::GetInstance()->PushKey(DIK_SPACE)) {
+			seMissPlaying_ = Audio::GetInstance()->PlayWave(seMissHandle_);
 			fade_->Start(Fade::Status::FadeOut, 1.0f,Fade::FadeType::Black);
 			phase_ = Phase::kFadeOut;
 		}

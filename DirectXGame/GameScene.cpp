@@ -180,8 +180,28 @@ void GameScene::Initialize() {
 
 	isPlayBGMPlaying_ = false;
 	isPauseBGMPlaying_ = false;
-	// 音声1回だけ再生(SE)
-	// voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_);
+
+	// SE
+	// 決定音
+	seSpaceHandle_ = Audio::GetInstance()->LoadWave("spaceSE.mp3");
+	Audio::GetInstance()->SetVolume(seSpaceHandle_, 0.5f);
+	//ハイスピード
+	seSpeedHandle_ = Audio::GetInstance()->LoadWave("speedSE.mp3");
+	Audio::GetInstance()->SetVolume(seSpeedHandle_, 0.5f);
+	//クリア音
+	seClearHandle_ = Audio::GetInstance()->LoadWave("clearSE.mp3");
+	Audio::GetInstance()->SetVolume(seClearHandle_, 0.5f);
+	// ミス(ポーズ中の決定音)
+	seMissHandle_ = Audio::GetInstance()->LoadWave("missSE.mp3");
+	Audio::GetInstance()->SetVolume(seMissHandle_, 0.5f);
+	// ポーズ音
+	sePauseHandle_ = Audio::GetInstance()->LoadWave("pauseSE.mp3");
+	Audio::GetInstance()->SetVolume(sePauseHandle_, 0.5f);
+	// ポーズ中選択音
+	seSelectHandle_ = Audio::GetInstance()->LoadWave("selectSE.mp3");
+	Audio::GetInstance()->SetVolume(seSelectHandle_, 0.5f);
+	goal_->SetSeHandle(seClearHandle_);//ゴールクラスからクリアSE
+
 	// 音声ループ再生(BGM)再生止めるもの
 	// voiceHandle_ = Audio::GetInstance()->PlayWave(soundDataHandle_, true);
 
@@ -303,6 +323,7 @@ void GameScene::CheckAllCollision() {
 			{
 				if (!player_->IsDead()) {
 					player_->OnCollision(enemy); // playerが倒れる
+					seMissPlaying_ = Audio::GetInstance()->PlayWave(seMissHandle_);
 					if (!deathParticle_) {
 						deathParticle_ = new DeathParticles;
 						const Vector3& deathParticlesPosition = player_->GetWorldPosition();
@@ -323,6 +344,7 @@ void GameScene::CheckAllCollision() {
 	if (isFalling && playerFootY <= -2.5f) {
 		if (!player_->IsDead()) {
 			player_->OnCollision(nullptr); // 衝突相手がいないのでnullptr等を渡す設計の場合
+			seMissPlaying_ = Audio::GetInstance()->PlayWave(seMissHandle_);
 			if (!deathParticle_) {
 				deathParticle_ = new DeathParticles;
 				const Vector3& deathParticlesPosition = player_->GetWorldPosition();
@@ -442,12 +464,21 @@ void GameScene::Update() {
 			// ハイスピードモードオン
 			if (Input::GetInstance()->TriggerKey(DIK_P)) {
 				isHighSpeed_ = !isHighSpeed_;
+
+				//強制 SE停止
+				Audio::GetInstance()->StopWave(seSpeedPlaying_);
+
+				if (isHighSpeed_)
+				{   //再生中のseを変数に保存、これでこの音だけ止めたりできる
+					seSpeedPlaying_ = Audio::GetInstance()->PlayWave(seSpeedHandle_);
+				}
 			}
 
 			if (isHighSpeed_) {
 				//あくまでplayWaveではないので、音量だけ変えてbgmを変えてるように仕上げてる
 				Audio::GetInstance()->SetVolume(playHandle_, 0.0f);
 				Audio::GetInstance()->SetVolume(pauseHandle_, 1.0f);
+
 			} else {
 				
 				Audio::GetInstance()->SetVolume(playHandle_, 1.0f);
@@ -557,19 +588,22 @@ void GameScene::Update() {
 				// 止めずにbgmを切り替える
 				Audio::GetInstance()->SetVolume(playHandle_, 0.0f);  // 流さない
 				Audio::GetInstance()->SetVolume(pauseHandle_, 1.0f); // 流す
+				Audio::GetInstance()->StopWave(seSpeedPlaying_);     // SEを止める
+			    // 再生中のseを変数に保存、これでこの音だけ止めたりできる
+				sePausePlaying_ = Audio::GetInstance()->PlayWave(sePauseHandle_);
 			}
-
 		} else // ポーズ画面
 		{
-
 			// 再開画面
 			if (currentPauseState_ == PauseState::Resume) {
 				if (Input::GetInstance()->TriggerKey(DIK_UP) ||
 					Input::GetInstance()->TriggerKey(DIK_W)) {
 					currentPauseState_ = PauseState::Title;
+					seSelectPlaying_ = Audio::GetInstance()->PlayWave(seSelectHandle_);
 				} else if (Input::GetInstance()->TriggerKey(DIK_DOWN)|| 
 					Input::GetInstance()->TriggerKey(DIK_S)) {
 					currentPauseState_ = PauseState::Retry;
+					seSelectPlaying_ = Audio::GetInstance()->PlayWave(seSelectHandle_);
 				}
 				if (Input::GetInstance()->TriggerKey(DIK_RETURN)|| 
 					Input::GetInstance()->TriggerKey(DIK_TAB)||
@@ -578,6 +612,7 @@ void GameScene::Update() {
 					// 音声再開
 					Audio::GetInstance()->SetVolume(playHandle_, 1.0f);  // プレイ曲をオン
 					Audio::GetInstance()->SetVolume(pauseHandle_, 0.0f); // ポーズ曲をミュート
+					sePausePlaying_ = Audio::GetInstance()->PlayWave(sePauseHandle_);
 				}
 
 				// リトライ画面
@@ -585,9 +620,11 @@ void GameScene::Update() {
 				if (Input::GetInstance()->TriggerKey(DIK_UP) || 
 					Input::GetInstance()->TriggerKey(DIK_W)) {
 					currentPauseState_ = PauseState::Resume;
+					seSelectPlaying_ = Audio::GetInstance()->PlayWave(seSelectHandle_);
 				} else if (Input::GetInstance()->TriggerKey(DIK_DOWN)|| 
 					Input::GetInstance()->TriggerKey(DIK_S)) {
 					currentPauseState_ = PauseState::Title;
+					seSelectPlaying_ = Audio::GetInstance()->PlayWave(seSelectHandle_);
 				}
 				if (Input::GetInstance()->TriggerKey(DIK_RETURN)|| 
 					Input::GetInstance()->TriggerKey(DIK_SPACE)) {
@@ -597,6 +634,7 @@ void GameScene::Update() {
 					// 音声停止
 					Audio::GetInstance()->StopWave(playHandle_);
 					Audio::GetInstance()->StopWave(pauseHandle_);
+					seMissPlaying_ = Audio::GetInstance()->PlayWave(seMissHandle_);
 					isPlayBGMPlaying_ = false;
 					break; // 音声再生の処理を通さない
 				}
@@ -606,15 +644,18 @@ void GameScene::Update() {
 					// 音声再開
 					Audio::GetInstance()->SetVolume(playHandle_, 1.0f);  // プレイ曲をオン
 					Audio::GetInstance()->SetVolume(pauseHandle_, 0.0f); // ポーズ曲をミュート
+					sePausePlaying_ = Audio::GetInstance()->PlayWave(sePauseHandle_);
 				}
 				//タイトルに戻る画面
 			} else if (currentPauseState_ == PauseState::Title) {
 				if (Input::GetInstance()->TriggerKey(DIK_UP) || 
 					Input::GetInstance()->TriggerKey(DIK_W)) {
 					currentPauseState_ = PauseState::Retry;
+					seSelectPlaying_ = Audio::GetInstance()->PlayWave(seSelectHandle_);
 				} else if (Input::GetInstance()->TriggerKey(DIK_DOWN) ||
 					Input::GetInstance()->TriggerKey(DIK_S)) {
 					currentPauseState_ = PauseState::Resume;
+					seSelectPlaying_ = Audio::GetInstance()->PlayWave(seSelectHandle_);
 				}
 				if (Input::GetInstance()->TriggerKey(DIK_RETURN)||
 					Input::GetInstance()->TriggerKey(DIK_SPACE)) {
@@ -625,6 +666,7 @@ void GameScene::Update() {
 					// 音声停止
 					Audio::GetInstance()->StopWave(playHandle_);
 					Audio::GetInstance()->StopWave(pauseHandle_);
+					seMissPlaying_ = Audio::GetInstance()->PlayWave(seMissHandle_);
 					isPlayBGMPlaying_ = false;
 					break; // 音声再生の処理を通さない
 				}
@@ -634,6 +676,7 @@ void GameScene::Update() {
 					// 音声再開
 					Audio::GetInstance()->SetVolume(playHandle_, 1.0f);  // プレイ曲をオン
 					Audio::GetInstance()->SetVolume(pauseHandle_, 0.0f); // ポーズ曲をミュート
+					sePausePlaying_ = Audio::GetInstance()->PlayWave(sePauseHandle_);
 				}
 			}
 		}
@@ -646,7 +689,7 @@ void GameScene::Update() {
 		//  止めずにbgmを切り替える
 		Audio::GetInstance()->SetVolume(playHandle_, 0.0f);  // 流さない
 		Audio::GetInstance()->SetVolume(pauseHandle_, 1.0f); // 流す
-
+		Audio::GetInstance()->StopWave(seSpeedPlaying_);     // SEを止める
 		//playerのデスパーティクルが終わるまで
 		if (deathParticle_ && deathParticle_->IsFinished()) {
 			phase_ = Phase::kFadeOut;
@@ -672,6 +715,7 @@ void GameScene::Update() {
 		// 止めずにbgmを切り替える
 		Audio::GetInstance()->SetVolume(playHandle_, 0.0f);  // 流さない
 		Audio::GetInstance()->SetVolume(pauseHandle_, 1.0f); // 流す
+		Audio::GetInstance()->StopWave(seSpeedPlaying_);     // SEを止める
 		player_->Update();
 		for (Enemy* enemy : enemies_) {
 			enemy->Update();
@@ -679,6 +723,7 @@ void GameScene::Update() {
 		goal_->Update();
 
 		if (Input::GetInstance()->TriggerKey(DIK_SPACE) && player_->IsClearMotionFinished()) {
+			seSpacePlaying_ = Audio::GetInstance()->PlayWave(seSpaceHandle_);
 			exitRequest_ = ExitRequest::Clear;
 			fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);
 			phase_ = Phase::kFadeOut;
@@ -695,6 +740,7 @@ void GameScene::Update() {
 		}
 		Audio::GetInstance()->StopWave(playHandle_);
 		Audio::GetInstance()->StopWave(pauseHandle_);
+		Audio::GetInstance()->StopWave(seClearPlaying_); // SEを止める
 		isPlayBGMPlaying_ = false;
 		break;
 	}

@@ -78,4 +78,11 @@ private:
 	    bool isSelectBGMPlaying_ = false;
 	    // 音声再生ハンドル(実際に再生している音)
 		uint32_t selectHandle_ = 0;
+
+		//SE
+		 uint32_t seSpaceHandle_ = 0;
+	    uint32_t seMissHandle_ = 0;
+
+		int seSpacePlaying_ = 0;
+	    int seMissPlaying_ = 0;
 };

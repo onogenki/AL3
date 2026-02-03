@@ -180,6 +180,21 @@ private:
 	uint32_t playHandle_ = 0;
 	uint32_t pauseHandle_ = 0;
 
+	uint32_t seSpaceHandle_ = 0;
+	uint32_t seSpeedHandle_ = 0;
+	uint32_t seClearHandle_ = 0;
+	uint32_t seMissHandle_ = 0;
+	uint32_t sePauseHandle_ = 0;
+	uint32_t seSelectHandle_ = 0;
+	
+	//ずっとseを保存して流してるseを止める用
+	int seSpacePlaying_ = 0;
+	int seSpeedPlaying_ = -1;
+	int seClearPlaying_ = 0;
+	int seMissPlaying_ = 0;
+	int sePausePlaying_ = 0;
+	int seSelectPlaying_ = 0;
+
 	//再生フラグ
 	bool isPlayBGMPlaying_ = false;
 	bool isPauseBGMPlaying_ = false;

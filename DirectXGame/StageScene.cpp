@@ -41,10 +41,19 @@ void StageScene::Initialize()
 	//リセット
 	phase_ = Phase::kFadeIn;
 	isFinished_ = false;
-
+	
+	//BGM
 	//selectBGM
 	selectBGM_ = Audio::GetInstance()->LoadWave("stageSelect.mp3");
 	isSelectBGMPlaying_ = false;
+	
+	//SE
+	// 決定音
+	seSpaceHandle_ = Audio::GetInstance()->LoadWave("spaceSE.mp3");
+	Audio::GetInstance()->SetVolume(seSpaceHandle_, 0.5f);
+	// ミス(タイトルへ)
+	seMissHandle_ = Audio::GetInstance()->LoadWave("missSE.mp3");
+	Audio::GetInstance()->SetVolume(seMissHandle_, 0.5f);
 }
 
 void StageScene::Update()
@@ -67,12 +76,14 @@ void StageScene::Update()
 	case Phase::kMain:
 		// タイトルの終了条件
 		if (Input::GetInstance()->PushKey(DIK_SPACE)) {
+			seMissPlaying_ = Audio::GetInstance()->PlayWave(seMissHandle_);
 			fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::Black);
 			phase_ = Phase::kFadeOut;
 			exitRequest_ = ExitRequest::Play;
 		}
 		// タイトルの終了条件
 		if (Input::GetInstance()->PushKey(DIK_BACKSPACE)) {
+			seSpacePlaying_ = Audio::GetInstance()->PlayWave(seSpaceHandle_);
 			fade_->Start(Fade::Status::FadeOut, 1.0f, Fade::FadeType::White);
 			phase_ = Phase::kFadeOut;
 			exitRequest_ = ExitRequest::Title;
